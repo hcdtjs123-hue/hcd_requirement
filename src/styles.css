@@ -1,0 +1,68 @@
+@import 'tailwindcss';
+
+/* Base font size for better readability */
+html {
+  font-size: 16px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 18px;
+  }
+}
+
+/* =========================
+   TOASTER ROOT (SONNER)
+========================= */
+[data-sonner-toaster] {
+  position: fixed !important;
+
+  /* reset inset bawaan */
+  inset: unset !important;
+
+  top: 1.5rem !important;
+  right: 1.5rem !important;
+  left: auto !important;
+  bottom: auto !important;
+
+  /* SUPER HIGH LAYER */
+  z-index: 999999999 !important;
+
+  pointer-events: none !important;
+}
+
+/* posisi kanan */
+[data-sonner-toaster][data-x-position='right'] {
+  right: 1.5rem !important;
+}
+
+/* =========================
+   TOAST ITEM
+========================= */
+[data-sonner-toast],
+.app-toast {
+  pointer-events: auto !important;
+  position: relative !important;
+
+  /* biar tiap toast tetap di atas */
+  z-index: 999999999 !important;
+
+  /* Shadow yang lebih lembut untuk tema terang */
+  box-shadow: 0 10px 25px rgb(0 0 0 / 0.1), 0 4px 10px rgb(0 0 0 / 0.05) !important;
+
+  /* Border radius lebih besar */
+  border-radius: 16px !important;
+
+  /* Border tipis */
+  border: 1px solid rgb(229 231 235) !important;
+
+  /* Background lebih putih */
+  background: rgb(255 255 255 / 0.95) !important;
+
+  /* Backdrop blur untuk efek modern */
+  backdrop-filter: blur(10px) !important;
+
+  border-radius: 12px;
+
+  padding: 20px;
+}
