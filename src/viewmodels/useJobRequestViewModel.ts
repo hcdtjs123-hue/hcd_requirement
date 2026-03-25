@@ -9,7 +9,7 @@ import { deleteJobRequest } from "@/application/usecases/deleteJobRequest"
 
 export function useJobRequestViewModel() {
   const jobs = ref<JobRequest[]>([])
-  const loading = ref(false)
+  const loading = ref(true)
   const saving = ref(false)
   const error = ref("")
 

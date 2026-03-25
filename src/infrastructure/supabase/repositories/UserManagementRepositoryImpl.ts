@@ -1,15 +1,20 @@
-import { supabase } from "@/infrastructure/supabase/client"
-import type { ManagedUser, CreateUserInput, RoleOption } from "@/domain/entities/ManagedUser"
-import type { UserManagementRepository } from "@/domain/repositories/UserManagementRepository"
-import type { UserRole } from "@/domain/entities/User"
+import { supabase } from '@/infrastructure/supabase/client'
+import type {
+  ManagedUser,
+  CreateUserInput,
+  RoleOption,
+  UpdateUserInput,
+} from '@/domain/entities/ManagedUser'
+import type { UserManagementRepository } from '@/domain/repositories/UserManagementRepository'
+import type { UserRole } from '@/domain/entities/User'
 
 export class UserManagementRepositoryImpl implements UserManagementRepository {
   async getAllUsers(): Promise<ManagedUser[]> {
     // Get all profiles with their roles
     const { data: profiles, error: profileError } = await supabase
-      .from("profiles")
-      .select("id, username, full_name, phone, created_at")
-      .order("created_at", { ascending: false })
+      .from('profiles')
+      .select('id, username, full_name, phone, created_at')
+      .order('created_at', { ascending: false })
 
     if (profileError) throw new Error(profileError.message)
 
@@ -18,9 +23,9 @@ export class UserManagementRepositoryImpl implements UserManagementRepository {
     // Get user_roles for all users
     const userIds = profiles.map((p) => p.id)
     const { data: userRoles, error: rolesError } = await supabase
-      .from("user_roles")
-      .select("user_id, role_id, roles(name)")
-      .in("user_id", userIds)
+      .from('user_roles')
+      .select('user_id, role_id, roles(name)')
+      .in('user_id', userIds)
 
     if (rolesError) throw new Error(rolesError.message)
 
@@ -42,7 +47,7 @@ export class UserManagementRepositoryImpl implements UserManagementRepository {
           : null
         roleMap.set(ur.user_id, {
           role_id: ur.role_id,
-          role_name: roleName ?? "",
+          role_name: roleName ?? '',
         })
       }
     }
@@ -51,7 +56,7 @@ export class UserManagementRepositoryImpl implements UserManagementRepository {
       const roleInfo = roleMap.get(profile.id)
       return {
         id: profile.id,
-        email: emailMap.get(profile.id) ?? "",
+        email: emailMap.get(profile.id) ?? '',
         username: profile.username,
         full_name: profile.full_name,
         phone: profile.phone,
@@ -64,9 +69,9 @@ export class UserManagementRepositoryImpl implements UserManagementRepository {
 
   async getRoles(): Promise<RoleOption[]> {
     const { data, error } = await supabase
-      .from("roles")
-      .select("id, name, description")
-      .order("name", { ascending: true })
+      .from('roles')
+      .select('id, name, description')
+      .order('name', { ascending: true })
 
     if (error) throw new Error(error.message)
     return data ?? []
@@ -81,36 +86,34 @@ export class UserManagementRepositoryImpl implements UserManagementRepository {
     })
 
     if (authError) throw new Error(authError.message)
-    if (!authData.user) throw new Error("Gagal membuat akun user.")
+    if (!authData.user) throw new Error('Gagal membuat akun user.')
 
     const userId = authData.user.id
 
     // 2. Update profile (trigger already inserts, so we update)
     const { error: profileError } = await supabase
-      .from("profiles")
+      .from('profiles')
       .update({
         username: input.username,
         full_name: input.full_name,
       })
-      .eq("id", userId)
+      .eq('id', userId)
 
     if (profileError) throw new Error(profileError.message)
 
     // 3. Assign role
-    const { error: roleError } = await supabase
-      .from("user_roles")
-      .insert({
-        user_id: userId,
-        role_id: input.role_id,
-      })
+    const { error: roleError } = await supabase.from('user_roles').insert({
+      user_id: userId,
+      role_id: input.role_id,
+    })
 
     if (roleError) throw new Error(roleError.message)
 
     // 4. Get the role name
     const { data: roleData } = await supabase
-      .from("roles")
-      .select("name")
-      .eq("id", input.role_id)
+      .from('roles')
+      .select('name')
+      .eq('id', input.role_id)
       .single()
 
     return {
@@ -125,6 +128,58 @@ export class UserManagementRepositoryImpl implements UserManagementRepository {
     }
   }
 
+  async updateUser(userId: string, input: UpdateUserInput): Promise<ManagedUser> {
+    const authPayload: { email: string; password?: string } = {
+      email: input.email,
+    }
+
+    if (input.password?.trim()) {
+      authPayload.password = input.password.trim()
+    }
+
+    const { error: authError } = await supabase.auth.admin.updateUserById(userId, authPayload)
+    if (authError) throw new Error(authError.message)
+
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({
+        username: input.username,
+        full_name: input.full_name,
+      })
+      .eq('id', userId)
+
+    if (profileError) throw new Error(profileError.message)
+
+    const { error: deleteError } = await supabase.from('user_roles').delete().eq('user_id', userId)
+
+    if (deleteError) throw new Error(deleteError.message)
+
+    const { error: insertError } = await supabase
+      .from('user_roles')
+      .insert({ user_id: userId, role_id: input.role_id })
+
+    if (insertError) throw new Error(insertError.message)
+
+    const { data: roleData, error: roleError } = await supabase
+      .from('roles')
+      .select('name')
+      .eq('id', input.role_id)
+      .single()
+
+    if (roleError) throw new Error(roleError.message)
+
+    return {
+      id: userId,
+      email: input.email,
+      username: input.username,
+      full_name: input.full_name,
+      phone: null,
+      role: (roleData?.name as UserRole) ?? null,
+      role_id: input.role_id,
+      created_at: null,
+    }
+  }
+
   async deleteUser(userId: string): Promise<void> {
     // Delete from auth (cascades to profiles and user_roles)
     const { error } = await supabase.auth.admin.deleteUser(userId)
@@ -133,16 +188,13 @@ export class UserManagementRepositoryImpl implements UserManagementRepository {
 
   async updateUserRole(userId: string, roleId: string): Promise<void> {
     // Remove old role
-    const { error: deleteError } = await supabase
-      .from("user_roles")
-      .delete()
-      .eq("user_id", userId)
+    const { error: deleteError } = await supabase.from('user_roles').delete().eq('user_id', userId)
 
     if (deleteError) throw new Error(deleteError.message)
 
     // Insert new role
     const { error: insertError } = await supabase
-      .from("user_roles")
+      .from('user_roles')
       .insert({ user_id: userId, role_id: roleId })
 
     if (insertError) throw new Error(insertError.message)

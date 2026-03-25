@@ -1,15 +1,7 @@
-export const genderOptions = ["Male", "Female"] as const
-export const maritalStatusOptions = ["Single", "Married", "Divorced"] as const
-export const bloodTypeOptions = ["A", "B", "AB", "O"] as const
-export const educationLevelOptions = [
-  "SD",
-  "SMP",
-  "SMA",
-  "Diploma",
-  "S1",
-  "S2",
-  "S3",
-] as const
+export const genderOptions = ['Male', 'Female'] as const
+export const maritalStatusOptions = ['Single', 'Married', 'Divorced'] as const
+export const bloodTypeOptions = ['A', 'B', 'AB', 'O'] as const
+export const educationLevelOptions = ['SD', 'SMP', 'SMA', 'Diploma', 'S1', 'S2', 'S3'] as const
 
 export type Gender = (typeof genderOptions)[number]
 export type MaritalStatus = (typeof maritalStatusOptions)[number]
@@ -68,7 +60,7 @@ export interface PersonalStatement {
   expected_salary: number | null
 }
 
-export interface CandidateApplication {
+export interface CandidateRecord {
   id: string
   job_request_id: string | null
   candidate_id: string | null
@@ -119,7 +111,7 @@ export interface FamilyEmergencyInput {
   id?: string
   name: string
   relationship: string
-  gender: Gender | ""
+  gender: Gender | ''
   place_and_date_of_birth: string
   education: string
   description: string
@@ -127,7 +119,7 @@ export interface FamilyEmergencyInput {
 
 export interface EducationHistoryInput {
   id?: string
-  level: EducationLevel | ""
+  level: EducationLevel | ''
   institution: string
   city: string
   major: string
@@ -162,7 +154,7 @@ export interface PersonalStatementInput {
   expected_salary: number | null
 }
 
-export interface CandidateApplicationInput {
+export interface CandidateRecordInput {
   job_request_id: string
   candidate_id?: string | null
   date_application: string
@@ -174,11 +166,11 @@ export interface CandidateApplicationInput {
   date_of_birth: string
   place_of_birth: string
   nationality: string
-  marital_status: MaritalStatus | ""
+  marital_status: MaritalStatus | ''
   religion: string
-  gender: Gender | ""
+  gender: Gender | ''
   ethnic: string
-  blood_type: BloodType | ""
+  blood_type: BloodType | ''
   id_card_address: string
   residential_address: string
   personal_email: string

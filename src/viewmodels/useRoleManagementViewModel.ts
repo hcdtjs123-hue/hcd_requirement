@@ -14,7 +14,7 @@ export function useRoleManagementViewModel() {
 
   const roles = ref<Role[]>([])
   const permissions = ref<Permission[]>([])
-  const loading = ref(false)
+  const loading = ref(true)
   const saving = ref(false)
   const error = ref("")
 

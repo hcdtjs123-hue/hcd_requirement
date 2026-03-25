@@ -1,14 +1,14 @@
-import { supabase } from "@/infrastructure/supabase/client"
+import { supabase } from '@/infrastructure/supabase/client'
 import type {
-  CandidateApplication,
-  CandidateApplicationInput,
+  CandidateRecord,
+  CandidateRecordInput,
   EducationHistoryInput,
   FamilyEmergencyInput,
   WorkHistoryInput,
-} from "@/domain/entities/Candidate"
-import type { CandidateRepository } from "@/domain/repositories/CandidateRepository"
+} from '@/domain/entities/Candidate'
+import type { CandidateDataRepository } from '@/domain/repositories/CandidateDataRepository'
 
-const applicationSelect = `
+const candidateSelect = `
   *,
   job_request:new_employee_application_form(
     id,
@@ -22,43 +22,43 @@ const applicationSelect = `
   personal_statement(*)
 `
 
-export class CandidateRepositoryImpl implements CandidateRepository {
-  async getAll(): Promise<CandidateApplication[]> {
+export class CandidateDataRepositoryImpl implements CandidateDataRepository {
+  async getAll(): Promise<CandidateRecord[]> {
     const { data, error } = await supabase
-      .from("main_application_form")
-      .select(applicationSelect)
-      .order("created_at", { ascending: false })
+      .from('main_application_form')
+      .select(candidateSelect)
+      .order('created_at', { ascending: false })
 
     if (error) {
       throw new Error(error.message)
     }
 
-    return (data ?? []).map(this.normalizeApplication)
+    return (data ?? []).map(this.normalizeCandidate)
   }
 
-  async getById(id: string): Promise<CandidateApplication | null> {
+  async getById(id: string): Promise<CandidateRecord | null> {
     const { data, error } = await supabase
-      .from("main_application_form")
-      .select(applicationSelect)
-      .eq("id", id)
+      .from('main_application_form')
+      .select(candidateSelect)
+      .eq('id', id)
       .maybeSingle()
 
     if (error) {
       throw new Error(error.message)
     }
 
-    return data ? this.normalizeApplication(data) : null
+    return data ? this.normalizeCandidate(data) : null
   }
 
-  async create(data: CandidateApplicationInput): Promise<CandidateApplication> {
+  async create(data: CandidateRecordInput): Promise<CandidateRecord> {
     const user = await supabase.auth.getUser()
     const { data: created, error } = await supabase
-      .from("main_application_form")
+      .from('main_application_form')
       .insert({
-        ...this.mapApplicationInput(data),
+        ...this.mapCandidateInput(data),
         candidate_id: data.candidate_id ?? user.data.user?.id ?? null,
       })
-      .select("*")
+      .select('*')
       .single()
 
     if (error) {
@@ -66,69 +66,66 @@ export class CandidateRepositoryImpl implements CandidateRepository {
     }
 
     await this.syncRelations(created.id, data)
-    const application = await this.getById(created.id)
+    const candidate = await this.getById(created.id)
 
-    if (!application) {
-      throw new Error("Gagal memuat data aplikasi yang baru dibuat.")
+    if (!candidate) {
+      throw new Error('Gagal memuat data kandidat yang baru dibuat.')
     }
 
-    return application
+    return candidate
   }
 
-  async update(id: string, data: CandidateApplicationInput): Promise<CandidateApplication> {
+  async update(id: string, data: CandidateRecordInput): Promise<CandidateRecord> {
     const { error } = await supabase
-      .from("main_application_form")
+      .from('main_application_form')
       .update({
-        ...this.mapApplicationInput(data),
+        ...this.mapCandidateInput(data),
         candidate_id: data.candidate_id ?? null,
         updated_at: new Date().toISOString(),
       })
-      .eq("id", id)
+      .eq('id', id)
 
     if (error) {
       throw new Error(error.message)
     }
 
     await this.syncRelations(id, data)
-    const application = await this.getById(id)
+    const candidate = await this.getById(id)
 
-    if (!application) {
-      throw new Error("Gagal memuat data aplikasi yang diperbarui.")
+    if (!candidate) {
+      throw new Error('Gagal memuat data kandidat yang diperbarui.')
     }
 
-    return application
+    return candidate
   }
 
   async delete(id: string): Promise<void> {
-    const { error } = await supabase
-      .from("main_application_form")
-      .delete()
-      .eq("id", id)
+    const { error } = await supabase.from('main_application_form').delete().eq('id', id)
 
     if (error) {
       throw new Error(error.message)
     }
   }
 
-  private normalizeApplication(data: Record<string, unknown>): CandidateApplication {
+  private normalizeCandidate(data: Record<string, unknown>): CandidateRecord {
     return {
-      ...(data as unknown as CandidateApplication),
+      ...(data as unknown as CandidateRecord),
       family_and_emergency: Array.isArray(data.family_and_emergency)
-        ? (data.family_and_emergency as CandidateApplication["family_and_emergency"])
+        ? (data.family_and_emergency as CandidateRecord['family_and_emergency'])
         : [],
       education: Array.isArray(data.education)
-        ? (data.education as CandidateApplication["education"])
+        ? (data.education as CandidateRecord['education'])
         : [],
       work_history: Array.isArray(data.work_history)
-        ? (data.work_history as CandidateApplication["work_history"])
+        ? (data.work_history as CandidateRecord['work_history'])
         : [],
       personal_statement: Array.isArray(data.personal_statement)
-        ? (data.personal_statement[0] as CandidateApplication["personal_statement"]) ?? null
-        : (data.personal_statement as CandidateApplication["personal_statement"]) ?? null,
+        ? ((data.personal_statement[0] as CandidateRecord['personal_statement']) ?? null)
+        : ((data.personal_statement as CandidateRecord['personal_statement']) ?? null),
     }
   }
 
-  private mapApplicationInput(data: CandidateApplicationInput) {
+  private mapCandidateInput(data: CandidateRecordInput) {
     return {
       job_request_id: data.job_request_id || null,
       date_application: data.date_application || null,
@@ -163,20 +160,20 @@ export class CandidateRepositoryImpl implements CandidateRepository {
     }
   }
 
-  private async syncRelations(applicationId: string, data: CandidateApplicationInput) {
+  private async syncRelations(candidateRecordId: string, data: CandidateRecordInput) {
     await Promise.all([
-      this.replaceFamilyEmergency(applicationId, data.family_and_emergency),
-      this.replaceEducation(applicationId, data.education),
-      this.replaceWorkHistory(applicationId, data.work_history),
-      this.upsertPersonalStatement(applicationId, data.personal_statement),
+      this.replaceFamilyEmergency(candidateRecordId, data.family_and_emergency),
+      this.replaceEducation(candidateRecordId, data.education),
+      this.replaceWorkHistory(candidateRecordId, data.work_history),
+      this.upsertPersonalStatement(candidateRecordId, data.personal_statement),
     ])
   }
 
-  private async replaceFamilyEmergency(applicationId: string, items: FamilyEmergencyInput[]) {
+  private async replaceFamilyEmergency(candidateRecordId: string, items: FamilyEmergencyInput[]) {
     const { error: deleteError } = await supabase
-      .from("family_and_emergency")
+      .from('family_and_emergency')
       .delete()
-      .eq("application_id", applicationId)
+      .eq('application_id', candidateRecordId)
 
     if (deleteError) {
       throw new Error(deleteError.message)
@@ -185,7 +182,7 @@ export class CandidateRepositoryImpl implements CandidateRepository {
     const payload = items
       .filter((item) => item.name || item.relationship || item.education || item.description)
       .map((item) => ({
-        application_id: applicationId,
+        application_id: candidateRecordId,
         name: item.name || null,
         relationship: item.relationship || null,
         gender: item.gender || null,
@@ -198,18 +195,18 @@ export class CandidateRepositoryImpl implements CandidateRepository {
       return
     }
 
-    const { error } = await supabase.from("family_and_emergency").insert(payload)
+    const { error } = await supabase.from('family_and_emergency').insert(payload)
 
     if (error) {
       throw new Error(error.message)
     }
   }
 
-  private async replaceEducation(applicationId: string, items: EducationHistoryInput[]) {
+  private async replaceEducation(candidateRecordId: string, items: EducationHistoryInput[]) {
     const { error: deleteError } = await supabase
-      .from("education")
+      .from('education')
       .delete()
-      .eq("application_id", applicationId)
+      .eq('application_id', candidateRecordId)
 
     if (deleteError) {
       throw new Error(deleteError.message)
@@ -218,7 +215,7 @@ export class CandidateRepositoryImpl implements CandidateRepository {
     const payload = items
       .filter((item) => item.institution || item.major || item.category || item.description)
       .map((item) => ({
-        application_id: applicationId,
+        application_id: candidateRecordId,
         level: item.level || null,
         institution: item.institution || null,
         city: item.city || null,
@@ -233,27 +230,29 @@ export class CandidateRepositoryImpl implements CandidateRepository {
       return
     }
 
-    const { error } = await supabase.from("education").insert(payload)
+    const { error } = await supabase.from('education').insert(payload)
 
     if (error) {
       throw new Error(error.message)
     }
   }
 
-  private async replaceWorkHistory(applicationId: string, items: WorkHistoryInput[]) {
+  private async replaceWorkHistory(candidateRecordId: string, items: WorkHistoryInput[]) {
     const { error: deleteError } = await supabase
-      .from("work_history")
+      .from('work_history')
       .delete()
-      .eq("application_id", applicationId)
+      .eq('application_id', candidateRecordId)
 
     if (deleteError) {
       throw new Error(deleteError.message)
     }
 
     const payload = items
-      .filter((item) => item.company || item.position || item.reason_to_quitting || item.description)
+      .filter(
+        (item) => item.company || item.position || item.reason_to_quitting || item.description,
+      )
       .map((item) => ({
-        application_id: applicationId,
+        application_id: candidateRecordId,
         company: item.company || null,
         position: item.position || null,
         from_year: item.from_year ?? null,
@@ -268,7 +267,7 @@ export class CandidateRepositoryImpl implements CandidateRepository {
       return
     }
 
-    const { error } = await supabase.from("work_history").insert(payload)
+    const { error } = await supabase.from('work_history').insert(payload)
 
     if (error) {
       throw new Error(error.message)
@@ -276,13 +275,12 @@ export class CandidateRepositoryImpl implements CandidateRepository {
   }
 
   private async upsertPersonalStatement(
-    applicationId: string,
-    personalStatement: CandidateApplicationInput["personal_statement"],
+    candidateRecordId: string,
+    personalStatement: CandidateRecordInput['personal_statement'],
   ) {
-    const { error } = await supabase
-      .from("personal_statement")
-      .upsert({
-        application_id: applicationId,
+    const { error } = await supabase.from('personal_statement').upsert(
+      {
+        application_id: candidateRecordId,
         contract: personalStatement.contract,
         contract_period: personalStatement.contract_period || null,
         legal_issues: personalStatement.legal_issues || null,
@@ -293,9 +291,11 @@ export class CandidateRepositoryImpl implements CandidateRepository {
         psychological_test_details: personalStatement.psychological_test_details || null,
         business_trip: personalStatement.business_trip,
         expected_salary: personalStatement.expected_salary ?? null,
-      }, {
-        onConflict: "application_id",
-      })
+      },
+      {
+        onConflict: 'application_id',
+      },
+    )
 
     if (error) {
       throw new Error(error.message)

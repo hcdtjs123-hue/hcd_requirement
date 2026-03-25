@@ -9,7 +9,7 @@ import { deleteApproverMaster } from "@/application/usecases/deleteApproverMaste
 
 export function useApproverMasterViewModel() {
   const approvers = ref<ApproverMaster[]>([])
-  const loading = ref(false)
+  const loading = ref(true)
   const saving = ref(false)
   const error = ref("")
 

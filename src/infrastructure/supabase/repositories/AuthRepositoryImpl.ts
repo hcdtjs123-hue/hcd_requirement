@@ -1,6 +1,6 @@
-import type { AuthRepository, LoginPayload } from "@/domain/repositories/AuthRepository"
-import type { User } from "@/domain/entities/User"
-import { supabase } from "@/infrastructure/supabase/client"
+import type { AuthRepository, LoginPayload } from '@/domain/repositories/AuthRepository'
+import type { User } from '@/domain/entities/User'
+import { supabase } from '@/infrastructure/supabase/client'
 
 export class AuthRepositoryImpl implements AuthRepository {
   async login(payload: LoginPayload): Promise<User> {
@@ -15,7 +15,7 @@ export class AuthRepositoryImpl implements AuthRepository {
     }
 
     if (!data.user?.email) {
-      throw new Error("User data tidak tersedia.")
+      throw new Error('User data tidak tersedia.')
     }
 
     return {
@@ -39,29 +39,56 @@ export class AuthRepositoryImpl implements AuthRepository {
       return normalizedIdentifier
     }
 
-    const usernameTable = import.meta.env.VITE_AUTH_USERNAME_TABLE ?? "profiles"
-    const usernameColumn = import.meta.env.VITE_AUTH_USERNAME_COLUMN ?? "username"
-    const emailColumn = import.meta.env.VITE_AUTH_EMAIL_COLUMN ?? "email"
+    const usernameTable = import.meta.env.VITE_AUTH_USERNAME_TABLE ?? 'profiles'
+    const usernameColumn = import.meta.env.VITE_AUTH_USERNAME_COLUMN ?? 'username'
+    const idColumn = import.meta.env.VITE_AUTH_USER_ID_COLUMN ?? 'id'
+    const normalizedUsername = normalizedIdentifier.replace(/^@/, '')
 
     const { data, error } = await supabase
       .from(usernameTable)
-      .select(emailColumn)
-      .eq(usernameColumn, normalizedIdentifier)
+      .select(idColumn)
+      .ilike(usernameColumn, normalizedUsername)
       .maybeSingle()
 
     if (error) {
       throw new Error(
-        `Username login belum siap. Pastikan tabel publik ${usernameTable} memiliki kolom ${usernameColumn} dan ${emailColumn}.`,
+        `Username login belum siap. Pastikan tabel publik ${usernameTable} memiliki kolom ${usernameColumn} dan ${idColumn}.`,
       )
     }
 
-    const email = data?.[emailColumn as keyof typeof data]
+    const userId = data?.[idColumn as keyof typeof data]
 
-    if (typeof email !== "string" || email.length === 0) {
-      throw new Error("Username tidak ditemukan.")
+    if (typeof userId !== 'string' || userId.length === 0) {
+      throw new Error('Username tidak ditemukan.')
     }
 
-    return email
+    return this.getAuthEmailByUserId(userId)
+  }
+
+  private async getAuthEmailByUserId(userId: string) {
+    const perPage = 1000
+    let page = 1
+
+    while (true) {
+      const { data, error } = await supabase.auth.admin.listUsers({ page, perPage })
+
+      if (error) {
+        throw new Error('Gagal mengambil data akun untuk proses login.')
+      }
+
+      const matchedUser = data.users.find((user) => user.id === userId)
+      if (matchedUser?.email) {
+        return matchedUser.email
+      }
+
+      if (!data.nextPage) {
+        break
+      }
+
+      page = data.nextPage
+    }
+
+    throw new Error('Email akun untuk username tersebut tidak ditemukan.')
   }
 
   private isEmail(value: string) {

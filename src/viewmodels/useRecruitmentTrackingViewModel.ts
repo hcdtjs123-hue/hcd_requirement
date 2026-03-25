@@ -19,7 +19,7 @@ import { confirmInterviewAttendance } from "@/application/usecases/confirmInterv
 export function useRecruitmentTrackingViewModel() {
   const trackings = ref<RecruitmentTracking[]>([])
   const invitations = ref<CandidateInvitation[]>([])
-  const loading = ref(false)
+  const loading = ref(true)
   const saving = ref(false)
   const error = ref("")
 

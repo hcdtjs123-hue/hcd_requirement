@@ -1,4 +1,4 @@
-import type { UserRole } from "@/domain/entities/User"
+import type { UserRole } from '@/domain/entities/User'
 
 export interface ManagedUser {
   id: string
@@ -15,6 +15,14 @@ export interface CreateUserInput {
   email: string
   username: string
   password: string
+  full_name: string
+  role_id: string
+}
+
+export interface UpdateUserInput {
+  email: string
+  username: string
+  password?: string
   full_name: string
   role_id: string
 }

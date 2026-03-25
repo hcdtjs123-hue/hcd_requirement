@@ -4,12 +4,14 @@ import { getAllUsers } from '../getAllUsers'
 import { createManagedUser } from '../createManagedUser'
 import { deleteManagedUser } from '../deleteManagedUser'
 import { updateManagedUserRole } from '../updateManagedUserRole'
+import { updateManagedUser } from '../updateManagedUser'
 
 describe('UserManagement Use Cases', () => {
   const mockRepo = {
     getAllUsers: vi.fn(),
     getRoles: vi.fn(),
     createUser: vi.fn(),
+    updateUser: vi.fn(),
     deleteUser: vi.fn(),
     updateUserRole: vi.fn(),
   } as unknown as UserManagementRepository
@@ -33,6 +35,19 @@ describe('UserManagement Use Cases', () => {
     mockRepo.updateUserRole = vi.fn().mockResolvedValue(undefined)
     await updateManagedUserRole(mockRepo, 'u1', 'r2')
     expect(mockRepo.updateUserRole).toHaveBeenCalledWith('u1', 'r2')
+  })
+
+  it('updateManagedUser calls repo.updateUser', async () => {
+    const data = {
+      email: 'edit@hcd.com',
+      username: 'editor',
+      full_name: 'Edit User',
+      role_id: 'r2',
+    }
+    mockRepo.updateUser = vi.fn().mockResolvedValue({ id: 'u1', email: 'edit@hcd.com' })
+    const result = await updateManagedUser(mockRepo, 'u1', data as any)
+    expect(mockRepo.updateUser).toHaveBeenCalledWith('u1', data)
+    expect(result.id).toBe('u1')
   })
 
   it('deleteManagedUser calls repo.deleteUser', async () => {

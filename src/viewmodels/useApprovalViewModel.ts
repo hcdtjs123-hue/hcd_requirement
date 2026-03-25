@@ -8,7 +8,7 @@ import { getChainByJobRequest } from "@/application/usecases/getChainByJobReques
 
 export function useApprovalViewModel() {
   const chains = ref<ApprovalChain[]>([])
-  const loading = ref(false)
+  const loading = ref(true)
   const saving = ref(false)
   const error = ref("")
 

@@ -101,6 +101,12 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
     const result = await this.getChainByJobRequest(input.job_request_id)
     if (!result) throw new Error("Gagal memuat approval chain yang baru dibuat.")
 
+    // 6. Send email to the first approver
+    const firstStep = result.steps.find((s) => s.step_order === 1)
+    if (firstStep && firstStep.token) {
+      await this.sendApprovalEmail(firstStep.approver_email, firstStep.approver_name || "Approver", firstStep.token)
+    }
+
     return result
   }
 
@@ -207,6 +213,18 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
             chain_id: step.chain_id,
             status: "pending_review",
           })
+      }
+    } else {
+      // Notify the NEXT approver in the chain
+      const { data: nextStep } = await supabase
+        .from("approval_steps")
+        .select("*")
+        .eq("chain_id", step.chain_id)
+        .eq("step_order", step.step_order + 1)
+        .maybeSingle()
+
+      if (nextStep && nextStep.token) {
+        await this.sendApprovalEmail(nextStep.approver_email, nextStep.approver_name || "Approver", nextStep.token)
       }
     }
   }
@@ -331,6 +349,32 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
     return {
       ...(data as unknown as ApprovalChain),
       steps,
+    }
+  }
+
+  private async sendApprovalEmail(email: string, name: string, token: string) {
+    const approvalLink = `${window.location.origin}/approve/${token}`
+    const html = `
+      <div style="font-family: sans-serif; padding: 20px;">
+        <h2>Permintaan Approval (HCD)</h2>
+        <p>Halo ${name},</p>
+        <p>Terdapat pengajuan Job Request baru yang membutuhkan persetujuan Anda.</p>
+        <p>Silakan klik tautan di bawah ini untuk melihat detail dan memberikan keputusan:</p>
+        <a href="${approvalLink}" style="display:inline-block; padding:10px 20px; background-color:#2563eb; color:white; text-decoration:none; border-radius:5px;">Buka Formulir Approval</a>
+        <p style="margin-top:20px; font-size: 12px; color: #666;">Jika tombol tidak berfungsi, salin link berikut: <br/>${approvalLink}</p>
+      </div>
+    `
+
+    try {
+      await supabase.functions.invoke("resend-email", {
+        body: {
+          to: email,
+          subject: "Pemberitahuan Approval Job Request (HCD)",
+          html,
+        },
+      })
+    } catch (err) {
+      console.error("Gagal mengirim email ke", email, err)
     }
   }
 }

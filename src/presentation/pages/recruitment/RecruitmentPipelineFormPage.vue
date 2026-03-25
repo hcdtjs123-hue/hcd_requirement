@@ -11,12 +11,15 @@
       <div>
         <p class="text-sm uppercase tracking-[0.3em] text-blue-600">Staff Rekrutmen</p>
         <h1 class="mt-1 text-2xl font-semibold tracking-tight">
-          {{ isEdit ? "Detail Kandidat" : "Tambah Kandidat Baru" }}
+          {{ isEdit ? 'Detail Pipeline Rekrutmen' : 'Tambah Kandidat ke Pipeline' }}
         </h1>
       </div>
     </div>
 
-    <p v-if="error" class="rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
+    <p
+      v-if="error"
+      class="rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800"
+    >
       {{ error }}
     </p>
 
@@ -30,15 +33,15 @@
         <form class="grid gap-4 md:grid-cols-2" @submit.prevent="handleCreateInvitation">
           <label class="space-y-2">
             <span class="text-sm font-medium text-gray-700">Nama Lengkap *</span>
-            <input v-model="invForm.candidate_name" class="field" type="text" required>
+            <input v-model="invForm.candidate_name" class="field" type="text" required />
           </label>
           <label class="space-y-2">
             <span class="text-sm font-medium text-gray-700">Email *</span>
-            <input v-model="invForm.candidate_email" class="field" type="email" required>
+            <input v-model="invForm.candidate_email" class="field" type="email" required />
           </label>
           <label class="space-y-2">
             <span class="text-sm font-medium text-gray-700">Posisi Dilamar</span>
-            <input v-model="invForm.position_applied" class="field" type="text">
+            <input v-model="invForm.position_applied" class="field" type="text" />
           </label>
           <label class="space-y-2">
             <span class="text-sm font-medium text-gray-700">Tracking ID *</span>
@@ -55,7 +58,7 @@
               class="rounded-2xl bg-blue-600 px-8 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
               :disabled="saving"
             >
-              {{ saving ? "Menyimpan..." : "Tambah Kandidat" }}
+              {{ saving ? 'Menyimpan...' : 'Tambah Kandidat' }}
             </button>
             <button
               type="button"
@@ -77,18 +80,31 @@
           <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <div class="rounded-2xl bg-gray-50 px-4 py-3">
               <p class="text-xs uppercase tracking-wider text-gray-500 font-medium">Email</p>
-              <p class="mt-1 text-sm font-medium truncate" :title="selectedInvitation.candidate_email">{{ selectedInvitation.candidate_email }}</p>
+              <p
+                class="mt-1 text-sm font-medium truncate"
+                :title="selectedInvitation.candidate_email"
+              >
+                {{ selectedInvitation.candidate_email }}
+              </p>
             </div>
             <div class="rounded-2xl bg-gray-50 px-4 py-3">
               <p class="text-xs uppercase tracking-wider text-gray-500 font-medium">Status</p>
-              <p class="mt-1 text-sm font-medium text-blue-700">{{ invStatusLabel(selectedInvitation.status) }}</p>
+              <p class="mt-1 text-sm font-medium text-blue-700">
+                {{ invStatusLabel(selectedInvitation.status) }}
+              </p>
             </div>
             <div class="rounded-2xl bg-gray-50 px-4 py-3">
-              <p class="text-xs uppercase tracking-wider text-gray-500 font-medium">Credential Sent</p>
-              <p class="mt-1 text-sm font-medium">{{ formatDate(selectedInvitation.credential_sent_at) }}</p>
+              <p class="text-xs uppercase tracking-wider text-gray-500 font-medium">
+                Credential Sent
+              </p>
+              <p class="mt-1 text-sm font-medium">
+                {{ formatDate(selectedInvitation.credential_sent_at) }}
+              </p>
             </div>
             <div class="rounded-2xl bg-gray-50 px-4 py-3">
-              <p class="text-xs uppercase tracking-wider text-gray-500 font-medium">Form Progress</p>
+              <p class="text-xs uppercase tracking-wider text-gray-500 font-medium">
+                Form Progress
+              </p>
               <div class="mt-1 flex items-center gap-2">
                 <div class="h-2 flex-1 overflow-hidden rounded-full bg-gray-200">
                   <div
@@ -103,7 +119,10 @@
         </div>
 
         <!-- Send Credentials -->
-        <div v-if="selectedInvitation.status === 'invited'" class="rounded-3xl border border-blue-200 bg-blue-50/50 p-6 shadow-sm">
+        <div
+          v-if="selectedInvitation.status === 'invited'"
+          class="rounded-3xl border border-blue-200 bg-blue-50/50 p-6 shadow-sm"
+        >
           <h3 class="mb-4 text-lg font-semibold text-blue-900">Kirim Credential Form Aplikasi</h3>
           <div class="flex flex-col sm:flex-row gap-3">
             <input
@@ -111,7 +130,7 @@
               class="flex-1 rounded-2xl border border-blue-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               type="text"
               placeholder="User ID (dari admin panel untuk kandidat login)"
-            >
+            />
             <button
               type="button"
               class="rounded-2xl bg-blue-600 px-8 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
@@ -129,7 +148,13 @@
           <form class="grid gap-4 md:grid-cols-2" @submit.prevent="handleScheduleInterview">
             <label class="space-y-2">
               <span class="text-sm font-medium text-gray-700">Meeting Link *</span>
-              <input v-model="interviewForm.meeting_link" class="field" type="url" required placeholder="https://zoom.us/...">
+              <input
+                v-model="interviewForm.meeting_link"
+                class="field"
+                type="url"
+                required
+                placeholder="https://zoom.us/..."
+              />
             </label>
             <label class="space-y-2">
               <span class="text-sm font-medium text-gray-700">Tipe Media</span>
@@ -141,11 +166,16 @@
             </label>
             <label class="space-y-2">
               <span class="text-sm font-medium text-gray-700">Tanggal & Waktu</span>
-              <input v-model="interviewForm.scheduled_at" class="field" type="datetime-local">
+              <input v-model="interviewForm.scheduled_at" class="field" type="datetime-local" />
             </label>
             <label class="space-y-2">
               <span class="text-sm font-medium text-gray-700">Catatan</span>
-              <input v-model="interviewForm.notes" class="field" type="text" placeholder="Info tambahan...">
+              <input
+                v-model="interviewForm.notes"
+                class="field"
+                type="text"
+                placeholder="Info tambahan..."
+              />
             </label>
             <div class="pt-2 md:col-span-2">
               <button
@@ -159,7 +189,10 @@
           </form>
 
           <!-- Interview History -->
-          <div v-if="selectedInvitation.interviews.length > 0" class="mt-8 pt-6 border-t border-gray-100 space-y-4">
+          <div
+            v-if="selectedInvitation.interviews.length > 0"
+            class="mt-8 pt-6 border-t border-gray-100 space-y-4"
+          >
             <h3 class="text-lg font-semibold text-gray-900">Histori Interview & Jadwal</h3>
             <div
               v-for="interview in selectedInvitation.interviews"
@@ -168,14 +201,22 @@
             >
               <div class="flex-1">
                 <p class="text-sm font-medium text-gray-900">
-                  <span class="uppercase tracking-wider text-xs text-gray-500 mr-2">{{ interview.meeting_type }}</span>
-                  <a :href="interview.meeting_link" target="_blank" class="text-blue-600 hover:text-blue-800 hover:underline transition">
+                  <span class="uppercase tracking-wider text-xs text-gray-500 mr-2">{{
+                    interview.meeting_type
+                  }}</span>
+                  <a
+                    :href="interview.meeting_link"
+                    target="_blank"
+                    class="text-blue-600 hover:text-blue-800 hover:underline transition"
+                  >
                     {{ interview.meeting_link }}
                   </a>
                 </p>
                 <p class="mt-1.5 text-sm text-gray-600">
                   <span class="font-medium">{{ formatDate(interview.scheduled_at) }}</span>
-                  <span v-if="interview.notes" class="ml-2 italic text-gray-500">"{{ interview.notes }}"</span>
+                  <span v-if="interview.notes" class="ml-2 italic text-gray-500"
+                    >"{{ interview.notes }}"</span
+                  >
                 </p>
               </div>
               <div class="shrink-0 pt-2 sm:pt-0">
@@ -201,7 +242,10 @@
         </div>
       </section>
 
-      <div v-else-if="isEdit && !selectedInvitation" class="py-10 text-center text-sm text-gray-500">
+      <div
+        v-else-if="isEdit && !selectedInvitation"
+        class="py-10 text-center text-sm text-gray-500"
+      >
         Data kandidat tidak ditemukan.
       </div>
     </template>
@@ -209,12 +253,15 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, computed, watch, onMounted } from "vue"
-import { useRoute, useRouter } from "vue-router"
+import { reactive, ref, computed, watch, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
-import type { CandidateInvitationInput, CandidateInvitationStatus } from "@/domain/entities/RecruitmentTracking"
-import { useAppToast } from "@/presentation/components/feedback/useAppToast"
-import { useRecruitmentTrackingViewModel } from "@/viewmodels/useRecruitmentTrackingViewModel"
+import type {
+  CandidateInvitationInput,
+  CandidateInvitationStatus,
+} from '@/domain/entities/RecruitmentTracking'
+import { useAppToast } from '@/presentation/components/feedback/useAppToast'
+import { useRecruitmentTrackingViewModel } from '@/viewmodels/useRecruitmentTrackingViewModel'
 
 const route = useRoute()
 const router = useRouter()
@@ -235,28 +282,28 @@ const appToast = useAppToast()
 
 const id = computed(() => route.params.id as string | undefined)
 const isEdit = computed(() => !!id.value)
-const credentialUserId = ref("")
+const credentialUserId = ref('')
 
-const selectedInvitationId = computed(() => id.value ?? "")
+const selectedInvitationId = computed(() => id.value ?? '')
 
-const selectedInvitation = computed(() =>
-  invitations.value.find((inv) => inv.id === selectedInvitationId.value) ?? null,
+const selectedInvitation = computed(
+  () => invitations.value.find((inv) => inv.id === selectedInvitationId.value) ?? null,
 )
 
 // Invitation form
 const invForm = reactive<CandidateInvitationInput>({
-  tracking_id: "",
-  candidate_name: "",
-  candidate_email: "",
-  position_applied: "",
+  tracking_id: '',
+  candidate_name: '',
+  candidate_email: '',
+  position_applied: '',
 })
 
 // Interview form
 const interviewForm = reactive({
-  meeting_link: "",
-  meeting_type: "zoom",
-  scheduled_at: "",
-  notes: "",
+  meeting_link: '',
+  meeting_type: 'zoom',
+  scheduled_at: '',
+  notes: '',
 })
 
 onMounted(() => {
@@ -265,25 +312,25 @@ onMounted(() => {
 })
 
 function formatDate(dateStr: string | null) {
-  if (!dateStr) return "-"
-  return new Date(dateStr).toLocaleString("id-ID", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
+  if (!dateStr) return '-'
+  return new Date(dateStr).toLocaleString('id-ID', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   })
 }
 
 function invStatusLabel(status: CandidateInvitationStatus) {
   const map: Record<CandidateInvitationStatus, string> = {
-    invited: "Diundang",
-    credentials_sent: "Credential Terkirim",
-    form_in_progress: "Mengisi Form",
-    form_completed: "Form Selesai",
-    interview_scheduled: "Interview Dijadwalkan",
-    confirmed: "Hadir Dikonfirmasi",
-    rejected: "Ditolak",
+    invited: 'Diundang',
+    credentials_sent: 'Credential Terkirim',
+    form_in_progress: 'Mengisi Form',
+    form_completed: 'Form Selesai',
+    interview_scheduled: 'Interview Dijadwalkan',
+    confirmed: 'Hadir Dikonfirmasi',
+    rejected: 'Ditolak',
   }
   return map[status] || status
 }
@@ -291,10 +338,10 @@ function invStatusLabel(status: CandidateInvitationStatus) {
 async function handleCreateInvitation() {
   try {
     await createInvitation({ ...invForm })
-    appToast.created("Kandidat")
-    router.push("/candidate-management")
+    appToast.created('Kandidat')
+    router.push('/recruitment/pipeline')
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Gagal menambah kandidat."
+    const message = err instanceof Error ? err.message : 'Gagal menambah kandidat.'
     appToast.error(message)
   }
 }
@@ -303,10 +350,10 @@ async function handleSendCredentials() {
   if (!selectedInvitationId.value || !credentialUserId.value) return
   try {
     await sendCredentials(selectedInvitationId.value, credentialUserId.value)
-    appToast.success("Credential berhasil dikirim.")
-    credentialUserId.value = ""
+    appToast.success('Credential berhasil dikirim.')
+    credentialUserId.value = ''
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Gagal kirim credential."
+    const message = err instanceof Error ? err.message : 'Gagal kirim credential.'
     appToast.error(message)
   }
 }
@@ -321,13 +368,13 @@ async function handleScheduleInterview() {
       scheduled_at: interviewForm.scheduled_at,
       notes: interviewForm.notes,
     })
-    appToast.success("Link interview berhasil dikirim.")
-    interviewForm.meeting_link = ""
-    interviewForm.meeting_type = "zoom"
-    interviewForm.scheduled_at = ""
-    interviewForm.notes = ""
+    appToast.success('Link interview berhasil dikirim.')
+    interviewForm.meeting_link = ''
+    interviewForm.meeting_type = 'zoom'
+    interviewForm.scheduled_at = ''
+    interviewForm.notes = ''
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Gagal jadwalkan interview."
+    const message = err instanceof Error ? err.message : 'Gagal jadwalkan interview.'
     appToast.error(message)
   }
 }
@@ -335,9 +382,9 @@ async function handleScheduleInterview() {
 async function handleConfirmAttendance(scheduleId: string) {
   try {
     await confirmAttendance(scheduleId)
-    appToast.success("Kehadiran dikonfirmasi.")
+    appToast.success('Kehadiran dikonfirmasi.')
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Gagal konfirmasi kehadiran."
+    const message = err instanceof Error ? err.message : 'Gagal konfirmasi kehadiran.'
     appToast.error(message)
   }
 }
