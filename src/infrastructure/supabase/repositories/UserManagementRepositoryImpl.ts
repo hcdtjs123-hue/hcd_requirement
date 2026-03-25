@@ -141,6 +141,7 @@ export class UserManagementRepositoryImpl implements UserManagementRepository {
       .from('employees')
       .update({
         username: input.username,
+        email: input.email,
         first_name: input.first_name,
         middle_name: input.middle_name,
         last_name: input.last_name,
@@ -230,6 +231,7 @@ export class UserManagementRepositoryImpl implements UserManagementRepository {
       .from('employees')
       .update({
         username: input.username,
+        email: input.email,
         first_name: input.first_name,
         middle_name: input.middle_name,
         last_name: input.last_name,

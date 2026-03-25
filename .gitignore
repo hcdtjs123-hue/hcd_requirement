@@ -43,3 +43,11 @@ __screenshots__/
 .env.*
 !.env.example
 !.env.sample
+# Tooling
+.gemini
+mcp
+.antigravity
+.agents
+.agent
+_agents
+_agent
