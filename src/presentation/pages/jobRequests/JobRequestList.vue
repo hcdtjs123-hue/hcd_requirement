@@ -10,115 +10,146 @@
         class="rounded-2xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
         @click="goToCreate"
       >
-        Buat Job Request
+        Create Job Request
       </button>
     </div>
 
-    <p v-if="error" class="rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
+    <p
+      v-if="error"
+      class="rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800"
+    >
       {{ error }}
     </p>
 
     <section class="max-w-full">
       <div class="rounded-3xl border border-gray-200 bg-gray-50 p-5">
-          <div class="mb-4 flex items-center justify-between">
-            <h2 class="text-xl font-semibold">Daftar Request</h2>
-            <button
-              type="button"
-              class="text-sm text-gray-600 transition hover:text-gray-900"
-              :disabled="loading"
-              @click="refresh"
-            >
-              {{ loading ? "Memuat..." : "Refresh" }}
-            </button>
-          </div>
+        <div class="mb-4 flex items-center justify-between">
+          <h2 class="text-xl font-semibold">Request List</h2>
+          <button
+            type="button"
+            class="text-sm text-gray-600 transition hover:text-gray-900"
+            :disabled="loading"
+            @click="refresh"
+          >
+            {{ loading ? 'Loading...' : 'Refresh' }}
+          </button>
+        </div>
 
-          <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div class="flex flex-1 items-center gap-2">
+        <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div class="flex flex-1 items-center gap-2">
               <input
                 v-model="searchQuery"
                 type="search"
-                placeholder="Search posisi, designation, site..."
-                class="h-11 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm outline-none focus:border-blue-600"
-              />
-            </div>
-            <div class="flex flex-wrap items-center gap-2">
-              <select
-                v-model="siteFilter"
-                class="h-11 rounded-2xl border border-gray-200 bg-white px-3 text-sm outline-none focus:border-blue-600"
-              >
-                <option value="">Semua Site</option>
-                <option v-for="opt in siteOptions" :key="opt" :value="opt">{{ opt }}</option>
-              </select>
-              <select
-                v-model="positionStatusFilter"
-                class="h-11 rounded-2xl border border-gray-200 bg-white px-3 text-sm outline-none focus:border-blue-600"
-              >
-                <option value="">Semua Status Posisi</option>
-                <option v-for="opt in positionStatusOptions" :key="opt" :value="opt">{{ opt }}</option>
-              </select>
-              <select
-                v-model="employmentFilter"
-                class="h-11 rounded-2xl border border-gray-200 bg-white px-3 text-sm outline-none focus:border-blue-600"
-              >
-                <option value="">Semua Employment</option>
-                <option v-for="opt in employmentOptions" :key="opt" :value="opt">{{ opt }}</option>
-              </select>
-            </div>
+                placeholder="Search position, site, approval..."
+              class="h-11 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm outline-none focus:border-blue-600"
+            />
           </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <select
+              v-model="siteFilter"
+              class="h-11 rounded-2xl border border-gray-200 bg-white px-3 text-sm outline-none focus:border-blue-600"
+            >
+              <option value="">All Sites</option>
+              <option v-for="opt in siteOptions" :key="opt" :value="opt">{{ opt }}</option>
+            </select>
+            <select
+              v-model="positionStatusFilter"
+              class="h-11 rounded-2xl border border-gray-200 bg-white px-3 text-sm outline-none focus:border-blue-600"
+            >
+              <option value="">All Position Statuses</option>
+              <option v-for="opt in positionStatusOptions" :key="opt" :value="opt">
+                {{ opt }}
+              </option>
+            </select>
+            <select
+              v-model="employmentFilter"
+              class="h-11 rounded-2xl border border-gray-200 bg-white px-3 text-sm outline-none focus:border-blue-600"
+            >
+              <option value="">Semua Employment</option>
+              <option v-for="opt in employmentOptions" :key="opt" :value="opt">{{ opt }}</option>
+            </select>
+          </div>
+        </div>
 
-          <div class="rounded-2xl border border-gray-200 bg-white overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-sm text-gray-600">
-                <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+        <div class="rounded-2xl border border-gray-200 bg-white overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-gray-600">
+              <thead class="bg-gray-50 text-xs uppercase text-gray-500">
                 <tr>
-                  <th class="px-4 py-3 font-medium w-14">No</th>
-                  <th class="px-4 py-3 font-medium min-w-[180px]">Posisi</th>
-                  <th class="px-4 py-3 font-medium min-w-[160px]">Designation</th>
-                  <th class="px-4 py-3 font-medium min-w-[140px]">Site</th>
-                  <th class="px-4 py-3 font-medium min-w-[160px]">Status Posisi</th>
-                  <th class="px-4 py-3 font-medium min-w-[160px]">Employment</th>
-                  <th class="px-4 py-3 font-medium min-w-[140px]">Required Date</th>
-                  <th class="px-4 py-3 font-medium text-right min-w-[220px]">Aksi</th>
+              <th class="px-4 py-3 font-medium w-14">No</th>
+              <th class="px-4 py-3 font-medium min-w-[180px]">Position</th>
+              <th class="px-4 py-3 font-medium min-w-[140px]">Site</th>
+              <th class="px-4 py-3 font-medium min-w-[160px]">Position Status</th>
+              <th class="px-4 py-3 font-medium min-w-[160px]">Employment</th>
+              <th class="px-4 py-3 font-medium min-w-[140px]">Required Date</th>
+              <th class="px-4 py-3 font-medium min-w-[160px]">Approval Dir. BU</th>
+              <th class="px-4 py-3 font-medium min-w-[160px]">Tanggal Dir. BU</th>
+              <th class="px-4 py-3 font-medium min-w-[160px]">Approval GM HRD</th>
+              <th class="px-4 py-3 font-medium min-w-[160px]">Tanggal GM HRD</th>
+              <th class="px-4 py-3 font-medium min-w-[160px]">Approval Direktur HRD</th>
+              <th class="px-4 py-3 font-medium min-w-[160px]">Tanggal Direktur HRD</th>
+              <th class="px-4 py-3 font-medium text-right min-w-[220px]">Actions</th>
                 </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200">
+              </thead>
+              <tbody class="divide-y divide-gray-200">
                 <tr
                   v-for="(job, idx) in pagedJobs"
                   :key="job.id"
                   class="transition hover:bg-gray-50"
                 >
-                  <td class="px-4 py-3 align-middle text-gray-500">{{ (page - 1) * pageSize + idx + 1 }}</td>
-                  <td class="px-4 py-3 align-middle">
-                    <p class="font-medium text-gray-900 whitespace-nowrap">{{ job.main_position || "-" }}</p>
+                  <td class="px-4 py-3 align-middle text-gray-500">
+                    {{ (page - 1) * pageSize + idx + 1 }}
                   </td>
                   <td class="px-4 py-3 align-middle">
-                    <p class="whitespace-nowrap">{{ job.designation || "-" }}</p>
+                    <p class="font-medium text-gray-900 whitespace-nowrap">
+                      {{ job.main_position || '-' }}
+                    </p>
                   </td>
                   <td class="px-4 py-3 align-middle">
-                    <p class="whitespace-nowrap">{{ job.site || "-" }}</p>
+                    <p class="whitespace-nowrap">{{ job.site || '-' }}</p>
                   </td>
                   <td class="px-4 py-3 align-middle">
-                    <span class="inline-flex whitespace-nowrap rounded-full bg-gray-100 px-2 py-0.5 text-[10px] uppercase tracking-wider text-gray-600">
-                      {{ job.position_status || "Tanpa Status" }}
+                    <span
+                      class="inline-flex whitespace-nowrap rounded-full bg-gray-100 px-2 py-0.5 text-[10px] uppercase tracking-wider text-gray-600"
+                    >
+                      {{ job.position_status || 'No Status' }}
                     </span>
                   </td>
                   <td class="px-4 py-3 align-middle">
-                    <p class="whitespace-nowrap">{{ job.employment_status || "-" }}</p>
+                    <p class="whitespace-nowrap">{{ job.employment_status || '-' }}</p>
                   </td>
                   <td class="px-4 py-3 align-middle">
-                    <p class="whitespace-nowrap text-gray-600">{{ job.required_date || "-" }}</p>
+                    <p class="whitespace-nowrap text-gray-600">{{ job.required_date || '-' }}</p>
+                  </td>
+                  <td class="px-4 py-3 align-middle">
+                    <p class="whitespace-nowrap">{{ job.approval_director_bu || '-' }}</p>
+                  </td>
+                  <td class="px-4 py-3 align-middle">
+                    <p class="whitespace-nowrap">{{ job.approval_director_bu_date || '-' }}</p>
+                  </td>
+                  <td class="px-4 py-3 align-middle">
+                    <p class="whitespace-nowrap">{{ job.approval_gm_hrd || '-' }}</p>
+                  </td>
+                  <td class="px-4 py-3 align-middle">
+                    <p class="whitespace-nowrap">{{ job.approval_gm_hrd_date || '-' }}</p>
+                  </td>
+                  <td class="px-4 py-3 align-middle">
+                    <p class="whitespace-nowrap">{{ job.approval_director_hrd || '-' }}</p>
+                  </td>
+                  <td class="px-4 py-3 align-middle">
+                    <p class="whitespace-nowrap">{{ job.approval_director_hrd_date || '-' }}</p>
                   </td>
                   <td class="px-4 py-3 text-right align-middle">
                     <RowActionsMenu
                       :actions="[
                         { label: 'Edit / Detail', onClick: () => goToEdit(job.id) },
                         {
-                          label: approvalSaving ? 'Memproses...' : 'Kirim Approval',
-                          disabled: approvalSaving,
-                          onClick: () => handleSubmitApproval(job.id),
+                          label: 'Export PDF',
+                          disabled: saving,
+                          onClick: () => handleExportPdf(job),
                         },
                         {
-                          label: 'Hapus',
+                          label: 'Delete',
                           tone: 'danger',
                           disabled: saving,
                           onClick: () => handleDelete(job.id, job.main_position || ''),
@@ -128,53 +159,51 @@
                   </td>
                 </tr>
                 <tr v-if="!loading && filteredJobs.length === 0">
-                  <td colspan="8" class="px-4 py-8 text-center text-sm text-gray-500">
-                    Tidak ada data yang cocok.
+                <td colspan="13" class="px-4 py-8 text-center text-sm text-gray-500">
+                    No matching data found.
                   </td>
                 </tr>
-                </tbody>
-              </table>
-            </div>
-            <TablePagination
-              v-if="!loading && filteredJobs.length > 0"
-              v-model:page="page"
-              :page-size="pageSize"
-              :total-items="filteredJobs.length"
-            />
+              </tbody>
+            </table>
           </div>
+          <TablePagination
+            v-if="!loading && filteredJobs.length > 0"
+            v-model:page="page"
+            :page-size="pageSize"
+            :total-items="filteredJobs.length"
+          />
+        </div>
       </div>
     </section>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from "vue"
-import { useRouter } from "vue-router"
+import { computed, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 
-import RowActionsMenu from "@/presentation/components/menus/RowActionsMenu.vue"
-import TablePagination from "@/presentation/components/tables/TablePagination.vue"
-import {
-  type JobRequest,
-  type JobRequestInput,
-} from "@/domain/entities/JobRequest"
-import { useAppToast } from "@/presentation/components/feedback/useAppToast"
-import { useJobRequestViewModel } from "@/viewmodels/useJobRequestViewModel"
-import { useApprovalViewModel } from "@/viewmodels/useApprovalViewModel"
+import RowActionsMenu from '@/presentation/components/menus/RowActionsMenu.vue'
+import TablePagination from '@/presentation/components/tables/TablePagination.vue'
+import { type JobRequest, type JobRequestInput } from '@/domain/entities/JobRequest'
+import { useAppToast } from '@/presentation/components/feedback/useAppToast'
+import { exportJobRequestPdf } from '@/presentation/utils/jobRequestPdfTemplate'
+import { useJobRequestViewModel } from '@/viewmodels/useJobRequestViewModel'
 
 const router = useRouter()
 const { jobs, loading, error, saving, remove, refresh } = useJobRequestViewModel()
-const { saving: approvalSaving, submitForApproval } = useApprovalViewModel()
 const appToast = useAppToast()
 
-const searchQuery = ref("")
-const siteFilter = ref("")
-const positionStatusFilter = ref("")
-const employmentFilter = ref("")
+const searchQuery = ref('')
+const siteFilter = ref('')
+const positionStatusFilter = ref('')
+const employmentFilter = ref('')
 const pageSize = 10
 const page = ref(1)
 
 function normalize(value: unknown) {
-  return String(value ?? "").toLowerCase().trim()
+  return String(value ?? '')
+    .toLowerCase()
+    .trim()
 }
 
 const siteOptions = computed(() => {
@@ -211,14 +240,19 @@ const filteredJobs = computed(() => {
 
     const haystack = [
       j.main_position,
-      j.designation,
       j.site,
       j.position_status,
       j.employment_status,
       j.required_date,
+      j.approval_director_bu,
+      j.approval_director_bu_date,
+      j.approval_gm_hrd,
+      j.approval_gm_hrd_date,
+      j.approval_director_hrd,
+      j.approval_director_hrd_date,
     ]
       .map(normalize)
-      .join(" ")
+      .join(' ')
 
     return haystack.includes(q)
   })
@@ -244,7 +278,7 @@ watch(
 )
 
 function goToCreate() {
-  router.push("/job-requests/create")
+  router.push('/job-requests/create')
 }
 
 function goToEdit(id: string) {
@@ -252,22 +286,22 @@ function goToEdit(id: string) {
 }
 
 async function handleDelete(id: string, mainPosition: string) {
-  if (!confirm(`Hapus job request ${mainPosition}?`)) return
+  if (!confirm(`Delete job request ${mainPosition}?`)) return
   try {
     await remove(id)
-    appToast.deleted("Job request")
+    appToast.deleted('Job request')
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Gagal menghapus job request."
+    const message = err instanceof Error ? err.message : 'Failed to delete job request.'
     appToast.error(message)
   }
 }
 
-async function handleSubmitApproval(jobRequestId: string) {
+function handleExportPdf(job: JobRequest) {
   try {
-    await submitForApproval({ job_request_id: jobRequestId })
-    appToast.success("Job request berhasil dikirim untuk approval.")
+    exportJobRequestPdf(job)
+    appToast.success('PDF template opened successfully.')
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Gagal mengirim approval."
+    const message = err instanceof Error ? err.message : 'Failed to export the PDF template.'
     appToast.error(message)
   }
 }

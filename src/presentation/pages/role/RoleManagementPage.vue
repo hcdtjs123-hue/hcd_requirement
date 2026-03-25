@@ -5,7 +5,7 @@
         <p class="text-sm uppercase tracking-[0.3em] text-blue-600">Administrator</p>
         <h1 class="mt-3 text-3xl font-semibold tracking-tight">Role Management</h1>
         <p class="mt-2 text-sm text-gray-600">
-          Atur master role dan hak akses fitur (permissions) untuk setiap role di sistem.
+          Manage role definitions and feature permissions for each role in the system.
         </p>
       </div>
       <button
@@ -14,11 +14,14 @@
         :disabled="loading"
         @click="goToCreate"
       >
-        Tambah Role Baru
+        Add New Role
       </button>
     </div>
 
-    <p v-if="error" class="rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
+    <p
+      v-if="error"
+      class="rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800"
+    >
       {{ error }}
     </p>
 
@@ -26,14 +29,14 @@
     <section class="max-w-5xl">
       <div class="rounded-3xl border border-gray-200 bg-gray-50 p-5">
         <div class="mb-4 flex items-center justify-between">
-          <h2 class="text-xl font-semibold">Daftar Roles</h2>
+          <h2 class="text-xl font-semibold">Role List</h2>
           <button
             type="button"
             class="text-sm text-gray-600 transition hover:text-gray-900"
             :disabled="loading"
             @click="refreshRoles"
           >
-            {{ loading ? "Memuat..." : "Refresh" }}
+            {{ loading ? 'Loading...' : 'Refresh' }}
           </button>
         </div>
 
@@ -48,9 +51,9 @@
             v-model="permissionFilter"
             class="h-11 w-full rounded-2xl border border-gray-200 bg-white px-3 text-sm outline-none focus:border-blue-600 sm:w-64"
           >
-            <option value="">Semua</option>
-            <option value="with">Dengan permission</option>
-            <option value="without">Tanpa permission</option>
+            <option value="">All</option>
+            <option value="with">With permissions</option>
+            <option value="without">Without permissions</option>
           </select>
         </div>
 
@@ -58,69 +61,84 @@
           <div class="overflow-x-auto">
             <table class="w-full text-left text-sm text-gray-600">
               <thead class="bg-gray-50 text-xs uppercase text-gray-500">
-              <tr>
-                <th class="px-4 py-3 font-medium w-14">No</th>
-                <th class="px-4 py-3 font-medium min-w-[160px]">Nama Role</th>
-                <th class="px-4 py-3 font-medium min-w-[240px]">Deskripsi</th>
-                <th class="px-4 py-3 font-medium">Hak Akses (Permissions)</th>
-                <th class="px-4 py-3 text-right font-medium min-w-[120px]">Aksi</th>
-              </tr>
+                <tr>
+                  <th class="px-4 py-3 font-medium w-14">No</th>
+                  <th class="px-4 py-3 font-medium min-w-[160px]">Role Name</th>
+                  <th class="px-4 py-3 font-medium min-w-[240px]">Description</th>
+                  <th class="px-4 py-3 font-medium">Permissions</th>
+                  <th class="px-4 py-3 text-right font-medium min-w-[120px]">Actions</th>
+                </tr>
               </thead>
               <tbody class="divide-y divide-gray-200">
-              <tr v-for="(role, idx) in pagedRoles" :key="role.id" class="transition hover:bg-gray-50">
-                <td class="px-4 py-3 align-top text-gray-500">{{ (page - 1) * pageSize + idx + 1 }}</td>
-                <td class="px-4 py-3 align-top">
-                  <p class="font-semibold text-gray-900 text-base whitespace-nowrap">{{ role.name }}</p>
-                </td>
-                <td class="px-4 py-3 align-top">
-                  <p v-if="role.description" class="text-xs text-gray-500">
-                    {{ role.description }}
-                  </p>
-                  <p v-else class="text-xs italic text-gray-400">-</p>
-                </td>
-                <td class="px-4 py-3 align-top">
-                  <div class="flex flex-wrap gap-1.5">
-                    <span
-                      v-for="perm in role.permissions"
-                      :key="perm.id"
-                      class="inline-flex rounded-md bg-blue-50 px-2 py-1 text-[10px] font-medium text-blue-700 border border-blue-100"
-                      :title="perm.description"
-                    >
-                      {{ perm.name }}
-                    </span>
-                    <span v-if="!role.permissions || role.permissions.length === 0" class="text-xs italic text-gray-400">
-                      Belum ada permission diatur
-                    </span>
-                  </div>
-                </td>
-                <td class="px-4 py-3 text-right align-top">
-                  <RowActionsMenu
-                    :actions="[
-                      { label: 'Ubah Akses', disabled: saving, onClick: () => goToEdit(role.id) },
-                      ...(role.name !== 'admin'
-                        ? [
-                            {
-                              label: 'Hapus',
-                              tone: 'danger' as const,
-                              disabled: saving,
-                              onClick: () => handleDelete(role.id, role.name),
-                            },
-                          ]
-                        : []),
-                    ]"
-                  />
-                </td>
-              </tr>
-              <tr v-if="!loading && filteredRoles.length === 0">
-                <td colspan="5" class="px-4 py-10 text-center text-sm text-gray-500">
-                  Tidak ada data yang cocok.
-                </td>
-              </tr>
-              <tr v-if="loading && roles.length === 0">
-                <td colspan="5" class="px-4 py-10 text-center text-sm text-gray-500">
-                  Memuat data roles...
-                </td>
-              </tr>
+                <tr
+                  v-for="(role, idx) in pagedRoles"
+                  :key="role.id"
+                  class="transition hover:bg-gray-50"
+                >
+                  <td class="px-4 py-3 align-top text-gray-500">
+                    {{ (page - 1) * pageSize + idx + 1 }}
+                  </td>
+                  <td class="px-4 py-3 align-top">
+                    <p class="font-semibold text-gray-900 text-base whitespace-nowrap">
+                      {{ role.name }}
+                    </p>
+                  </td>
+                  <td class="px-4 py-3 align-top">
+                    <p v-if="role.description" class="text-xs text-gray-500">
+                      {{ role.description }}
+                    </p>
+                    <p v-else class="text-xs italic text-gray-400">-</p>
+                  </td>
+                  <td class="px-4 py-3 align-top">
+                    <div class="flex flex-wrap gap-1.5">
+                      <span
+                        v-for="perm in role.permissions"
+                        :key="perm.id"
+                        class="inline-flex rounded-md bg-blue-50 px-2 py-1 text-[10px] font-medium text-blue-700 border border-blue-100"
+                        :title="perm.description"
+                      >
+                        {{ perm.name }}
+                      </span>
+                      <span
+                        v-if="!role.permissions || role.permissions.length === 0"
+                        class="text-xs italic text-gray-400"
+                      >
+                        No permissions configured yet
+                      </span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3 text-right align-top">
+                    <RowActionsMenu
+                      :actions="[
+                        {
+                          label: 'Edit Access',
+                          disabled: saving,
+                          onClick: () => goToEdit(role.id),
+                        },
+                        ...(role.name !== 'admin'
+                          ? [
+                              {
+                                label: 'Delete',
+                                tone: 'danger' as const,
+                                disabled: saving,
+                                onClick: () => handleDelete(role.id, role.name),
+                              },
+                            ]
+                          : []),
+                      ]"
+                    />
+                  </td>
+                </tr>
+                <tr v-if="!loading && filteredRoles.length === 0">
+                  <td colspan="5" class="px-4 py-10 text-center text-sm text-gray-500">
+                    No matching data found.
+                  </td>
+                </tr>
+                <tr v-if="loading && roles.length === 0">
+                  <td colspan="5" class="px-4 py-10 text-center text-sm text-gray-500">
+                    Loading roles...
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -137,37 +155,39 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from "vue"
-import { useRouter } from "vue-router"
+import { computed, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 
-import RowActionsMenu from "@/presentation/components/menus/RowActionsMenu.vue"
-import TablePagination from "@/presentation/components/tables/TablePagination.vue"
-import { useAppToast } from "@/presentation/components/feedback/useAppToast"
-import { useRoleManagementViewModel } from "@/viewmodels/useRoleManagementViewModel"
+import RowActionsMenu from '@/presentation/components/menus/RowActionsMenu.vue'
+import TablePagination from '@/presentation/components/tables/TablePagination.vue'
+import { useAppToast } from '@/presentation/components/feedback/useAppToast'
+import { useRoleManagementViewModel } from '@/viewmodels/useRoleManagementViewModel'
 
 const router = useRouter()
 const { roles, loading, saving, error, refreshRoles, deleteRole } = useRoleManagementViewModel()
 const appToast = useAppToast()
 
-const searchQuery = ref("")
-const permissionFilter = ref("")
+const searchQuery = ref('')
+const permissionFilter = ref('')
 const pageSize = 10
 const page = ref(1)
 
 function normalize(value: unknown) {
-  return String(value ?? "").toLowerCase().trim()
+  return String(value ?? '')
+    .toLowerCase()
+    .trim()
 }
 
 const filteredRoles = computed(() => {
   const q = normalize(searchQuery.value)
   return roles.value.filter((r) => {
     const hasPerms = (r.permissions?.length ?? 0) > 0
-    if (permissionFilter.value === "with" && !hasPerms) return false
-    if (permissionFilter.value === "without" && hasPerms) return false
+    if (permissionFilter.value === 'with' && !hasPerms) return false
+    if (permissionFilter.value === 'without' && hasPerms) return false
     if (!q) return true
 
-    const perms = (r.permissions ?? []).map((p) => p.name).join(" ")
-    const haystack = [r.name, r.description, perms].map(normalize).join(" ")
+    const perms = (r.permissions ?? []).map((p) => p.name).join(' ')
+    const haystack = [r.name, r.description, perms].map(normalize).join(' ')
     return haystack.includes(q)
   })
 })
@@ -192,7 +212,7 @@ watch(
 )
 
 function goToCreate() {
-  router.push("/role-management/create")
+  router.push('/role-management/create')
 }
 
 function goToEdit(roleId: string) {
@@ -200,12 +220,17 @@ function goToEdit(roleId: string) {
 }
 
 async function handleDelete(roleId: string, name: string) {
-  if (!confirm(`Hapus role "${name}"? Semua user dengan role ini mungkin akan kehilangan hak aksesnya. Tindakan ini tidak bisa dibatalkan.`)) return
+  if (
+    !confirm(
+      `Delete role "${name}"? Users assigned to this role may lose access. This action cannot be undone.`,
+    )
+  )
+    return
   try {
     await deleteRole(roleId)
-    appToast.deleted("Role")
+    appToast.deleted('Role')
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Gagal menghapus role."
+    const message = err instanceof Error ? err.message : 'Failed to delete role.'
     appToast.error(message)
   }
 }

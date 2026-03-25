@@ -98,7 +98,6 @@ export interface CandidateRecord {
   job_request?: {
     id: string
     main_position: string | null
-    designation: string | null
     site: string | null
   } | null
   family_and_emergency: FamilyEmergency[]

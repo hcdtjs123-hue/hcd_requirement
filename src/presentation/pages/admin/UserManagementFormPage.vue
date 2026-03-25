@@ -1,5 +1,5 @@
 <template>
-  <div class="mx-auto flex max-w-3xl flex-col gap-8 text-gray-900">
+  <div class="mx-auto flex max-w-5xl flex-col gap-8 text-gray-900">
     <div class="flex items-center gap-4">
       <button
         type="button"
@@ -10,10 +10,10 @@
       </button>
       <div>
         <p class="text-sm uppercase tracking-[0.3em] text-blue-600">
-          {{ isEditMode ? 'Administrator' : 'Registrasi' }}
+          {{ isEditMode ? 'Administrator' : 'Registration' }}
         </p>
         <h1 class="mt-1 text-2xl font-semibold tracking-tight">
-          {{ isEditMode ? 'Edit User' : 'Buat Akun Baru' }}
+          {{ isEditMode ? 'Edit Employee Account' : 'Create Employee Account' }}
         </h1>
       </div>
     </div>
@@ -29,7 +29,7 @@
       v-if="isEditMode && !targetUser && !loading"
       class="rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800"
     >
-      User tidak ditemukan.
+      User not found.
     </p>
 
     <section class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -44,6 +44,7 @@
             placeholder="user@company.com"
           />
         </label>
+
         <label class="space-y-2">
           <span class="text-sm font-medium text-gray-700">Username *</span>
           <input
@@ -54,9 +55,10 @@
             placeholder="username"
           />
         </label>
+
         <label class="space-y-2">
           <span class="text-sm font-medium text-gray-700">
-            {{ isEditMode ? 'Password Baru' : 'Password *' }}
+            {{ isEditMode ? 'New Password' : 'Password *' }}
           </span>
           <input
             v-model="form.password"
@@ -64,23 +66,134 @@
             type="password"
             :required="!isEditMode"
             :minlength="isEditMode ? undefined : 6"
-            :placeholder="isEditMode ? 'Kosongkan jika tidak diubah' : 'Min 6 karakter'"
+            :placeholder="
+              isEditMode ? 'Leave blank to keep current password' : 'Minimum 6 characters'
+            "
           />
           <p v-if="isEditMode" class="text-xs text-gray-500">
-            Isi hanya jika password user perlu diganti.
+            Fill this only if the user's password needs to be changed.
           </p>
         </label>
-        <label class="space-y-2">
-          <span class="text-sm font-medium text-gray-700">Nama Lengkap</span>
-          <input v-model="form.full_name" class="field" type="text" placeholder="Nama lengkap" />
-        </label>
+
         <label class="space-y-2">
           <span class="text-sm font-medium text-gray-700">Role *</span>
           <select v-model="form.role_id" class="field" required>
-            <option value="">Pilih role</option>
+            <option value="">Select a role</option>
             <option v-for="role in roles" :key="role.id" :value="role.id">
-              {{ role.name }} — {{ role.description || 'Tanpa deskripsi' }}
+              {{ role.name }} — {{ role.description || 'No description' }}
             </option>
+          </select>
+        </label>
+
+        <label class="space-y-2">
+          <span class="text-sm font-medium text-gray-700">First Name</span>
+          <input v-model="form.first_name" class="field" type="text" placeholder="First name" />
+        </label>
+
+        <label class="space-y-2">
+          <span class="text-sm font-medium text-gray-700">Middle Name</span>
+          <input
+            v-model="form.middle_name"
+            class="field"
+            type="text"
+            placeholder="Middle name"
+          />
+        </label>
+
+        <label class="space-y-2">
+          <span class="text-sm font-medium text-gray-700">Last Name</span>
+          <input v-model="form.last_name" class="field" type="text" placeholder="Last name" />
+        </label>
+
+        <label class="space-y-2">
+          <span class="text-sm font-medium text-gray-700">No ID</span>
+          <input v-model="form.no_id" class="field" type="text" placeholder="National ID number" />
+        </label>
+
+        <label class="space-y-2">
+          <span class="text-sm font-medium text-gray-700">Main Position</span>
+          <input
+            v-model="form.main_position"
+            class="field"
+            type="text"
+            placeholder="Main position"
+          />
+        </label>
+
+        <label class="space-y-2">
+          <span class="text-sm font-medium text-gray-700">Hire Location</span>
+          <input
+            v-model="form.hire_location"
+            class="field"
+            type="text"
+            placeholder="Hire location"
+          />
+        </label>
+
+        <label class="space-y-2">
+          <span class="text-sm font-medium text-gray-700">Date of Birth</span>
+          <input v-model="form.date_of_birth" class="field" type="date" />
+        </label>
+
+        <label class="space-y-2">
+          <span class="text-sm font-medium text-gray-700">Place of Birth</span>
+          <input
+            v-model="form.place_of_birth"
+            class="field"
+            type="text"
+            placeholder="Place of birth"
+          />
+        </label>
+
+        <label class="space-y-2">
+          <span class="text-sm font-medium text-gray-700">Nationality</span>
+          <input
+            v-model="form.nationality"
+            class="field"
+            type="text"
+            placeholder="Nationality"
+          />
+        </label>
+
+        <label class="space-y-2">
+          <span class="text-sm font-medium text-gray-700">Marital Status</span>
+          <select v-model="form.marital_status" class="field">
+            <option value="">Select marital status</option>
+            <option value="Single">Single</option>
+            <option value="Married">Married</option>
+            <option value="Divorced">Divorced</option>
+            <option value="Widowed">Widowed</option>
+          </select>
+        </label>
+
+        <label class="space-y-2">
+          <span class="text-sm font-medium text-gray-700">Religion</span>
+          <input v-model="form.religion" class="field" type="text" placeholder="Religion" />
+        </label>
+
+        <label class="space-y-2">
+          <span class="text-sm font-medium text-gray-700">Gender</span>
+          <select v-model="form.gender" class="field">
+            <option value="">Select gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
+        </label>
+
+        <label class="space-y-2">
+          <span class="text-sm font-medium text-gray-700">Ethnic</span>
+          <input v-model="form.ethnic" class="field" type="text" placeholder="Ethnic group" />
+        </label>
+
+        <label class="space-y-2">
+          <span class="text-sm font-medium text-gray-700">Blood Type</span>
+          <select v-model="form.blood_type" class="field">
+            <option value="">Select blood type</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="AB">AB</option>
+            <option value="O">O</option>
           </select>
         </label>
 
@@ -93,11 +206,11 @@
             {{
               saving
                 ? isEditMode
-                  ? 'Menyimpan...'
-                  : 'Mendaftarkan...'
+                  ? 'Saving...'
+                  : 'Registering...'
                 : isEditMode
-                  ? 'Simpan Perubahan'
-                  : 'Daftarkan User'
+                  ? 'Save Changes'
+                  : 'Register User'
             }}
           </button>
           <button
@@ -106,7 +219,7 @@
             :disabled="saving"
             @click="router.back()"
           >
-            Batal
+            Cancel
           </button>
         </div>
       </form>
@@ -115,16 +228,13 @@
         v-if="lastCreated && !isEditMode"
         class="mt-8 rounded-2xl border border-emerald-200 bg-emerald-50 p-5"
       >
-        <h3 class="mb-3 font-semibold text-emerald-800">✓ Akun Berhasil Dibuat</h3>
+        <h3 class="mb-3 font-semibold text-emerald-800">✓ Account Created Successfully</h3>
         <div class="space-y-2 text-sm text-emerald-700">
           <p><span class="font-medium">Email:</span> {{ lastCreated.email }}</p>
           <p><span class="font-medium">Username:</span> {{ lastCreated.username }}</p>
           <p><span class="font-medium">Password:</span> {{ lastCreated.password }}</p>
           <p><span class="font-medium">Role:</span> {{ lastCreated.roleName }}</p>
         </div>
-        <p class="mt-4 text-xs font-medium text-emerald-600">
-          Salin kredensial di atas untuk dikirim ke user yang bersangkutan.
-        </p>
       </div>
     </section>
   </div>
@@ -142,7 +252,20 @@ type UserFormState = {
   email: string
   username: string
   password: string
-  full_name: string
+  first_name: string
+  middle_name: string
+  last_name: string
+  main_position: string
+  hire_location: string
+  date_of_birth: string
+  place_of_birth: string
+  nationality: string
+  marital_status: string
+  religion: string
+  gender: string
+  ethnic: string
+  blood_type: string
+  no_id: string
   role_id: string
 }
 
@@ -167,7 +290,20 @@ function createEmptyForm(): UserFormState {
     email: '',
     username: '',
     password: '',
-    full_name: '',
+    first_name: '',
+    middle_name: '',
+    last_name: '',
+    main_position: '',
+    hire_location: '',
+    date_of_birth: '',
+    place_of_birth: '',
+    nationality: '',
+    marital_status: '',
+    religion: '',
+    gender: '',
+    ethnic: '',
+    blood_type: '',
+    no_id: '',
     role_id: '',
   }
 }
@@ -179,8 +315,25 @@ function populateFormFromTarget() {
   form.email = targetUser.value.email ?? ''
   form.username = targetUser.value.username ?? ''
   form.password = ''
-  form.full_name = targetUser.value.full_name ?? ''
+  form.first_name = targetUser.value.first_name ?? ''
+  form.middle_name = targetUser.value.middle_name ?? ''
+  form.last_name = targetUser.value.last_name ?? ''
+  form.main_position = targetUser.value.main_position ?? ''
+  form.hire_location = targetUser.value.hire_location ?? ''
+  form.date_of_birth = targetUser.value.date_of_birth ?? ''
+  form.place_of_birth = targetUser.value.place_of_birth ?? ''
+  form.nationality = targetUser.value.nationality ?? ''
+  form.marital_status = targetUser.value.marital_status ?? ''
+  form.religion = targetUser.value.religion ?? ''
+  form.gender = targetUser.value.gender ?? ''
+  form.ethnic = targetUser.value.ethnic ?? ''
+  form.blood_type = targetUser.value.blood_type ?? ''
+  form.no_id = targetUser.value.no_id ?? ''
   form.role_id = targetUser.value.role_id ?? ''
+}
+
+function resetForm() {
+  Object.assign(form, createEmptyForm())
 }
 
 async function loadDependencies() {
@@ -207,19 +360,32 @@ async function handleSubmit() {
 
     if (isEditMode.value) {
       if (!targetUser.value) {
-        throw new Error('User tidak ditemukan.')
+        throw new Error('User not found.')
       }
 
       const payload: UpdateUserInput = {
         email: form.email,
         username: form.username,
-        full_name: form.full_name,
-        role_id: form.role_id,
-      }
+        first_name: form.first_name,
+        middle_name: form.middle_name,
+        last_name: form.last_name,
+        main_position: form.main_position,
+        hire_location: form.hire_location,
+        date_of_birth: form.date_of_birth,
+        place_of_birth: form.place_of_birth,
+        nationality: form.nationality,
+        marital_status: form.marital_status,
+        religion: form.religion,
+        gender: form.gender,
+      ethnic: form.ethnic,
+      blood_type: form.blood_type,
+      no_id: form.no_id,
+      role_id: form.role_id,
+    }
 
       if (form.password.trim()) {
         if (form.password.trim().length < 6) {
-          throw new Error('Password baru minimal 6 karakter.')
+          throw new Error('The new password must be at least 6 characters.')
         }
         payload.password = form.password.trim()
       }
@@ -234,7 +400,20 @@ async function handleSubmit() {
       email: form.email,
       username: form.username,
       password: form.password,
-      full_name: form.full_name,
+      first_name: form.first_name,
+      middle_name: form.middle_name,
+      last_name: form.last_name,
+      main_position: form.main_position,
+      hire_location: form.hire_location,
+      date_of_birth: form.date_of_birth,
+      place_of_birth: form.place_of_birth,
+      nationality: form.nationality,
+      marital_status: form.marital_status,
+      religion: form.religion,
+      gender: form.gender,
+      ethnic: form.ethnic,
+      blood_type: form.blood_type,
+      no_id: form.no_id,
       role_id: form.role_id,
     }
 
@@ -247,18 +426,14 @@ async function handleSubmit() {
     }
     appToast.created('User')
 
-    form.email = ''
-    form.username = ''
-    form.password = ''
-    form.full_name = ''
-    form.role_id = ''
+    resetForm()
   } catch (err) {
     const message =
       err instanceof Error
         ? err.message
         : isEditMode.value
-          ? 'Gagal mengubah user.'
-          : 'Gagal membuat user.'
+          ? 'Failed to update the user.'
+          : 'Failed to create the user.'
     appToast.error(message)
   }
 }

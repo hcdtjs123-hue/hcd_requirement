@@ -13,8 +13,13 @@ const candidateSelect = `
   job_request:new_employee_application_form(
     id,
     main_position,
-    designation,
-    site
+    site,
+    approval_director_bu,
+    approval_director_bu_date,
+    approval_gm_hrd,
+    approval_gm_hrd_date,
+    approval_director_hrd,
+    approval_director_hrd_date
   ),
   family_and_emergency(*),
   education(*),
@@ -29,6 +34,12 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
 
     if (accessScope.isCandidate && accessScope.userId) {
       query = query.eq('candidate_id', accessScope.userId)
+    }
+    if (accessScope.isManager) {
+      if (accessScope.jobRequestIds.length === 0) {
+        return []
+      }
+      query = query.in('job_request_id', accessScope.jobRequestIds)
     }
 
     const { data, error } = await query.order('created_at', { ascending: false })
@@ -47,6 +58,12 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
     if (accessScope.isCandidate && accessScope.userId) {
       query = query.eq('candidate_id', accessScope.userId)
     }
+    if (accessScope.isManager) {
+      if (accessScope.jobRequestIds.length === 0) {
+        return null
+      }
+      query = query.in('job_request_id', accessScope.jobRequestIds)
+    }
 
     const { data, error } = await query.maybeSingle()
 
@@ -59,6 +76,11 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
 
   async create(data: CandidateRecordInput): Promise<CandidateRecord> {
     const accessScope = await this.getAccessScope()
+
+    if (accessScope.isManager && !accessScope.jobRequestIds.includes(data.job_request_id)) {
+      throw new Error('Anda hanya dapat menambahkan kandidat untuk job request yang Anda buat.')
+    }
+
     const { data: created, error } = await supabase
       .from('main_application_form')
       .insert({
@@ -86,6 +108,11 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
 
   async update(id: string, data: CandidateRecordInput): Promise<CandidateRecord> {
     const accessScope = await this.getAccessScope()
+
+    if (accessScope.isManager && !accessScope.jobRequestIds.includes(data.job_request_id)) {
+      throw new Error('Anda hanya dapat memindahkan kandidat ke job request yang Anda buat.')
+    }
+
     let query = supabase
       .from('main_application_form')
       .update({
@@ -97,6 +124,12 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
 
     if (accessScope.isCandidate && accessScope.userId) {
       query = query.eq('candidate_id', accessScope.userId)
+    }
+    if (accessScope.isManager) {
+      if (accessScope.jobRequestIds.length === 0) {
+        throw new Error('Data kandidat tidak ditemukan atau tidak dapat diakses.')
+      }
+      query = query.in('job_request_id', accessScope.jobRequestIds)
     }
 
     const { data: updatedRows, error } = await query.select('id')
@@ -126,6 +159,12 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
     if (accessScope.isCandidate && accessScope.userId) {
       query = query.eq('candidate_id', accessScope.userId)
     }
+    if (accessScope.isManager) {
+      if (accessScope.jobRequestIds.length === 0) {
+        throw new Error('Data kandidat tidak ditemukan atau tidak dapat dihapus.')
+      }
+      query = query.in('job_request_id', accessScope.jobRequestIds)
+    }
 
     const { data, error } = await query.select('id')
 
@@ -133,7 +172,7 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
       throw new Error(error.message)
     }
 
-    if (accessScope.isCandidate && (!data || data.length === 0)) {
+    if ((accessScope.isCandidate || accessScope.isManager) && (!data || data.length === 0)) {
       throw new Error('Data kandidat tidak ditemukan atau tidak dapat dihapus.')
     }
   }
@@ -151,6 +190,8 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
     if (!user) {
       return {
         isCandidate: false,
+        isManager: false,
+        jobRequestIds: [] as string[],
         userId: null as string | null,
       }
     }
@@ -166,9 +207,26 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
     }
 
     const roleName = (roleData as { roles?: { name?: string } | null } | null)?.roles?.name
+    const isManager = roleName?.toLowerCase() === 'manager'
+    let jobRequestIds: string[] = []
+
+    if (isManager) {
+      const { data: ownedJobRequests, error: ownedJobRequestsError } = await supabase
+        .from('new_employee_application_form')
+        .select('id')
+        .eq('created_by', user.id)
+
+      if (ownedJobRequestsError) {
+        throw new Error(ownedJobRequestsError.message)
+      }
+
+      jobRequestIds = (ownedJobRequests || []).map((jobRequest) => jobRequest.id as string)
+    }
 
     return {
       isCandidate: roleName?.toLowerCase() === 'candidate',
+      isManager,
+      jobRequestIds,
       userId: user.id,
     }
   }

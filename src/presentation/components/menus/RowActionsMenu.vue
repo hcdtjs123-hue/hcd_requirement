@@ -5,7 +5,7 @@
       class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 transition hover:bg-gray-50"
       :aria-expanded="open ? 'true' : 'false'"
       aria-haspopup="menu"
-      aria-label="Buka menu aksi"
+      aria-label="Open action menu"
       @click="toggle"
       @keydown.esc.prevent.stop="close"
     >
@@ -27,7 +27,11 @@
           type="button"
           role="menuitem"
           class="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2 text-left text-sm transition disabled:cursor-not-allowed disabled:opacity-60"
-          :class="action.tone === 'danger' ? 'text-red-600 hover:bg-red-50' : 'text-gray-700 hover:bg-gray-50'"
+          :class="
+            action.tone === 'danger'
+              ? 'text-red-600 hover:bg-red-50'
+              : 'text-gray-700 hover:bg-gray-50'
+          "
           :disabled="action.disabled"
           @click="handleAction(action)"
         >
@@ -39,15 +43,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, ref, watch } from "vue"
-import { useEventListener } from "@vueuse/core"
-import { MoreVertical } from "lucide-vue-next"
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
+import { useEventListener } from '@vueuse/core'
+import { MoreVertical } from 'lucide-vue-next'
 
 export type RowAction = {
   label: string
   onClick: () => void | Promise<void>
   disabled?: boolean
-  tone?: "default" | "danger"
+  tone?: 'default' | 'danger'
 }
 
 const props = defineProps<{
@@ -87,7 +91,7 @@ async function updatePosition() {
   const menu = menuEl.value
   if (!root || !menu) return
 
-  const button = root.querySelector("button")
+  const button = root.querySelector('button')
   if (!button) return
 
   const rect = (button as HTMLElement).getBoundingClientRect()
@@ -110,17 +114,12 @@ watch(open, async (value) => {
   await updatePosition()
 })
 
-useEventListener(window, "resize", () => updatePosition())
-useEventListener(
-  window,
-  "scroll",
-  () => updatePosition(),
-  { capture: true },
-)
+useEventListener(window, 'resize', () => updatePosition())
+useEventListener(window, 'scroll', () => updatePosition(), { capture: true })
 
 useEventListener(
   document,
-  "pointerdown",
+  'pointerdown',
   (event) => {
     if (!open.value) return
     const target = event.target as Node | null

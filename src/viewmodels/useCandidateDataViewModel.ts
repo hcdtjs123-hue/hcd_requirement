@@ -19,7 +19,7 @@ export function useCandidateDataViewModel() {
     try {
       candidates.value = await getCandidates(candidateDataRepo)
     } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Gagal memuat data kandidat.'
+      error.value = err instanceof Error ? err.message : 'Failed to load candidate data.'
     } finally {
       loading.value = false
     }
@@ -32,7 +32,7 @@ export function useCandidateDataViewModel() {
       await createCandidate(candidateDataRepo, payload)
       await refresh()
     } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Gagal membuat data kandidat.'
+      error.value = err instanceof Error ? err.message : 'Failed to create candidate data.'
       throw err
     } finally {
       saving.value = false
@@ -46,7 +46,7 @@ export function useCandidateDataViewModel() {
       await updateCandidate(candidateDataRepo, id, payload)
       await refresh()
     } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Gagal memperbarui data kandidat.'
+      error.value = err instanceof Error ? err.message : 'Failed to update candidate data.'
       throw err
     } finally {
       saving.value = false
@@ -60,7 +60,7 @@ export function useCandidateDataViewModel() {
       await deleteCandidate(candidateDataRepo, id)
       await refresh()
     } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Gagal menghapus data kandidat.'
+      error.value = err instanceof Error ? err.message : 'Failed to delete candidate data.'
       throw err
     } finally {
       saving.value = false

@@ -41,7 +41,20 @@ describe('UserManagement Use Cases', () => {
     const data = {
       email: 'edit@hcd.com',
       username: 'editor',
-      full_name: 'Edit User',
+      first_name: 'Edit',
+      middle_name: '',
+      last_name: 'User',
+      main_position: 'Engineer',
+      hire_location: 'Jakarta',
+      date_of_birth: '1998-01-01',
+      place_of_birth: 'Jakarta',
+      nationality: 'Indonesian',
+      marital_status: 'Single',
+      religion: 'Islam',
+      gender: 'Male',
+      ethnic: 'Javanese',
+      blood_type: 'O',
+      no_id: '1234567890',
       role_id: 'r2',
     }
     mockRepo.updateUser = vi.fn().mockResolvedValue({ id: 'u1', email: 'edit@hcd.com' })

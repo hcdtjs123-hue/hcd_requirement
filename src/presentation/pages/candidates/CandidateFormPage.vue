@@ -31,7 +31,7 @@
             <select v-model="form.job_request_id" class="field" required>
               <option value="">Pilih job request</option>
               <option v-for="job in jobs" :key="job.id" :value="job.id">
-                {{ job.main_position || '-' }} - {{ job.designation || '-' }}
+                {{ job.main_position || '-' }}
               </option>
             </select>
           </label>

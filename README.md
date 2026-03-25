@@ -61,6 +61,48 @@ Aplikasi ini sudah dikonfigurasi dengan Prettier untuk konsistensi penulisan gay
 npm run format
 ```
 
+### 6. Menjalankan MCP Server
+Project ini sekarang memiliki server MCP (*Model Context Protocol*) berbasis `stdio` untuk akses read-only ke data HCD di Supabase.
+
+Prasyarat env:
+```bash
+SUPABASE_URL=...
+SUPABASE_SERVICE_ROLE_KEY=...
+```
+
+Atau gunakan env yang sudah dipakai app:
+```bash
+VITE_SUPABASE_URL=...
+VITE_SUPABASE_SERVICE_ROLE_KEY=...
+```
+
+Menjalankan server:
+```bash
+npm run mcp:hcd
+```
+
+Tools MCP yang tersedia:
+- `list_job_requests`
+- `get_job_request`
+- `list_candidates`
+- `get_candidate`
+- `list_recruitment_trackings`
+- `get_recruitment_tracking`
+- `list_candidate_invitations`
+
+Contoh konfigurasi client MCP:
+```json
+{
+  "mcpServers": {
+    "hcd": {
+      "command": "npm",
+      "args": ["run", "mcp:hcd"],
+      "cwd": "/path/to/hcd"
+    }
+  }
+}
+```
+
 ---
 
 ## 🎨 Rekomendasi IDE

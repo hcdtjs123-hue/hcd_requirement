@@ -12,7 +12,17 @@ const trackingSelect = `
   *,
   files:job_posting_files(*),
   job_request:new_employee_application_form(
-    id, main_position, designation, site, employment_status, required_date
+    id,
+    main_position,
+    site,
+    employment_status,
+    required_date,
+    approval_director_bu,
+    approval_director_bu_date,
+    approval_gm_hrd,
+    approval_gm_hrd_date,
+    approval_director_hrd,
+    approval_director_hrd_date
   )
 `
 

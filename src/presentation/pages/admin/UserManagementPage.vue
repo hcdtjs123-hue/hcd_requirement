@@ -5,7 +5,7 @@
         <p class="text-sm uppercase tracking-[0.3em] text-blue-600">Administrator</p>
         <h1 class="mt-3 text-3xl font-semibold tracking-tight">User Management</h1>
         <p class="mt-2 text-sm text-gray-600">
-          Daftarkan akun baru, atur username, password, dan role untuk setiap user.
+          Register new employee accounts and manage their identity details, credentials, and role.
         </p>
       </div>
       <button
@@ -13,7 +13,7 @@
         class="rounded-2xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
         @click="goToCreate"
       >
-        Tambah User
+        Add User
       </button>
     </div>
 
@@ -28,14 +28,14 @@
       <!-- User List -->
       <div class="rounded-3xl border border-gray-200 bg-gray-50 p-5">
         <div class="mb-4 flex items-center justify-between">
-          <h2 class="text-xl font-semibold">Daftar User</h2>
+          <h2 class="text-xl font-semibold">User List</h2>
           <button
             type="button"
             class="text-sm text-gray-600 transition hover:text-gray-900"
             :disabled="loading"
             @click="refreshUsers"
           >
-            {{ loading ? 'Memuat...' : 'Refresh' }}
+            {{ loading ? 'Loading...' : 'Refresh' }}
           </button>
         </div>
 
@@ -43,14 +43,14 @@
           <input
             v-model="searchQuery"
             type="search"
-            placeholder="Search nama, email, username..."
+            placeholder="Search name, email, username, position..."
             class="h-11 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm outline-none focus:border-blue-600"
           />
           <select
             v-model="roleFilter"
             class="h-11 w-full rounded-2xl border border-gray-200 bg-white px-3 text-sm outline-none focus:border-blue-600 sm:w-64"
           >
-            <option value="">Semua Role</option>
+            <option value="">All Roles</option>
             <option v-for="opt in roleOptions" :key="opt" :value="opt">{{ opt }}</option>
           </select>
         </div>
@@ -61,11 +61,11 @@
               <thead class="bg-gray-50 text-xs uppercase text-gray-500">
                 <tr>
                   <th class="px-4 py-3 font-medium w-14">No</th>
-                  <th class="px-4 py-3 font-medium min-w-[200px]">Nama</th>
+                  <th class="px-4 py-3 font-medium min-w-[200px]">Name</th>
                   <th class="px-4 py-3 font-medium min-w-[220px]">Email</th>
                   <th class="px-4 py-3 font-medium min-w-[160px]">Username</th>
                   <th class="px-4 py-3 font-medium">Role</th>
-                  <th class="px-4 py-3 text-right font-medium">Aksi</th>
+                  <th class="px-4 py-3 text-right font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200">
@@ -75,7 +75,7 @@
                   </td>
                   <td class="px-4 py-3 align-top">
                     <p class="font-medium text-gray-900 whitespace-nowrap">
-                      {{ u.full_name || '-' }}
+                      {{ getDisplayName(u) }}
                     </p>
                   </td>
                   <td class="px-4 py-3 align-top">
@@ -97,7 +97,7 @@
                           v-model="roleChanges[u.id]"
                           class="rounded border border-gray-200 px-1 py-0.5 text-xs outline-none"
                         >
-                          <option value="">Ubah role...</option>
+                          <option value="">Change role...</option>
                           <option v-for="role in roles" :key="role.id" :value="role.id">
                             {{ role.name }}
                           </option>
@@ -123,7 +123,7 @@
                           onClick: () => goToEdit(u.id),
                         },
                         {
-                          label: 'Hapus',
+                          label: 'Delete',
                           tone: 'danger',
                           disabled: saving,
                           onClick: () => handleDelete(u.id, u.email),
@@ -134,7 +134,7 @@
                 </tr>
                 <tr v-if="!loading && filteredUsers.length === 0">
                   <td colspan="6" class="px-4 py-8 text-center text-sm text-gray-500">
-                    Tidak ada data yang cocok.
+                    No matching data found.
                   </td>
                 </tr>
               </tbody>
@@ -159,6 +159,7 @@ import { useRouter } from 'vue-router'
 import RowActionsMenu from '@/presentation/components/menus/RowActionsMenu.vue'
 import TablePagination from '@/presentation/components/tables/TablePagination.vue'
 import type { UserRole } from '@/domain/entities/User'
+import type { ManagedUser } from '@/domain/entities/ManagedUser'
 import { useAppToast } from '@/presentation/components/feedback/useAppToast'
 import { useAuthViewModel } from '@/viewmodels/useAuthViewModel'
 import { useUserManagementViewModel } from '@/viewmodels/useUserManagementViewModel'
@@ -181,6 +182,15 @@ function normalize(value: unknown) {
     .trim()
 }
 
+function getDisplayName(user: ManagedUser) {
+  const fullName = [user.first_name, user.middle_name, user.last_name]
+    .map((part) => String(part ?? '').trim())
+    .filter(Boolean)
+    .join(' ')
+
+  return fullName || '-'
+}
+
 const roleOptions = computed(() => {
   const set = new Set<string>()
   for (const u of users.value) {
@@ -196,7 +206,15 @@ const filteredUsers = computed(() => {
     if (roleFilter.value && roleLabel !== roleFilter.value) return false
     if (!q) return true
 
-    const haystack = [u.full_name, u.email, u.username ? `@${u.username}` : '', roleLabel]
+    const haystack = [
+      getDisplayName(u),
+      u.email,
+      u.username ? `@${u.username}` : '',
+      u.main_position ?? '',
+      u.hire_location ?? '',
+      u.no_id ?? '',
+      roleLabel,
+    ]
       .map(normalize)
       .join(' ')
 
@@ -242,12 +260,12 @@ function roleBadge(role: UserRole | null) {
 }
 
 async function handleDelete(userId: string, email: string) {
-  if (!confirm(`Hapus akun ${email}? Tindakan ini tidak bisa dibatalkan.`)) return
+  if (!confirm(`Delete account ${email}? This action cannot be undone.`)) return
   try {
     await deleteUser(userId)
     appToast.deleted('User')
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Gagal menghapus user.'
+    const message = err instanceof Error ? err.message : 'Failed to delete user.'
     appToast.error(message)
   }
 }

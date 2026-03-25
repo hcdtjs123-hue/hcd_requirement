@@ -14,7 +14,12 @@ export interface JobRequest {
   pt_pembebanan: string | null
   employment_status: EmploymentStatus | null
   direct_manager: string | null
-  designation: string | null
+  approval_director_bu: string | null
+  approval_director_bu_date: string | null
+  approval_gm_hrd: string | null
+  approval_gm_hrd_date: string | null
+  approval_director_hrd: string | null
+  approval_director_hrd_date: string | null
   site: string | null
   working_location: string | null
   custom_grup_1: string | null
@@ -36,7 +41,8 @@ export interface JobRequestInput {
   pt_pembebanan: string
   employment_status: EmploymentStatus | ""
   direct_manager: string
-  designation: string
+  approval_director_bu?: string
+  approval_director_bu_date?: string
   site: string
   working_location: string
   custom_grup_1: string

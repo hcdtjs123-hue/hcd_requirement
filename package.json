@@ -8,13 +8,15 @@
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "test:unit": "vitest",
+    "mcp:hcd": "node ./mcp/hcd-server.mjs",
     "build-only": "vite build",
     "type-check": "vue-tsc --build",
     "format": "prettier --write --experimental-cli src/"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.27.1",
     "@supabase/supabase-js": "^2.99.2",
-    "@tanstack/vue-query": "^5.92.9",
+    "@/vue-query": "^5.92.9",
     "@vueuse/core": "^14.2.1",
     "lucide-vue-next": "^0.577.0",
     "pinia": "^3.0.4",

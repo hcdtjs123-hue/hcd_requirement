@@ -1,5 +1,5 @@
 <template>
-  <div class="mx-auto flex max-w-3xl flex-col gap-8 text-gray-900">
+  <div class="mx-auto flex max-w-4xl flex-col gap-8 text-gray-900 pb-12">
     <div class="flex items-center gap-4">
       <button
         type="button"
@@ -9,125 +9,315 @@
         ←
       </button>
       <div>
-        <p class="text-sm uppercase tracking-[0.3em] text-blue-600">Master Data</p>
-        <h1 class="mt-1 text-2xl font-semibold tracking-tight">
-          {{ isEdit ? "Edit Approver" : "Tambah Approver Baru" }}
-        </h1>
+        <p class="text-sm uppercase tracking-[0.3em] text-blue-600 font-inter">Master Data</p>
+        <h1 class="mt-1 text-2xl font-semibold tracking-tight">Approver Configuration</h1>
       </div>
     </div>
 
-    <p v-if="error" class="rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
+    <p
+      v-if="error"
+      class="rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800"
+    >
       {{ error }}
     </p>
 
-    <section class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
-      <form v-if="!loading" class="grid gap-5 md:grid-cols-2" @submit.prevent="handleSubmit">
-        <label class="space-y-2 md:col-span-2">
-          <span class="text-sm font-medium text-gray-700">Email Approver *</span>
-          <input v-model="form.email" class="field" type="email" required placeholder="manager@company.com">
-        </label>
-        <label class="space-y-2">
-          <span class="text-sm font-medium text-gray-700">Nama</span>
-          <input v-model="form.name" class="field" type="text" placeholder="Nama Approver">
-        </label>
-        <label class="space-y-2">
-          <span class="text-sm font-medium text-gray-700">Urutan Step *</span>
-          <input v-model.number="form.step_order" class="field" type="number" min="1" required>
-        </label>
-        <label class="flex items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 px-4 py-4 md:col-span-2">
-          <input v-model="form.is_active" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-blue-600">
-          <span class="text-sm font-medium text-gray-900">Status Aktif</span>
-        </label>
+    <div v-if="loading" class="py-20 text-center text-sm text-gray-500">Loading data...</div>
 
-        <div class="md:col-span-2 mt-6 flex gap-3">
-          <button
-            type="submit"
-            class="rounded-2xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
-            :disabled="saving"
-          >
-            {{ saving ? "Menyimpan..." : isEdit ? "Update Approver" : "Simpan Approver" }}
-          </button>
-          <button
-            type="button"
-            class="rounded-2xl border border-gray-200 px-6 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
-            :disabled="saving"
-            @click="router.back()"
-          >
-            Batal
-          </button>
+    <form v-else class="space-y-8 font-inter" @submit.prevent="handleSubmit">
+      <!-- Section 1: GM HRD -->
+      <section class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div class="mb-5 flex items-center gap-3">
+          <span class="h-8 w-1 rounded-full bg-purple-500"></span>
+          <h2 class="text-lg font-semibold text-gray-800">1. GM HRD</h2>
+          <span class="rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-medium text-purple-700">
+            Approval Step 1
+          </span>
         </div>
-      </form>
-      <div v-else class="py-10 text-center text-sm text-gray-500">
-        Memuat data...
+
+        <div class="grid gap-5">
+          <label class="space-y-2">
+            <span class="text-sm font-medium text-gray-700">Select Employee *</span>
+            <div class="relative" ref="gmFieldRef">
+              <input
+                v-model="searchGm"
+                type="text"
+                class="field"
+                placeholder="Search employee name or position..."
+                @focus="isGmDropdownOpen = true"
+                @input="isGmDropdownOpen = true"
+                autocomplete="off"
+                required
+              />
+              <ul
+                v-show="isGmDropdownOpen && filteredGmEmployees.length > 0"
+                class="absolute z-20 mt-1 max-h-52 w-full overflow-auto rounded-2xl border border-gray-200 bg-white shadow-xl"
+              >
+                <li
+                  v-for="emp in filteredGmEmployees"
+                  :key="emp.id"
+                  class="cursor-pointer px-4 py-3 hover:bg-blue-50 transition border-b border-gray-50 last:border-0 text-sm"
+                  @click="selectEmployee('gm', emp)"
+                >
+                  {{ emp.label }}
+                </li>
+              </ul>
+            </div>
+          </label>
+          
+          <div v-if="gmForm.employee_id" class="grid grid-cols-2 gap-4 rounded-2xl bg-gray-50 p-4 border border-gray-100">
+            <div class="space-y-1">
+              <p class="text-[10px] font-bold uppercase text-gray-400">Position</p>
+              <p class="text-sm font-medium">{{ getSelectedEmployee('gm')?.rawPosition || '-' }}</p>
+            </div>
+            <div class="space-y-1">
+              <p class="text-[10px] font-bold uppercase text-gray-400">Email</p>
+              <p class="text-sm font-medium">{{ getSelectedEmployee('gm')?.email || '-' }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 2: Director HRD -->
+      <section class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div class="mb-5 flex items-center gap-3">
+          <span class="h-8 w-1 rounded-full bg-indigo-500"></span>
+          <h2 class="text-lg font-semibold text-gray-800">2. Director HRD</h2>
+          <span class="rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-medium text-indigo-700">
+            Approval Step 2
+          </span>
+        </div>
+
+        <div class="grid gap-5">
+          <label class="space-y-2">
+            <span class="text-sm font-medium text-gray-700">Select Employee *</span>
+            <div class="relative" ref="directorFieldRef">
+              <input
+                v-model="searchDirector"
+                type="text"
+                class="field"
+                placeholder="Search employee name or position..."
+                @focus="isDirectorDropdownOpen = true"
+                @input="isDirectorDropdownOpen = true"
+                autocomplete="off"
+                required
+              />
+              <ul
+                v-show="isDirectorDropdownOpen && filteredDirectorEmployees.length > 0"
+                class="absolute z-20 mt-1 max-h-52 w-full overflow-auto rounded-2xl border border-gray-200 bg-white shadow-xl"
+              >
+                <li
+                  v-for="emp in filteredDirectorEmployees"
+                  :key="emp.id"
+                  class="cursor-pointer px-4 py-3 hover:bg-blue-50 transition border-b border-gray-50 last:border-0 text-sm"
+                  @click="selectEmployee('director', emp)"
+                >
+                   {{ emp.label }}
+                </li>
+              </ul>
+            </div>
+          </label>
+
+          <div v-if="directorForm.employee_id" class="grid grid-cols-2 gap-4 rounded-2xl bg-gray-50 p-4 border border-gray-100">
+            <div class="space-y-1">
+              <p class="text-[10px] font-bold uppercase text-gray-400">Position</p>
+              <p class="text-sm font-medium">{{ getSelectedEmployee('director')?.rawPosition || '-' }}</p>
+            </div>
+            <div class="space-y-1">
+              <p class="text-[10px] font-bold uppercase text-gray-400">Email</p>
+              <p class="text-sm font-medium">{{ getSelectedEmployee('director')?.email || '-' }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="flex gap-4 sticky bottom-4">
+        <button
+          type="submit"
+          class="flex-1 rounded-2xl bg-blue-600 px-6 py-4 text-sm font-bold text-white shadow-2xl transition hover:bg-blue-700 disabled:opacity-60"
+          :disabled="saving"
+        >
+          {{ saving ? 'Saving Changes...' : 'Save All Configuration' }}
+        </button>
+        <button
+          type="button"
+          class="rounded-2xl border border-gray-200 bg-white px-8 py-4 text-sm font-semibold text-gray-700 shadow-md transition hover:bg-gray-50"
+          :disabled="saving"
+          @click="router.back()"
+        >
+          Cancel
+        </button>
       </div>
-    </section>
+    </form>
   </div>
 </template>
 
 <script setup lang="ts">
-import { reactive, computed, onMounted, watch } from "vue"
-import { useRoute, useRouter } from "vue-router"
+import { reactive, onMounted, watch, ref, computed, onBeforeUnmount } from 'vue'
+import { useRouter } from 'vue-router'
 
-import type { ApproverMasterInput } from "@/domain/entities/ApprovalChain"
-import { useAppToast } from "@/presentation/components/feedback/useAppToast"
-import { useApproverMasterViewModel } from "@/viewmodels/useApproverMasterViewModel"
+import type { ApproverMasterInput } from '@/domain/entities/ApprovalChain'
+import { useAppToast } from '@/presentation/components/feedback/useAppToast'
+import { useApproverMasterViewModel } from '@/viewmodels/useApproverMasterViewModel'
+import { supabase } from '@/infrastructure/supabase/client'
 
-const route = useRoute()
 const router = useRouter()
 const { approvers, loading, error, saving, create, update, refresh } = useApproverMasterViewModel()
 const appToast = useAppToast()
 
-const id = computed(() => route.params.id as string | undefined)
-const isEdit = computed(() => !!id.value)
+// Employee selection state
+const employees = ref<EmployeeOption[]>([])
+const searchGm = ref('')
+const searchDirector = ref('')
+const isGmDropdownOpen = ref(false)
+const isDirectorDropdownOpen = ref(false)
+const gmFieldRef = ref<HTMLElement | null>(null)
+const directorFieldRef = ref<HTMLElement | null>(null)
 
-function createEmptyForm(): ApproverMasterInput & { is_active: boolean } {
+type EmployeeOption = {
+  id: string
+  label: string
+  rawName: string
+  rawPosition: string
+  email: string | null
+}
+
+function createEmptyForm(jabatan: string, step: number): ApproverMasterInput & { id?: string } {
   return {
-    email: "",
-    name: "",
-    step_order: 1,
-    is_active: true,
+    employee_id: '',
+    jabatan: jabatan,
+    step_order: step,
   }
 }
 
-const form = reactive(createEmptyForm())
+const gmForm = reactive(createEmptyForm('GM HRD', 1))
+const directorForm = reactive(createEmptyForm('Director HRD', 2))
+
+async function loadEmployees() {
+  const { data, error } = await supabase
+    .from('employees')
+    .select(`id, first_name, middle_name, last_name, main_position, email`)
+
+  if (error) return
+
+  employees.value = (data ?? []).map((emp) => {
+    const fullName = [emp.first_name, emp.middle_name, emp.last_name].filter(Boolean).join(' ').trim()
+    const position = emp.main_position ?? 'No position'
+    return {
+      id: emp.id,
+      label: `${fullName || 'Unnamed'} — ${position}`,
+      rawName: fullName || 'Unnamed',
+      rawPosition: position,
+      email: emp.email ?? null,
+    }
+  })
+}
+
+function getSelectedEmployee(type: 'gm' | 'director') {
+  const id = type === 'gm' ? gmForm.employee_id : directorForm.employee_id
+  return employees.value.find(e => e.id === id)
+}
+
+function filterEmployees(term: string) {
+  const q = term.toLowerCase().trim()
+  if (!q) return employees.value
+  return employees.value.filter((emp) => emp.label.toLowerCase().includes(q))
+}
+
+const filteredGmEmployees = computed(() => filterEmployees(searchGm.value))
+const filteredDirectorEmployees = computed(() => filterEmployees(searchDirector.value))
+
+function selectEmployee(type: 'gm' | 'director', emp: EmployeeOption) {
+  if (type === 'gm') {
+    searchGm.value = emp.rawName
+    gmForm.employee_id = emp.id
+    isGmDropdownOpen.value = false
+  } else {
+    searchDirector.value = emp.rawName
+    directorForm.employee_id = emp.id
+    isDirectorDropdownOpen.value = false
+  }
+}
+
+function handleClickOutside(event: MouseEvent) {
+  if (gmFieldRef.value && !gmFieldRef.value.contains(event.target as Node)) {
+    isGmDropdownOpen.value = false
+  }
+  if (directorFieldRef.value && !directorFieldRef.value.contains(event.target as Node)) {
+    isDirectorDropdownOpen.value = false
+  }
+}
 
 function loadData() {
-  if (isEdit.value && id.value) {
-    const approver = approvers.value.find((a) => a.id === id.value)
-    if (approver) {
-      Object.assign(form, {
-        email: approver.email,
-        name: approver.name ?? "",
-        step_order: approver.step_order,
-        is_active: approver.is_active,
+  if (!loading.value && approvers.value.length > 0) {
+    const gm = approvers.value.find((a) => a.jabatan?.toLowerCase().includes('gm hrd'))
+    if (gm) {
+      Object.assign(gmForm, {
+        id: gm.id,
+        employee_id: gm.employee_id,
+        jabatan: gm.jabatan ?? 'GM HRD',
+        step_order: gm.step_order,
       })
-    } else if (!loading.value) {
-      appToast.error("Data Approver tidak ditemukan.")
-      router.back()
+      const emp = employees.value.find(e => e.id === gm.employee_id)
+      if (emp) searchGm.value = emp.rawName
+    }
+
+    const director = approvers.value.find((a) => 
+      a.jabatan?.toLowerCase().includes('director hrd') || a.jabatan?.toLowerCase().includes('direktur hrd')
+    )
+    if (director) {
+      Object.assign(directorForm, {
+        id: director.id,
+        employee_id: director.employee_id,
+        jabatan: director.jabatan ?? 'Director HRD',
+        step_order: director.step_order,
+      })
+      const emp = employees.value.find(e => e.id === director.employee_id)
+      if (emp) searchDirector.value = emp.rawName
     }
   }
 }
 
-watch(() => approvers.value, loadData, { immediate: true })
+watch([loading, approvers, employees], loadData)
 
 onMounted(() => {
-  if (isEdit.value && approvers.value.length === 0) {
+  if (approvers.value.length === 0) {
     refresh()
+  } else {
+    loadData()
   }
+  loadEmployees()
+  document.addEventListener('click', handleClickOutside)
 })
 
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
+
+async function saveRecord(form: any) {
+  const { id, ...data } = form
+  if (!data.employee_id) return // Skip if no employee selected
+  
+  if (id) {
+    await update(id, data)
+  } else {
+    await create(data)
+  }
+}
+
 async function handleSubmit() {
+  if (!gmForm.employee_id || !directorForm.employee_id) {
+      appToast.error('Please select an employee for both roles.')
+      return
+  }
+  
   try {
-    if (isEdit.value && id.value) {
-      await update(id.value, { ...form })
-      appToast.updated("Approver")
-    } else {
-      await create({ ...form })
-      appToast.created("Approver")
-    }
-    router.push("/approver-master")
+    await saveRecord(gmForm)
+    await saveRecord(directorForm)
+    
+    appToast.success('Configuration updated successfully.')
+    router.push('/approver-master')
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Gagal menyimpan approver."
+    const message = err instanceof Error ? err.message : 'Failed to save configuration.'
     appToast.error(message)
   }
 }
@@ -138,15 +328,21 @@ async function handleSubmit() {
   width: 100%;
   border-radius: 0.75rem;
   border: 1px solid rgb(209 213 219);
-  background: rgb(249 250 251);
+  background: white;
   padding: 0.75rem 1rem;
   color: rgb(17 24 39);
   outline: none;
   transition: all 0.2s;
+  font-family: inherit;
 }
 .field:focus {
   border-color: rgb(37 99 235);
-  background: white;
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+.bg-gray-50 {
+  background: rgb(249 250 251);
+}
+.font-inter {
+  font-family: 'Inter', sans-serif;
 }
 </style>

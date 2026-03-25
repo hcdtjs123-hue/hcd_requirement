@@ -79,8 +79,8 @@ const router = createRouter({
           meta: { requiredPermissions: ['approval:read'] },
         },
         {
-          path: 'approver-master/create',
-          name: 'approver-master-create',
+          path: 'approver-master/configure',
+          name: 'approver-master-configure',
           component: () => import('@/presentation/pages/approvals/ApproverMasterFormPage.vue'),
           meta: { requiredPermissions: ['approval:read'] },
         },

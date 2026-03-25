@@ -31,10 +31,15 @@ export interface RecruitmentTracking {
   job_request?: {
     id: string
     main_position: string | null
-    designation: string | null
     site: string | null
     employment_status: string | null
     required_date: string | null
+    approval_director_bu: string | null
+    approval_director_bu_date: string | null
+    approval_gm_hrd: string | null
+    approval_gm_hrd_date: string | null
+    approval_director_hrd: string | null
+    approval_director_hrd_date: string | null
   } | null
 }
 

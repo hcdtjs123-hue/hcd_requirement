@@ -9,9 +9,9 @@
         ←
       </button>
       <div>
-        <p class="text-sm uppercase tracking-[0.3em] text-blue-600">Staff Rekrutmen</p>
+        <p class="text-sm uppercase tracking-[0.3em] text-blue-600">Recruitment Team</p>
         <h1 class="mt-1 text-2xl font-semibold tracking-tight">
-          {{ isEdit ? 'Detail Pipeline Rekrutmen' : 'Tambah Kandidat ke Pipeline' }}
+          {{ isEdit ? 'Recruitment Pipeline Details' : 'Add Candidate to Pipeline' }}
         </h1>
       </div>
     </div>
@@ -24,7 +24,7 @@
     </p>
 
     <div v-if="loading && isEdit" class="py-10 text-center text-sm text-gray-500">
-      Memuat data...
+      Loading data...
     </div>
 
     <template v-else>
@@ -32,7 +32,7 @@
       <section v-if="!isEdit" class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
         <form class="grid gap-4 md:grid-cols-2" @submit.prevent="handleCreateInvitation">
           <label class="space-y-2">
-            <span class="text-sm font-medium text-gray-700">Nama Lengkap *</span>
+            <span class="text-sm font-medium text-gray-700">Full Name *</span>
             <input v-model="invForm.candidate_name" class="field" type="text" required />
           </label>
           <label class="space-y-2">
@@ -40,13 +40,13 @@
             <input v-model="invForm.candidate_email" class="field" type="email" required />
           </label>
           <label class="space-y-2">
-            <span class="text-sm font-medium text-gray-700">Posisi Dilamar</span>
+            <span class="text-sm font-medium text-gray-700">Applied Position</span>
             <input v-model="invForm.position_applied" class="field" type="text" />
           </label>
           <label class="space-y-2">
             <span class="text-sm font-medium text-gray-700">Tracking ID *</span>
             <select v-model="invForm.tracking_id" class="field" required>
-              <option value="">Pilih Job Request</option>
+              <option value="">Select a Job Request</option>
               <option v-for="t in trackings" :key="t.id" :value="t.id">
                 {{ t.job_request?.main_position || t.id }}
               </option>
@@ -58,7 +58,7 @@
               class="rounded-2xl bg-blue-600 px-8 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
               :disabled="saving"
             >
-              {{ saving ? 'Menyimpan...' : 'Tambah Kandidat' }}
+              {{ saving ? 'Saving...' : 'Add Candidate' }}
             </button>
             <button
               type="button"
@@ -66,7 +66,7 @@
               :disabled="saving"
               @click="router.back()"
             >
-              Batal
+              Cancel
             </button>
           </div>
         </form>
@@ -123,13 +123,15 @@
           v-if="selectedInvitation.status === 'invited'"
           class="rounded-3xl border border-blue-200 bg-blue-50/50 p-6 shadow-sm"
         >
-          <h3 class="mb-4 text-lg font-semibold text-blue-900">Kirim Credential Form Aplikasi</h3>
+          <h3 class="mb-4 text-lg font-semibold text-blue-900">
+            Send Application Form Credentials
+          </h3>
           <div class="flex flex-col sm:flex-row gap-3">
             <input
               v-model="credentialUserId"
               class="flex-1 rounded-2xl border border-blue-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               type="text"
-              placeholder="User ID (dari admin panel untuk kandidat login)"
+              placeholder="User ID (from the admin panel for candidate sign-in)"
             />
             <button
               type="button"
@@ -137,14 +139,14 @@
               :disabled="saving || !credentialUserId"
               @click="handleSendCredentials"
             >
-              Kirim Credential
+              Send Credentials
             </button>
           </div>
         </div>
 
         <!-- Schedule Interview -->
         <div class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
-          <h3 class="mb-4 text-lg font-semibold text-gray-900">Jadwalkan Interview</h3>
+          <h3 class="mb-4 text-lg font-semibold text-gray-900">Schedule Interview</h3>
           <form class="grid gap-4 md:grid-cols-2" @submit.prevent="handleScheduleInterview">
             <label class="space-y-2">
               <span class="text-sm font-medium text-gray-700">Meeting Link *</span>
@@ -157,24 +159,24 @@
               />
             </label>
             <label class="space-y-2">
-              <span class="text-sm font-medium text-gray-700">Tipe Media</span>
+              <span class="text-sm font-medium text-gray-700">Meeting Platform</span>
               <select v-model="interviewForm.meeting_type" class="field">
                 <option value="zoom">Zoom</option>
                 <option value="gmeet">Google Meet</option>
-                <option value="other">Lainnya</option>
+                <option value="other">Other</option>
               </select>
             </label>
             <label class="space-y-2">
-              <span class="text-sm font-medium text-gray-700">Tanggal & Waktu</span>
+              <span class="text-sm font-medium text-gray-700">Date & Time</span>
               <input v-model="interviewForm.scheduled_at" class="field" type="datetime-local" />
             </label>
             <label class="space-y-2">
-              <span class="text-sm font-medium text-gray-700">Catatan</span>
+              <span class="text-sm font-medium text-gray-700">Notes</span>
               <input
                 v-model="interviewForm.notes"
                 class="field"
                 type="text"
-                placeholder="Info tambahan..."
+                placeholder="Additional information..."
               />
             </label>
             <div class="pt-2 md:col-span-2">
@@ -183,7 +185,7 @@
                 class="rounded-2xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
                 :disabled="saving"
               >
-                Kirim Link Interview
+                Send Interview Link
               </button>
             </div>
           </form>
@@ -193,7 +195,7 @@
             v-if="selectedInvitation.interviews.length > 0"
             class="mt-8 pt-6 border-t border-gray-100 space-y-4"
           >
-            <h3 class="text-lg font-semibold text-gray-900">Histori Interview & Jadwal</h3>
+            <h3 class="text-lg font-semibold text-gray-900">Interview History & Schedule</h3>
             <div
               v-for="interview in selectedInvitation.interviews"
               :key="interview.id"

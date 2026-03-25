@@ -6,7 +6,7 @@
         <p class="text-sm uppercase tracking-[0.3em] text-blue-600">Overview</p>
         <h1 class="mt-2 text-3xl font-semibold tracking-tight">Dashboard</h1>
         <p class="mt-1 text-sm text-gray-500">
-          Selamat datang, <span class="font-medium text-gray-800">{{ user?.email }}</span> —
+          Welcome, <span class="font-medium text-gray-800">{{ user?.email }}</span> —
           <span class="font-semibold text-blue-600 uppercase">{{ userRole }}</span>
         </p>
       </div>
@@ -17,7 +17,7 @@
       v-if="dashboardIntro"
       class="rounded-3xl border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-cyan-50 p-6 shadow-sm"
     >
-      <p class="text-xs font-semibold uppercase tracking-[0.25em] text-blue-600">Dashboard Fokus</p>
+      <p class="text-xs font-semibold uppercase tracking-[0.25em] text-blue-600">Dashboard Focus</p>
       <h2 class="mt-2 text-2xl font-semibold tracking-tight text-gray-900">
         {{ dashboardIntro.title }}
       </h2>
@@ -60,10 +60,10 @@
         <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4">
           <div class="flex items-center gap-2">
             <FileText class="h-4 w-4 text-blue-600" />
-            <h2 class="text-sm font-semibold text-gray-900">Job Requests Terbaru</h2>
+            <h2 class="text-sm font-semibold text-gray-900">Latest Job Requests</h2>
           </div>
           <RouterLink to="/job-requests" class="text-xs text-blue-600 hover:underline"
-            >Lihat semua →</RouterLink
+            >View all →</RouterLink
           >
         </div>
         <div class="divide-y divide-gray-50">
@@ -77,7 +77,7 @@
                 {{ job.main_position || '-' }}
               </p>
               <p class="mt-0.5 truncate text-xs text-gray-500">
-                {{ job.designation || '-' }} • {{ job.site || '-' }}
+                {{ job.site || '-' }}
               </p>
             </div>
             <span
@@ -87,7 +87,7 @@
             >
           </div>
           <div v-if="recentJobs.length === 0" class="px-6 py-10 text-center text-sm text-gray-400">
-            Belum ada job request.
+            No job requests yet.
           </div>
         </div>
       </div>
@@ -96,7 +96,7 @@
       <div v-if="showApprovalPanel" class="rounded-3xl border border-gray-200 bg-white shadow-sm">
         <div class="flex items-center gap-2 border-b border-gray-100 px-6 py-4">
           <CheckSquare class="h-4 w-4 text-emerald-600" />
-          <h2 class="text-sm font-semibold text-gray-900">Status Approval</h2>
+          <h2 class="text-sm font-semibold text-gray-900">Approval Status</h2>
         </div>
         <div class="space-y-3 p-5">
           <div
@@ -120,7 +120,7 @@
           to="/approval-tracking"
           class="mx-5 mb-5 flex items-center justify-center rounded-2xl border border-gray-200 py-2.5 text-xs font-medium text-gray-600 transition hover:bg-gray-50"
         >
-          Lihat Approval Tracking
+          View Approval Tracking
         </RouterLink>
       </div>
     </div>
@@ -135,10 +135,10 @@
         <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4">
           <div class="flex items-center gap-2">
             <Users class="h-4 w-4 text-purple-600" />
-            <h2 class="text-sm font-semibold text-gray-900">Pipeline Kandidat</h2>
+            <h2 class="text-sm font-semibold text-gray-900">Candidate Pipeline</h2>
           </div>
           <RouterLink to="/recruitment/pipeline" class="text-xs text-blue-600 hover:underline"
-            >Buka modul rekrutmen →</RouterLink
+            >Open recruitment module →</RouterLink
           >
         </div>
         <div class="space-y-2 p-5">
@@ -162,7 +162,7 @@
             </p>
           </div>
           <p v-if="totalCandidates === 0" class="py-4 text-center text-sm text-gray-400">
-            Belum ada data kandidat.
+            No candidate data yet.
           </p>
         </div>
       </div>
@@ -174,7 +174,7 @@
       >
         <div class="flex items-center gap-2 border-b border-gray-100 px-6 py-4">
           <LayoutDashboard class="h-4 w-4 text-gray-600" />
-          <h2 class="text-sm font-semibold text-gray-900">Akses Cepat</h2>
+          <h2 class="text-sm font-semibold text-gray-900">Quick Access</h2>
         </div>
         <div class="grid grid-cols-2 gap-3 p-5">
           <RouterLink

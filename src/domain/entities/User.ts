@@ -5,8 +5,19 @@ export interface User {
   email: string
   role?: UserRole
   permissions?: string[] // e.g., ['job_request:read', 'user:create']
-  full_name?: string
   username?: string
-  phone?: string
+  first_name?: string
+  middle_name?: string
+  last_name?: string
+  main_position?: string
+  hire_location?: string
+  date_of_birth?: string
+  place_of_birth?: string
+  nationality?: string
+  marital_status?: string
+  religion?: string
+  gender?: string
+  ethnic?: string
+  blood_type?: string
   avatar_url?: string
 }

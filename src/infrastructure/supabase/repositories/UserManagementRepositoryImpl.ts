@@ -10,18 +10,44 @@ import type { UserRole } from '@/domain/entities/User'
 
 export class UserManagementRepositoryImpl implements UserManagementRepository {
   async getAllUsers(): Promise<ManagedUser[]> {
-    // Get all profiles with their roles
-    const { data: profiles, error: profileError } = await supabase
-      .from('profiles')
-      .select('id, username, full_name, phone, created_at')
+    // Get all employees with their roles
+    const { data: employees, error: employeeError } = await supabase
+      .from('employees')
+      .select(
+        `id,
+         username,
+         first_name,
+         middle_name,
+         last_name,
+         main_position,
+         hire_location,
+         date_of_birth,
+         place_of_birth,
+         nationality,
+         marital_status,
+         religion,
+         gender,
+        ethnic,
+        blood_type,
+        no_id,
+        employee_code,
+         department,
+         employment_type,
+         employment_start_date,
+         emergency_contact_name,
+         emergency_contact_phone,
+         is_active,
+         created_at,
+         updated_at`,
+      )
       .order('created_at', { ascending: false })
 
-    if (profileError) throw new Error(profileError.message)
+    if (employeeError) throw new Error(employeeError.message)
 
-    if (!profiles || profiles.length === 0) return []
+    if (!employees || employees.length === 0) return []
 
     // Get user_roles for all users
-    const userIds = profiles.map((p) => p.id)
+    const userIds = employees.map((p) => p.id)
     const { data: userRoles, error: rolesError } = await supabase
       .from('user_roles')
       .select('user_id, role_id, roles(name)')
@@ -52,17 +78,37 @@ export class UserManagementRepositoryImpl implements UserManagementRepository {
       }
     }
 
-    return profiles.map((profile) => {
-      const roleInfo = roleMap.get(profile.id)
+    return employees.map((employee) => {
+      const roleInfo = roleMap.get(employee.id)
       return {
-        id: profile.id,
-        email: emailMap.get(profile.id) ?? '',
-        username: profile.username,
-        full_name: profile.full_name,
-        phone: profile.phone,
+        id: employee.id,
+        email: emailMap.get(employee.id) ?? '',
+        username: employee.username ?? null,
+        first_name: employee.first_name ?? null,
+        middle_name: employee.middle_name ?? null,
+        last_name: employee.last_name ?? null,
+        main_position: employee.main_position ?? null,
+        hire_location: employee.hire_location ?? null,
+        date_of_birth: employee.date_of_birth ?? null,
+        place_of_birth: employee.place_of_birth ?? null,
+        nationality: employee.nationality ?? null,
+        marital_status: employee.marital_status ?? null,
+        religion: employee.religion ?? null,
+        gender: employee.gender ?? null,
+        ethnic: employee.ethnic ?? null,
+        blood_type: employee.blood_type ?? null,
+        no_id: employee.no_id ?? null,
+        employee_code: employee.employee_code ?? null,
+        department: employee.department ?? null,
+        employment_type: employee.employment_type ?? null,
+        employment_start_date: employee.employment_start_date ?? null,
+        emergency_contact_name: employee.emergency_contact_name ?? null,
+        emergency_contact_phone: employee.emergency_contact_phone ?? null,
+        is_active: employee.is_active ?? null,
         role: (roleInfo?.role_name as UserRole) ?? null,
         role_id: roleInfo?.role_id ?? null,
-        created_at: profile.created_at,
+        created_at: employee.created_at ?? null,
+        updated_at: employee.updated_at ?? null,
       }
     })
   }
@@ -90,16 +136,36 @@ export class UserManagementRepositoryImpl implements UserManagementRepository {
 
     const userId = authData.user.id
 
-    // 2. Update profile (trigger already inserts, so we update)
-    const { error: profileError } = await supabase
-      .from('profiles')
+    // 2. Update employee (trigger already inserts, so we update)
+    const { error: employeeError } = await supabase
+      .from('employees')
       .update({
         username: input.username,
-        full_name: input.full_name,
+        first_name: input.first_name,
+        middle_name: input.middle_name,
+        last_name: input.last_name,
+        main_position: input.main_position,
+        hire_location: input.hire_location,
+        date_of_birth: input.date_of_birth || null,
+        place_of_birth: input.place_of_birth,
+        nationality: input.nationality,
+        marital_status: input.marital_status,
+        religion: input.religion,
+        gender: input.gender,
+        ethnic: input.ethnic,
+        blood_type: input.blood_type,
+        no_id: input.no_id,
+        employee_code: input.employee_code ?? null,
+        department: input.department ?? null,
+        employment_type: input.employment_type ?? null,
+        employment_start_date: input.employment_start_date || null,
+        emergency_contact_name: input.emergency_contact_name ?? null,
+        emergency_contact_phone: input.emergency_contact_phone ?? null,
+        is_active: input.is_active ?? true,
       })
       .eq('id', userId)
 
-    if (profileError) throw new Error(profileError.message)
+    if (employeeError) throw new Error(employeeError.message)
 
     // 3. Assign role
     const { error: roleError } = await supabase.from('user_roles').insert({
@@ -120,11 +186,31 @@ export class UserManagementRepositoryImpl implements UserManagementRepository {
       id: userId,
       email: input.email,
       username: input.username,
-      full_name: input.full_name,
-      phone: null,
+      first_name: input.first_name,
+      middle_name: input.middle_name,
+      last_name: input.last_name,
+      main_position: input.main_position,
+      hire_location: input.hire_location,
+      date_of_birth: input.date_of_birth,
+      place_of_birth: input.place_of_birth,
+      nationality: input.nationality,
+      marital_status: input.marital_status,
+      religion: input.religion,
+      gender: input.gender,
+      ethnic: input.ethnic,
+      blood_type: input.blood_type,
+      no_id: input.no_id,
+      employee_code: input.employee_code ?? null,
+      department: input.department ?? null,
+      employment_type: input.employment_type ?? null,
+      employment_start_date: input.employment_start_date ?? null,
+      emergency_contact_name: input.emergency_contact_name ?? null,
+      emergency_contact_phone: input.emergency_contact_phone ?? null,
+      is_active: input.is_active ?? true,
       role: (roleData?.name as UserRole) ?? null,
       role_id: input.role_id,
       created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     }
   }
 
@@ -140,15 +226,35 @@ export class UserManagementRepositoryImpl implements UserManagementRepository {
     const { error: authError } = await supabase.auth.admin.updateUserById(userId, authPayload)
     if (authError) throw new Error(authError.message)
 
-    const { error: profileError } = await supabase
-      .from('profiles')
+    const { error: employeeError } = await supabase
+      .from('employees')
       .update({
         username: input.username,
-        full_name: input.full_name,
+        first_name: input.first_name,
+        middle_name: input.middle_name,
+        last_name: input.last_name,
+        main_position: input.main_position,
+        hire_location: input.hire_location,
+        date_of_birth: input.date_of_birth || null,
+        place_of_birth: input.place_of_birth,
+        nationality: input.nationality,
+        marital_status: input.marital_status,
+        religion: input.religion,
+        gender: input.gender,
+        ethnic: input.ethnic,
+        blood_type: input.blood_type,
+        no_id: input.no_id,
+        employee_code: input.employee_code ?? null,
+        department: input.department ?? null,
+        employment_type: input.employment_type ?? null,
+        employment_start_date: input.employment_start_date || null,
+        emergency_contact_name: input.emergency_contact_name ?? null,
+        emergency_contact_phone: input.emergency_contact_phone ?? null,
+        is_active: input.is_active ?? true,
       })
       .eq('id', userId)
 
-    if (profileError) throw new Error(profileError.message)
+    if (employeeError) throw new Error(employeeError.message)
 
     const { error: deleteError } = await supabase.from('user_roles').delete().eq('user_id', userId)
 
@@ -172,16 +278,36 @@ export class UserManagementRepositoryImpl implements UserManagementRepository {
       id: userId,
       email: input.email,
       username: input.username,
-      full_name: input.full_name,
-      phone: null,
+      first_name: input.first_name,
+      middle_name: input.middle_name,
+      last_name: input.last_name,
+      main_position: input.main_position,
+      hire_location: input.hire_location,
+      date_of_birth: input.date_of_birth,
+      place_of_birth: input.place_of_birth,
+      nationality: input.nationality,
+      marital_status: input.marital_status,
+      religion: input.religion,
+      gender: input.gender,
+      ethnic: input.ethnic,
+      blood_type: input.blood_type,
+      no_id: input.no_id,
+      employee_code: input.employee_code ?? null,
+      department: input.department ?? null,
+      employment_type: input.employment_type ?? null,
+      employment_start_date: input.employment_start_date ?? null,
+      emergency_contact_name: input.emergency_contact_name ?? null,
+      emergency_contact_phone: input.emergency_contact_phone ?? null,
+      is_active: input.is_active ?? true,
       role: (roleData?.name as UserRole) ?? null,
       role_id: input.role_id,
       created_at: null,
+      updated_at: new Date().toISOString(),
     }
   }
 
   async deleteUser(userId: string): Promise<void> {
-    // Delete from auth (cascades to profiles and user_roles)
+    // Delete from auth (cascades to employees and user_roles)
     const { error } = await supabase.auth.admin.deleteUser(userId)
     if (error) throw new Error(error.message)
   }

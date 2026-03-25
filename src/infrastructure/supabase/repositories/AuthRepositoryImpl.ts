@@ -39,7 +39,7 @@ export class AuthRepositoryImpl implements AuthRepository {
       return normalizedIdentifier
     }
 
-    const usernameTable = import.meta.env.VITE_AUTH_USERNAME_TABLE ?? 'profiles'
+    const usernameTable = import.meta.env.VITE_AUTH_USERNAME_TABLE ?? 'employees'
     const usernameColumn = import.meta.env.VITE_AUTH_USERNAME_COLUMN ?? 'username'
     const idColumn = import.meta.env.VITE_AUTH_USER_ID_COLUMN ?? 'id'
     const normalizedUsername = normalizedIdentifier.replace(/^@/, '')

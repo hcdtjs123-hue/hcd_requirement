@@ -2,10 +2,10 @@
   <div class="mx-auto flex max-w-5xl flex-col gap-8 text-gray-900">
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <p class="text-sm uppercase tracking-[0.3em] text-blue-600">Modul Kandidat</p>
-        <h1 class="mt-3 text-3xl font-semibold tracking-tight">Database Kandidat</h1>
+        <p class="text-sm uppercase tracking-[0.3em] text-blue-600">Candidate Module</p>
+        <h1 class="mt-3 text-3xl font-semibold tracking-tight">Candidate Database</h1>
         <p class="mt-2 text-sm text-gray-600">
-          Kelola data profil kandidat, form kandidat, dan relasi kandidat terhadap job request.
+          Manage candidate profiles, candidate forms, and their relationship to job requests.
         </p>
       </div>
       <button
@@ -13,7 +13,7 @@
         class="rounded-2xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
         @click="goToCreate"
       >
-        Tambah Data Kandidat
+        Add Candidate Data
       </button>
     </div>
 
@@ -27,14 +27,14 @@
     <section class="max-w-full">
       <div class="rounded-3xl border border-gray-200 bg-gray-50 p-5">
         <div class="mb-4 flex items-center justify-between">
-          <h2 class="text-xl font-semibold">Daftar Kandidat</h2>
+          <h2 class="text-xl font-semibold">Candidate List</h2>
           <button
             type="button"
             class="text-sm text-gray-600 transition hover:text-gray-900"
             :disabled="candidateLoading"
             @click="refreshCandidates"
           >
-            {{ candidateLoading ? 'Memuat...' : 'Refresh' }}
+            {{ candidateLoading ? 'Loading...' : 'Refresh' }}
           </button>
         </div>
 
@@ -52,7 +52,7 @@
               v-model="jobRequestFilter"
               class="h-11 rounded-2xl border border-gray-200 bg-white px-3 text-sm outline-none focus:border-blue-600"
             >
-              <option value="">Semua Job Request</option>
+              <option value="">All Job Requests</option>
               <option v-for="opt in jobRequestOptions" :key="opt" :value="opt">{{ opt }}</option>
             </select>
           </div>
@@ -64,11 +64,11 @@
               <thead class="bg-gray-50 text-xs uppercase text-gray-500">
                 <tr>
                   <th class="px-4 py-3 font-medium w-14">No</th>
-                  <th class="px-4 py-3 font-medium min-w-[220px]">Nama</th>
+                  <th class="px-4 py-3 font-medium min-w-[220px]">Name</th>
                   <th class="px-4 py-3 font-medium min-w-[220px]">Email</th>
-                  <th class="px-4 py-3 font-medium min-w-[160px]">Telepon</th>
+                  <th class="px-4 py-3 font-medium min-w-[160px]">Phone</th>
                   <th class="px-4 py-3 font-medium min-w-[200px]">Job Request</th>
-                  <th class="px-4 py-3 font-medium text-right min-w-[160px]">Aksi</th>
+                  <th class="px-4 py-3 font-medium text-right min-w-[160px]">Actions</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200">
@@ -99,15 +99,15 @@
                     <span
                       class="inline-flex rounded-full bg-blue-100 px-2.5 py-0.5 text-[10px] font-medium tracking-wider text-blue-700"
                     >
-                      {{ candidate.job_request?.main_position || 'Tanpa Job Request' }}
+                      {{ candidate.job_request?.main_position || 'No Job Request' }}
                     </span>
                   </td>
                   <td class="px-4 py-3 text-right align-middle">
                     <RowActionsMenu
                       :actions="[
-                        { label: 'Edit / Detail', onClick: () => goToEdit(candidate.id) },
+                        { label: 'Edit / Details', onClick: () => goToEdit(candidate.id) },
                         {
-                          label: 'Hapus',
+                          label: 'Delete',
                           tone: 'danger',
                           disabled: candidateSaving,
                           onClick: () => handleDelete(candidate.id, candidate.first_name || ''),
@@ -118,7 +118,7 @@
                 </tr>
                 <tr v-if="!candidateLoading && filteredCandidates.length === 0">
                   <td colspan="6" class="px-4 py-8 text-center text-sm text-gray-500">
-                    Tidak ada data yang cocok.
+                    No matching data found.
                   </td>
                 </tr>
               </tbody>
@@ -221,12 +221,12 @@ function goToEdit(id: string) {
 }
 
 async function handleDelete(id: string, name: string) {
-  if (!confirm(`Hapus data kandidat ${name}?`)) return
+  if (!confirm(`Delete candidate data for ${name}?`)) return
   try {
     await remove(id)
-    appToast.deleted('Kandidat')
+    appToast.deleted('Candidate')
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Gagal menghapus data kandidat.'
+    const message = err instanceof Error ? err.message : 'Failed to delete candidate data.'
     appToast.error(message)
   }
 }

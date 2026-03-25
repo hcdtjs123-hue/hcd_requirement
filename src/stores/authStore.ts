@@ -26,10 +26,12 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   async function fetchUserProfile(userId: string): Promise<Partial<User>> {
-    // Fetch profile
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("username, full_name, phone, avatar_url")
+    // Fetch employee profile
+    const { data: employee } = await supabase
+      .from("employees")
+      .select(
+        "username, first_name, middle_name, last_name, main_position, hire_location, date_of_birth, place_of_birth, nationality, marital_status, religion, gender, ethnic, blood_type, avatar_url",
+      )
       .eq("id", userId)
       .maybeSingle()
 
@@ -65,10 +67,21 @@ export const useAuthStore = defineStore("auth", () => {
     }
 
     return {
-      full_name: profile?.full_name ?? undefined,
-      username: profile?.username ?? undefined,
-      phone: profile?.phone ?? undefined,
-      avatar_url: profile?.avatar_url ?? undefined,
+      username: employee?.username ?? undefined,
+      first_name: employee?.first_name ?? undefined,
+      middle_name: employee?.middle_name ?? undefined,
+      last_name: employee?.last_name ?? undefined,
+      main_position: employee?.main_position ?? undefined,
+      hire_location: employee?.hire_location ?? undefined,
+      date_of_birth: employee?.date_of_birth ?? undefined,
+      place_of_birth: employee?.place_of_birth ?? undefined,
+      nationality: employee?.nationality ?? undefined,
+      marital_status: employee?.marital_status ?? undefined,
+      religion: employee?.religion ?? undefined,
+      gender: employee?.gender ?? undefined,
+      ethnic: employee?.ethnic ?? undefined,
+      blood_type: employee?.blood_type ?? undefined,
+      avatar_url: employee?.avatar_url ?? undefined,
       role: roleName as UserRole | undefined,
       permissions,
     }

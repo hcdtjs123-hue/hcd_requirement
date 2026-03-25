@@ -29,7 +29,6 @@ export interface ApprovalChain {
   job_request?: {
     id: string
     main_position: string | null
-    designation: string | null
     site: string | null
     employment_status: string | null
     direct_manager: string | null
@@ -44,6 +43,12 @@ export interface ApprovalChain {
     custom_grup_4: string | null
     custom_grup_5: string | null
     custom_grup_6: string | null
+    approval_director_bu: string | null
+    approval_director_bu_date: string | null
+    approval_gm_hrd: string | null
+    approval_gm_hrd_date: string | null
+    approval_director_hrd: string | null
+    approval_director_hrd_date: string | null
   } | null
 }
 
@@ -53,12 +58,19 @@ export interface ApprovalChain {
 
 export interface ApproverMaster {
   id: string
-  email: string
-  name: string | null
+  employee_id: string
+  jabatan: string | null
   step_order: number
-  is_active: boolean
   created_by: string | null
   created_at: string | null
+  employee?: {
+    first_name: string
+    middle_name: string | null
+    last_name: string | null
+    email: string | null
+    phone: string | null
+    main_position: string | null
+  }
 }
 
 // ===========================
@@ -66,10 +78,9 @@ export interface ApproverMaster {
 // ===========================
 
 export interface ApproverMasterInput {
-  email: string
-  name: string
+  employee_id: string
+  jabatan?: string
   step_order: number
-  is_active?: boolean
 }
 
 export interface SubmitApprovalInput {

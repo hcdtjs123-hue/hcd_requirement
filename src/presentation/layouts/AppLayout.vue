@@ -26,7 +26,7 @@
               type="button"
               class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-gray-200 bg-gray-50 text-gray-900 transition hover:bg-gray-100"
               @click="closeMobileSidebar"
-              aria-label="Tutup menu"
+              aria-label="Close menu"
             >
               <X class="h-5 w-5" />
             </button>
@@ -124,7 +124,7 @@
                 type="button"
                 class="mt-0.5 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-gray-200 bg-gray-50 text-gray-900 transition hover:bg-gray-100 lg:hidden"
                 @click="openMobileSidebar"
-                aria-label="Buka menu"
+                aria-label="Open menu"
               >
                 <Menu class="h-5 w-5" />
               </button>
@@ -141,7 +141,7 @@
                 :disabled="isLoading"
                 @click="handleLogout"
               >
-                {{ isLoading ? 'Memproses...' : 'Logout' }}
+                {{ isLoading ? 'Processing...' : 'Logout' }}
               </button>
             </div>
           </div>
@@ -197,7 +197,7 @@ interface NavSection {
 
 const navigationSections: NavSection[] = [
   {
-    label: 'Umum',
+    label: 'General',
     items: [{ to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard }],
   },
   {
@@ -224,35 +224,35 @@ const navigationSections: NavSection[] = [
     ],
   },
   {
-    label: 'Rekrutmen',
+    label: 'Recruitment',
     items: [
       {
         to: '/recruitment',
-        label: 'Dashboard Rekrutmen',
+        label: 'Recruitment Dashboard',
         icon: Briefcase,
         permissions: ['recruitment:read', 'candidate:read'],
       },
       {
         to: '/recruitment/pipeline',
-        label: 'Pipeline Rekrutmen',
+        label: 'Recruitment Pipeline',
         icon: Users,
         permissions: ['recruitment:read', 'candidate:read'],
       },
     ],
   },
   {
-    label: 'Kandidat',
+    label: 'Candidates',
     items: [
       {
         to: '/candidates',
-        label: 'Database Kandidat',
+        label: 'Candidate Database',
         icon: ClipboardList,
         permissions: ['candidate_data:read', 'candidate:read'],
       },
     ],
   },
   {
-    label: 'Akun',
+    label: 'Account',
     items: [
       { to: '/profile', label: 'Profile', icon: UserCircle },
       {
@@ -290,13 +290,13 @@ const pageTitle = computed(() => {
   const titleMatchers: Array<{ prefix: string; title: string }> = [
     { prefix: '/dashboard', title: 'Dashboard' },
     { prefix: '/job-requests', title: 'Job Requests' },
-    { prefix: '/approver-master', title: 'Approver Master Data' },
+    { prefix: '/approver-master', title: 'Approver Master' },
     { prefix: '/approval-tracking', title: 'Approval Tracking' },
-    { prefix: '/recruitment/pipeline', title: 'Pipeline Rekrutmen' },
-    { prefix: '/candidate-management', title: 'Pipeline Rekrutmen' },
-    { prefix: '/recruitment', title: 'Dashboard Rekrutmen' },
-    { prefix: '/candidates', title: 'Database Kandidat' },
-    { prefix: '/applications', title: 'Database Kandidat' },
+    { prefix: '/recruitment/pipeline', title: 'Recruitment Pipeline' },
+    { prefix: '/candidate-management', title: 'Recruitment Pipeline' },
+    { prefix: '/recruitment', title: 'Recruitment Dashboard' },
+    { prefix: '/candidates', title: 'Candidate Database' },
+    { prefix: '/applications', title: 'Candidate Database' },
     { prefix: '/profile', title: 'Profile' },
     { prefix: '/user-management', title: 'User Management' },
     { prefix: '/role-management', title: 'Role Management' },
@@ -331,10 +331,10 @@ watch(
 async function handleLogout() {
   try {
     await logout()
-    appToast.success('Logout berhasil.')
+    appToast.success('Logged out successfully.')
     await router.push({ name: 'login' })
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Logout gagal.'
+    const message = err instanceof Error ? err.message : 'Logout failed.'
     appToast.error(message)
   }
 }

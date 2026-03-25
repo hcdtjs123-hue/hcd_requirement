@@ -2,10 +2,11 @@
   <div class="mx-auto flex max-w-7xl flex-col gap-8 text-gray-900">
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <p class="text-sm uppercase tracking-[0.3em] text-blue-600">Staff Rekrutmen</p>
-        <h1 class="mt-3 text-3xl font-semibold tracking-tight">Pipeline Rekrutmen</h1>
+        <p class="text-sm uppercase tracking-[0.3em] text-blue-600">Recruitment Team</p>
+        <h1 class="mt-3 text-3xl font-semibold tracking-tight">Recruitment Pipeline</h1>
         <p class="mt-2 text-sm text-gray-600">
-          Kelola kandidat yang sedang diproses tim rekrutmen, dari undangan sampai interview.
+          Manage candidates being processed by the recruitment team, from invitation through
+          interview.
         </p>
       </div>
       <button
@@ -13,7 +14,7 @@
         class="rounded-2xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
         @click="goToCreate"
       >
-        Tambah Kandidat ke Pipeline
+        Add Candidate to Pipeline
       </button>
     </div>
 
@@ -29,14 +30,14 @@
       <div class="space-y-4">
         <div class="rounded-3xl border border-gray-200 bg-gray-50 p-5">
           <div class="mb-4 flex items-center justify-between">
-            <h2 class="text-xl font-semibold">Daftar Kandidat dalam Pipeline</h2>
+            <h2 class="text-xl font-semibold">Candidates in Pipeline</h2>
             <button
               type="button"
               class="text-sm text-gray-600 transition hover:text-gray-900"
               :disabled="loading"
               @click="refreshInvitations"
             >
-              {{ loading ? 'Memuat...' : 'Refresh' }}
+              {{ loading ? 'Loading...' : 'Refresh' }}
             </button>
           </div>
 
@@ -51,7 +52,7 @@
               v-model="statusFilter"
               class="h-11 w-full rounded-2xl border border-gray-200 bg-white px-3 text-sm outline-none focus:border-blue-600 sm:w-64"
             >
-              <option value="">Semua Status</option>
+              <option value="">All Statuses</option>
               <option v-for="opt in statusOptions" :key="opt" :value="opt">
                 {{ invStatusLabel(opt as CandidateInvitationStatus) }}
               </option>
@@ -64,11 +65,11 @@
                 <thead class="bg-gray-50 text-xs uppercase text-gray-500">
                   <tr>
                     <th class="px-4 py-3 font-medium w-14">No</th>
-                    <th class="px-4 py-3 font-medium">Kandidat</th>
-                    <th class="px-4 py-3 font-medium">Posisi</th>
+                    <th class="px-4 py-3 font-medium">Candidate</th>
+                    <th class="px-4 py-3 font-medium">Position</th>
                     <th class="px-4 py-3 font-medium min-w-[160px]">Status</th>
-                    <th class="px-4 py-3 font-medium min-w-[140px]">Progress Form</th>
-                    <th class="px-4 py-3 font-medium text-right">Aksi</th>
+                    <th class="px-4 py-3 font-medium min-w-[140px]">Form Progress</th>
+                    <th class="px-4 py-3 font-medium text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">
@@ -115,13 +116,13 @@
                     </td>
                     <td class="px-4 py-3 text-right align-middle">
                       <RowActionsMenu
-                        :actions="[{ label: 'Proses / Detail', onClick: () => goToEdit(inv.id) }]"
+                        :actions="[{ label: 'Process / Details', onClick: () => goToEdit(inv.id) }]"
                       />
                     </td>
                   </tr>
                   <tr v-if="!loading && filteredInvitations.length === 0">
                     <td colspan="6" class="px-4 py-8 text-center text-sm text-gray-500">
-                      Tidak ada data yang cocok.
+                      No matching data found.
                     </td>
                   </tr>
                 </tbody>

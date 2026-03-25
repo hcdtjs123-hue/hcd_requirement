@@ -17,7 +17,17 @@ const chainWithJobRequestSelect = `
   *,
   steps:approval_steps(*),
   job_request:new_employee_application_form(
-    id, main_position, designation, site, employment_status,
+    id,
+    main_position,
+    site,
+    employment_status,
+    required_date,
+    approval_director_bu,
+    approval_director_bu_date,
+    approval_gm_hrd,
+    approval_gm_hrd_date,
+    approval_director_hrd,
+    approval_director_hrd_date,
     direct_manager, pt_pembebanan, working_location, required_date,
     position_status, periode_probation,
     custom_grup_1, custom_grup_2, custom_grup_3,
@@ -31,10 +41,14 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
   // ========================
 
   async getChainsByUser(): Promise<ApprovalChain[]> {
-    const { data, error } = await supabase
-      .from('approval_chains')
-      .select(chainWithJobRequestSelect)
-      .order('created_at', { ascending: false })
+    const accessScope = await this.getApprovalChainAccessScope()
+    let query = supabase.from('approval_chains').select(chainWithJobRequestSelect)
+
+    if (accessScope.isManager && accessScope.userId) {
+      query = query.eq('created_by', accessScope.userId)
+    }
+
+    const { data, error } = await query.order('created_at', { ascending: false })
 
     if (error) throw new Error(error.message)
 
@@ -287,7 +301,9 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
 
   async getAllApproverMasters(): Promise<ApproverMaster[]> {
     const accessScope = await this.getApproverMasterAccessScope()
-    let query = supabase.from('approver_master').select('*')
+    let query = supabase
+      .from('approver_master')
+      .select('*, employee:employees(first_name, middle_name, last_name, email, phone, main_position)')
 
     if (accessScope.isManager && accessScope.userId) {
       query = query.eq('created_by', accessScope.userId)
@@ -297,7 +313,7 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
 
     if (error) throw new Error(error.message)
 
-    return data ?? []
+    return (data ?? []) as ApproverMaster[]
   }
 
   async createApproverMaster(input: ApproverMasterInput): Promise<ApproverMaster> {
@@ -306,18 +322,17 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
     const { data, error } = await supabase
       .from('approver_master')
       .insert({
-        email: input.email,
-        name: input.name || null,
+        employee_id: input.employee_id,
+        jabatan: input.jabatan || null,
         step_order: input.step_order,
-        is_active: input.is_active ?? true,
         created_by: user.data.user?.id ?? null,
       })
-      .select('*')
+      .select('*, employee:employees(first_name, middle_name, last_name, email, phone, main_position)')
       .single()
 
     if (error) throw new Error(error.message)
 
-    return data
+    return data as ApproverMaster
   }
 
   async updateApproverMaster(id: string, input: ApproverMasterInput): Promise<ApproverMaster> {
@@ -325,10 +340,9 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
     let query = supabase
       .from('approver_master')
       .update({
-        email: input.email,
-        name: input.name || null,
+        employee_id: input.employee_id,
+        jabatan: input.jabatan || null,
         step_order: input.step_order,
-        is_active: input.is_active ?? true,
       })
       .eq('id', id)
 
@@ -336,14 +350,16 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
       query = query.eq('created_by', accessScope.userId)
     }
 
-    const { data, error } = await query.select('*').maybeSingle()
+    const { data, error } = await query
+      .select('*, employee:employees(first_name, middle_name, last_name, email, phone, main_position)')
+      .maybeSingle()
 
     if (error) throw new Error(error.message)
     if (!data) {
       throw new Error('Data approver tidak ditemukan atau tidak dapat diakses.')
     }
 
-    return data
+    return data as ApproverMaster
   }
 
   async deleteApproverMaster(id: string): Promise<void> {
@@ -378,6 +394,37 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
   }
 
   private async getApproverMasterAccessScope() {
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser()
+
+    if (userError) throw new Error(userError.message)
+
+    if (!user) {
+      return {
+        isManager: false,
+        userId: null as string | null,
+      }
+    }
+
+    const { data: roleData, error: roleError } = await supabase
+      .from('user_roles')
+      .select('roles(name)')
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    if (roleError) throw new Error(roleError.message)
+
+    const roleName = (roleData as { roles?: { name?: string } | null } | null)?.roles?.name
+
+    return {
+      isManager: roleName?.toLowerCase() === 'manager',
+      userId: user.id,
+    }
+  }
+
+  private async getApprovalChainAccessScope() {
     const {
       data: { user },
       error: userError,
