@@ -13,8 +13,21 @@
       <p class="text-xs text-gray-400">{{ currentDate }}</p>
     </div>
 
+    <section
+      v-if="dashboardIntro"
+      class="rounded-3xl border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-cyan-50 p-6 shadow-sm"
+    >
+      <p class="text-xs font-semibold uppercase tracking-[0.25em] text-blue-600">Dashboard Fokus</p>
+      <h2 class="mt-2 text-2xl font-semibold tracking-tight text-gray-900">
+        {{ dashboardIntro.title }}
+      </h2>
+      <p class="mt-2 max-w-3xl text-sm leading-relaxed text-gray-600">
+        {{ dashboardIntro.description }}
+      </p>
+    </section>
+
     <!-- KPI Cards -->
-    <section class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+    <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
       <div
         v-for="kpi in kpiCards"
         :key="kpi.label"
@@ -37,9 +50,13 @@
     </section>
 
     <!-- Main Content Grid -->
-    <div class="grid gap-6 lg:grid-cols-3">
+    <div class="grid gap-6 lg:grid-cols-3" v-if="showOperationalOverview">
       <!-- Job Requests Terbaru -->
-      <div class="lg:col-span-2 rounded-3xl border border-gray-200 bg-white shadow-sm">
+      <div
+        v-if="showJobRequestsPanel"
+        class="rounded-3xl border border-gray-200 bg-white shadow-sm"
+        :class="showApprovalPanel ? 'lg:col-span-2' : 'lg:col-span-3'"
+      >
         <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4">
           <div class="flex items-center gap-2">
             <FileText class="h-4 w-4 text-blue-600" />
@@ -76,7 +93,7 @@
       </div>
 
       <!-- Status Approval -->
-      <div class="rounded-3xl border border-gray-200 bg-white shadow-sm">
+      <div v-if="showApprovalPanel" class="rounded-3xl border border-gray-200 bg-white shadow-sm">
         <div class="flex items-center gap-2 border-b border-gray-100 px-6 py-4">
           <CheckSquare class="h-4 w-4 text-emerald-600" />
           <h2 class="text-sm font-semibold text-gray-900">Status Approval</h2>
@@ -111,7 +128,10 @@
     <!-- Bottom Grid -->
     <div class="grid gap-6 lg:grid-cols-2">
       <!-- Kandidat Pipeline -->
-      <div class="rounded-3xl border border-gray-200 bg-white shadow-sm">
+      <div
+        v-if="showRecruitmentPanel"
+        class="rounded-3xl border border-gray-200 bg-white shadow-sm"
+      >
         <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4">
           <div class="flex items-center gap-2">
             <Users class="h-4 w-4 text-purple-600" />
@@ -148,7 +168,10 @@
       </div>
 
       <!-- Akses Cepat -->
-      <div class="rounded-3xl border border-gray-200 bg-white shadow-sm">
+      <div
+        class="rounded-3xl border border-gray-200 bg-white shadow-sm"
+        :class="showRecruitmentPanel ? '' : 'lg:col-span-2'"
+      >
         <div class="flex items-center gap-2 border-b border-gray-100 px-6 py-4">
           <LayoutDashboard class="h-4 w-4 text-gray-600" />
           <h2 class="text-sm font-semibold text-gray-900">Akses Cepat</h2>
@@ -212,45 +235,145 @@ const currentDate = computed(() =>
   }),
 )
 
+const normalizedRole = computed(() => (userRole.value ?? '').toLowerCase())
+
+const canReadJobRequests = computed(() => hasAnyPermission(['job_request:read']))
+const canReadApprovals = computed(() => hasAnyPermission(['approval:read']))
+const canReadRecruitment = computed(() => hasAnyPermission(['recruitment:read', 'candidate:read']))
+const canReadCandidates = computed(() =>
+  hasAnyPermission(['candidate_data:read', 'candidate:read']),
+)
+const canManageUsers = computed(() => hasAnyPermission(['user:read']))
+const isCandidateRole = computed(() => normalizedRole.value === 'candidate')
+const isManagerRole = computed(() => normalizedRole.value === 'manager')
+const isAdminRole = computed(() =>
+  ['admin', 'administrator', 'super admin', 'super_admin'].includes(normalizedRole.value),
+)
+
+const dashboardIntro = computed(() => {
+  if (isCandidateRole.value) {
+    return {
+      title: 'Ringkasan data kandidat Anda',
+      description:
+        'Dashboard ini difokuskan untuk memantau profil kandidat Anda, status proses rekrutmen, dan akses cepat ke form yang perlu diperbarui.',
+    }
+  }
+
+  if (isManagerRole.value) {
+    return {
+      title: 'Pantau approval dan approver yang Anda kelola',
+      description:
+        'Sebagai manager, Anda difokuskan pada pengajuan yang membutuhkan monitoring approval serta master approver yang Anda input sendiri.',
+    }
+  }
+
+  if (isAdminRole.value) {
+    return {
+      title: 'Kelola operasional dan akses sistem',
+      description:
+        'Dashboard administrator menonjolkan modul lintas proses, mulai dari job request, approval, rekrutmen, hingga pengelolaan user dan role.',
+    }
+  }
+
+  if (canReadRecruitment.value) {
+    return {
+      title: 'Fokus pada eksekusi pipeline rekrutmen',
+      description:
+        'Dashboard ini menyorot kandidat yang sedang diproses, posisi yang siap direkrut, dan pintasan ke modul rekrutmen yang paling sering dipakai.',
+    }
+  }
+
+  return {
+    title: 'Ringkasan kerja sesuai hak akses Anda',
+    description:
+      'Konten dashboard disesuaikan dengan modul yang dapat Anda akses, sehingga Anda bisa langsung masuk ke pekerjaan yang paling relevan.',
+  }
+})
+
+const showJobRequestsPanel = computed(() => canReadJobRequests.value)
+const showApprovalPanel = computed(() => canReadApprovals.value && !isCandidateRole.value)
+const showRecruitmentPanel = computed(() => canReadRecruitment.value && !isManagerRole.value)
+const showOperationalOverview = computed(
+  () => showJobRequestsPanel.value || showApprovalPanel.value,
+)
+
 // ─── KPI Cards ────────────────────────────
-const kpiCards = computed(() => [
-  {
-    label: 'Total Job Request',
-    value: jobs.value.length,
-    sub: 'Semua permintaan posisi',
-    icon: FileText,
-    bg: 'bg-blue-50',
-    color: 'text-blue-600',
-    bar: 'bg-blue-500',
-  },
-  {
-    label: 'Menunggu Approval',
-    value: chains.value.filter((c) => c.status === 'pending').length,
-    sub: 'Perlu tindakan approver',
-    icon: Clock,
-    bg: 'bg-amber-50',
-    color: 'text-amber-600',
-    bar: 'bg-amber-500',
-  },
-  {
-    label: 'Approved',
-    value: chains.value.filter((c) => c.status === 'approved').length,
-    sub: 'Siap diproses rekrutmen',
-    icon: CheckCircle2,
-    bg: 'bg-emerald-50',
-    color: 'text-emerald-600',
-    bar: 'bg-emerald-500',
-  },
-  {
-    label: 'Total Kandidat',
-    value: invitations.value.length,
-    sub: 'Dalam pipeline rekrutmen',
-    icon: Users,
-    bg: 'bg-purple-50',
-    color: 'text-purple-600',
-    bar: 'bg-purple-500',
-  },
-])
+const kpiCards = computed(() => {
+  const cards = []
+
+  if (showJobRequestsPanel.value) {
+    cards.push({
+      label: 'Total Job Request',
+      value: jobs.value.length,
+      sub: 'Semua permintaan posisi',
+      icon: FileText,
+      bg: 'bg-blue-50',
+      color: 'text-blue-600',
+      bar: 'bg-blue-500',
+    })
+  }
+
+  if (canReadApprovals.value) {
+    cards.push({
+      label: 'Menunggu Approval',
+      value: chains.value.filter((c) => c.status === 'pending').length,
+      sub: isManagerRole.value ? 'Approval yang Anda monitor' : 'Perlu tindakan approver',
+      icon: Clock,
+      bg: 'bg-amber-50',
+      color: 'text-amber-600',
+      bar: 'bg-amber-500',
+    })
+    cards.push({
+      label: 'Approved',
+      value: chains.value.filter((c) => c.status === 'approved').length,
+      sub: 'Pengajuan yang sudah disetujui',
+      icon: CheckCircle2,
+      bg: 'bg-emerald-50',
+      color: 'text-emerald-600',
+      bar: 'bg-emerald-500',
+    })
+  }
+
+  if (canReadRecruitment.value) {
+    cards.push({
+      label: isCandidateRole.value ? 'Status Rekrutmen' : 'Total Kandidat',
+      value: invitations.value.length,
+      sub: isCandidateRole.value ? 'Data proses rekrutmen Anda' : 'Dalam pipeline rekrutmen',
+      icon: Users,
+      bg: 'bg-purple-50',
+      color: 'text-purple-600',
+      bar: 'bg-purple-500',
+    })
+  }
+
+  if (canReadCandidates.value) {
+    cards.push({
+      label: isCandidateRole.value ? 'Profil Kandidat' : 'Data Kandidat',
+      value: invitations.value.filter((invitation) => invitation.status === 'confirmed').length,
+      sub: isCandidateRole.value
+        ? 'Form dan tahapan yang sudah terkonfirmasi'
+        : 'Kandidat terkonfirmasi di pipeline',
+      icon: ClipboardList,
+      bg: 'bg-indigo-50',
+      color: 'text-indigo-600',
+      bar: 'bg-indigo-500',
+    })
+  }
+
+  if (canManageUsers.value) {
+    cards.push({
+      label: 'Administrasi User',
+      value: 'RBAC',
+      sub: 'Kelola akun dan akses pengguna',
+      icon: Settings,
+      bg: 'bg-slate-100',
+      color: 'text-slate-700',
+      bar: 'bg-slate-500',
+    })
+  }
+
+  return cards.slice(0, 4)
+})
 
 // ─── Recent Jobs ──────────────────────────
 const recentJobs = computed(() => jobs.value.slice(0, 6))
@@ -399,6 +522,22 @@ const quickLinks = computed(() => {
       permissions: ['role:manage'],
     },
   ]
-  return all.filter((link) => !link.permissions || hasAnyPermission(link.permissions))
+  const filtered = all.filter((link) => !link.permissions || hasAnyPermission(link.permissions))
+
+  if (isCandidateRole.value) {
+    return filtered.filter((link) => ['/candidates', '/recruitment/pipeline'].includes(link.to))
+  }
+
+  if (isManagerRole.value) {
+    return filtered.filter((link) =>
+      ['/job-requests/create', '/approver-master/create', '/recruitment'].includes(link.to),
+    )
+  }
+
+  if (isAdminRole.value) {
+    return filtered
+  }
+
+  return filtered.slice(0, 6)
 })
 </script>

@@ -262,16 +262,23 @@ const legacyPermissionMap: Record<string, string[]> = {
   'candidate:delete': ['recruitment:delete', 'candidate_data:delete'],
 }
 
+function getManageablePermissions() {
+  return permissions.value.filter((permission) => !permission.name.startsWith('candidate:'))
+}
+
 const isAllSelected = computed({
   get: () => {
+    const manageablePermissions = getManageablePermissions()
     return (
-      permissions.value.length > 0 &&
-      selectedPermissionIds.value.length === permissions.value.length
+      manageablePermissions.length > 0 &&
+      manageablePermissions.every((permission) =>
+        selectedPermissionIds.value.includes(permission.id),
+      )
     )
   },
   set: (val) => {
     if (val) {
-      selectedPermissionIds.value = permissions.value.map((p) => p.id)
+      selectedPermissionIds.value = getManageablePermissions().map((permission) => permission.id)
     } else {
       selectedPermissionIds.value = []
     }
@@ -304,15 +311,18 @@ function mapLegacyPermissionsToCurrentIds(permissionNames: string[]) {
   const selectedIds = new Set<string>()
 
   for (const permissionName of permissionNames) {
-    const directPermission = permissions.value.find(
-      (permission) => permission.name === permissionName,
-    )
-    if (directPermission) {
-      selectedIds.add(directPermission.id)
+    const mappedNames = legacyPermissionMap[permissionName]
+
+    if (!mappedNames) {
+      const directPermission = permissions.value.find(
+        (permission) => permission.name === permissionName,
+      )
+      if (directPermission) {
+        selectedIds.add(directPermission.id)
+      }
     }
 
-    const mappedNames = legacyPermissionMap[permissionName] || []
-    for (const mappedName of mappedNames) {
+    for (const mappedName of mappedNames || []) {
       const mappedPermission = permissions.value.find(
         (permission) => permission.name === mappedName,
       )
@@ -341,6 +351,14 @@ onMounted(async () => {
 // watch roles if they get fetched late
 watch(
   () => roles.value,
+  () => {
+    setupFormData()
+  },
+  { deep: true },
+)
+
+watch(
+  () => permissions.value,
   () => {
     setupFormData()
   },

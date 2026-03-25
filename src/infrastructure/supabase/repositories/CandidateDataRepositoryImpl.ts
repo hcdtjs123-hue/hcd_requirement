@@ -24,10 +24,14 @@ const candidateSelect = `
 
 export class CandidateDataRepositoryImpl implements CandidateDataRepository {
   async getAll(): Promise<CandidateRecord[]> {
-    const { data, error } = await supabase
-      .from('main_application_form')
-      .select(candidateSelect)
-      .order('created_at', { ascending: false })
+    const accessScope = await this.getAccessScope()
+    let query = supabase.from('main_application_form').select(candidateSelect)
+
+    if (accessScope.isCandidate && accessScope.userId) {
+      query = query.eq('candidate_id', accessScope.userId)
+    }
+
+    const { data, error } = await query.order('created_at', { ascending: false })
 
     if (error) {
       throw new Error(error.message)
@@ -37,11 +41,14 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
   }
 
   async getById(id: string): Promise<CandidateRecord | null> {
-    const { data, error } = await supabase
-      .from('main_application_form')
-      .select(candidateSelect)
-      .eq('id', id)
-      .maybeSingle()
+    const accessScope = await this.getAccessScope()
+    let query = supabase.from('main_application_form').select(candidateSelect).eq('id', id)
+
+    if (accessScope.isCandidate && accessScope.userId) {
+      query = query.eq('candidate_id', accessScope.userId)
+    }
+
+    const { data, error } = await query.maybeSingle()
 
     if (error) {
       throw new Error(error.message)
@@ -51,12 +58,14 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
   }
 
   async create(data: CandidateRecordInput): Promise<CandidateRecord> {
-    const user = await supabase.auth.getUser()
+    const accessScope = await this.getAccessScope()
     const { data: created, error } = await supabase
       .from('main_application_form')
       .insert({
         ...this.mapCandidateInput(data),
-        candidate_id: data.candidate_id ?? user.data.user?.id ?? null,
+        candidate_id: accessScope.isCandidate
+          ? accessScope.userId
+          : (data.candidate_id ?? accessScope.userId ?? null),
       })
       .select('*')
       .single()
@@ -76,17 +85,28 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
   }
 
   async update(id: string, data: CandidateRecordInput): Promise<CandidateRecord> {
-    const { error } = await supabase
+    const accessScope = await this.getAccessScope()
+    let query = supabase
       .from('main_application_form')
       .update({
         ...this.mapCandidateInput(data),
-        candidate_id: data.candidate_id ?? null,
+        candidate_id: accessScope.isCandidate ? accessScope.userId : (data.candidate_id ?? null),
         updated_at: new Date().toISOString(),
       })
       .eq('id', id)
 
+    if (accessScope.isCandidate && accessScope.userId) {
+      query = query.eq('candidate_id', accessScope.userId)
+    }
+
+    const { data: updatedRows, error } = await query.select('id')
+
     if (error) {
       throw new Error(error.message)
+    }
+
+    if (!updatedRows || updatedRows.length === 0) {
+      throw new Error('Data kandidat tidak ditemukan atau tidak dapat diakses.')
     }
 
     await this.syncRelations(id, data)
@@ -100,10 +120,56 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
   }
 
   async delete(id: string): Promise<void> {
-    const { error } = await supabase.from('main_application_form').delete().eq('id', id)
+    const accessScope = await this.getAccessScope()
+    let query = supabase.from('main_application_form').delete().eq('id', id)
+
+    if (accessScope.isCandidate && accessScope.userId) {
+      query = query.eq('candidate_id', accessScope.userId)
+    }
+
+    const { data, error } = await query.select('id')
 
     if (error) {
       throw new Error(error.message)
+    }
+
+    if (accessScope.isCandidate && (!data || data.length === 0)) {
+      throw new Error('Data kandidat tidak ditemukan atau tidak dapat dihapus.')
+    }
+  }
+
+  private async getAccessScope() {
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser()
+
+    if (userError) {
+      throw new Error(userError.message)
+    }
+
+    if (!user) {
+      return {
+        isCandidate: false,
+        userId: null as string | null,
+      }
+    }
+
+    const { data: roleData, error: roleError } = await supabase
+      .from('user_roles')
+      .select('roles(name)')
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    if (roleError) {
+      throw new Error(roleError.message)
+    }
+
+    const roleName = (roleData as { roles?: { name?: string } | null } | null)?.roles?.name
+
+    return {
+      isCandidate: roleName?.toLowerCase() === 'candidate',
+      userId: user.id,
     }
   }
 
