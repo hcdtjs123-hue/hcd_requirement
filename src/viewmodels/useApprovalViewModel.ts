@@ -18,7 +18,7 @@ export function useApprovalViewModel() {
     try {
       chains.value = await getApprovalChains(approvalRepo)
     } catch (err) {
-      error.value = err instanceof Error ? err.message : "Gagal memuat approval chains."
+      error.value = err instanceof Error ? err.message : "Failed to load approval chains."
     } finally {
       loading.value = false
     }
@@ -31,7 +31,7 @@ export function useApprovalViewModel() {
       await submitForApproval(approvalRepo, data)
       await refreshChains()
     } catch (err) {
-      error.value = err instanceof Error ? err.message : "Gagal mengirim untuk approval."
+      error.value = err instanceof Error ? err.message : "Failed to submit for approval."
       throw err
     } finally {
       saving.value = false

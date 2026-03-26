@@ -78,7 +78,7 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
     const accessScope = await this.getAccessScope()
 
     if (accessScope.isManager && !accessScope.jobRequestIds.includes(data.job_request_id)) {
-      throw new Error('Anda hanya dapat menambahkan kandidat untuk job request yang Anda buat.')
+      throw new Error('You can only add candidates for job requests you created.')
     }
 
     const { data: created, error } = await supabase
@@ -100,7 +100,7 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
     const candidate = await this.getById(created.id)
 
     if (!candidate) {
-      throw new Error('Gagal memuat data kandidat yang baru dibuat.')
+      throw new Error('Failed to load newly created candidate data.')
     }
 
     return candidate
@@ -110,7 +110,7 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
     const accessScope = await this.getAccessScope()
 
     if (accessScope.isManager && !accessScope.jobRequestIds.includes(data.job_request_id)) {
-      throw new Error('Anda hanya dapat memindahkan kandidat ke job request yang Anda buat.')
+      throw new Error('You can only move candidates to job requests you created.')
     }
 
     let query = supabase
@@ -127,7 +127,7 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
     }
     if (accessScope.isManager) {
       if (accessScope.jobRequestIds.length === 0) {
-        throw new Error('Data kandidat tidak ditemukan atau tidak dapat diakses.')
+        throw new Error('Candidate data not found or inaccessible.')
       }
       query = query.in('job_request_id', accessScope.jobRequestIds)
     }
@@ -139,14 +139,14 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
     }
 
     if (!updatedRows || updatedRows.length === 0) {
-      throw new Error('Data kandidat tidak ditemukan atau tidak dapat diakses.')
+      throw new Error('Candidate data not found or inaccessible.')
     }
 
     await this.syncRelations(id, data)
     const candidate = await this.getById(id)
 
     if (!candidate) {
-      throw new Error('Gagal memuat data kandidat yang diperbarui.')
+      throw new Error('Failed to load updated candidate data.')
     }
 
     return candidate
@@ -161,7 +161,7 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
     }
     if (accessScope.isManager) {
       if (accessScope.jobRequestIds.length === 0) {
-        throw new Error('Data kandidat tidak ditemukan atau tidak dapat dihapus.')
+        throw new Error('Candidate data not found or could not be deleted.')
       }
       query = query.in('job_request_id', accessScope.jobRequestIds)
     }
@@ -173,7 +173,7 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
     }
 
     if ((accessScope.isCandidate || accessScope.isManager) && (!data || data.length === 0)) {
-      throw new Error('Data kandidat tidak ditemukan atau tidak dapat dihapus.')
+      throw new Error('Candidate data not found or could not be deleted.')
     }
   }
 

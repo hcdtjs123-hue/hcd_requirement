@@ -116,7 +116,7 @@ export const useAuthStore = defineStore("auth", () => {
       user.value = { ...authenticatedUser, ...profile }
       return user.value
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Login gagal."
+      const message = err instanceof Error ? err.message : "Login failed."
       error.value = message
       throw err
     } finally {
@@ -132,7 +132,7 @@ export const useAuthStore = defineStore("auth", () => {
       await logoutUser(authRepo)
       user.value = null
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Logout gagal."
+      const message = err instanceof Error ? err.message : "Logout failed."
       error.value = message
       throw err
     } finally {

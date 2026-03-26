@@ -275,10 +275,10 @@ async function handleRoleChange(userId: string) {
   if (!newRoleId) return
   try {
     await updateUserRole(userId, newRoleId)
-    appToast.updated('Role user')
+    appToast.updated('User role')
     roleChanges.value[userId] = ''
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Gagal update role.'
+    const message = err instanceof Error ? err.message : 'Failed to update role.'
     appToast.error(message)
   }
 }

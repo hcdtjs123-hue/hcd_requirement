@@ -15,7 +15,7 @@ export class AuthRepositoryImpl implements AuthRepository {
     }
 
     if (!data.user?.email) {
-      throw new Error('User data tidak tersedia.')
+      throw new Error('User data is unavailable.')
     }
 
     return {
@@ -52,14 +52,14 @@ export class AuthRepositoryImpl implements AuthRepository {
 
     if (error) {
       throw new Error(
-        `Username login belum siap. Pastikan tabel publik ${usernameTable} memiliki kolom ${usernameColumn} dan ${idColumn}.`,
+        `Username login is not ready. Ensure public table ${usernameTable} has columns ${usernameColumn} and ${idColumn}.`,
       )
     }
 
     const userId = data?.[idColumn as keyof typeof data]
 
     if (typeof userId !== 'string' || userId.length === 0) {
-      throw new Error('Username tidak ditemukan.')
+      throw new Error('Username not found.')
     }
 
     return this.getAuthEmailByUserId(userId)
@@ -73,7 +73,7 @@ export class AuthRepositoryImpl implements AuthRepository {
       const { data, error } = await supabase.auth.admin.listUsers({ page, perPage })
 
       if (error) {
-        throw new Error('Gagal mengambil data akun untuk proses login.')
+        throw new Error('Failed to fetch account data for login process.')
       }
 
       const matchedUser = data.users.find((user) => user.id === userId)
@@ -88,7 +88,7 @@ export class AuthRepositoryImpl implements AuthRepository {
       page = data.nextPage
     }
 
-    throw new Error('Email akun untuk username tersebut tidak ditemukan.')
+    throw new Error('Account email for that username was not found.')
   }
 
   private isEmail(value: string) {

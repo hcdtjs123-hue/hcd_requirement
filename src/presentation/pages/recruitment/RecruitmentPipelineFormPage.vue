@@ -227,7 +227,7 @@
                   class="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-semibold text-emerald-800"
                 >
                   <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                  Hadir
+                  Attended
                 </span>
                 <button
                   v-else
@@ -236,7 +236,7 @@
                   :disabled="saving"
                   @click="handleConfirmAttendance(interview.id)"
                 >
-                  Konfirmasi Kehadiran
+                  Confirm Attendance
                 </button>
               </div>
             </div>
@@ -248,7 +248,7 @@
         v-else-if="isEdit && !selectedInvitation"
         class="py-10 text-center text-sm text-gray-500"
       >
-        Data kandidat tidak ditemukan.
+        Candidate data not found.
       </div>
     </template>
   </div>
@@ -315,7 +315,7 @@ onMounted(() => {
 
 function formatDate(dateStr: string | null) {
   if (!dateStr) return '-'
-  return new Date(dateStr).toLocaleString('id-ID', {
+  return new Date(dateStr).toLocaleString('en-US', {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
@@ -326,13 +326,13 @@ function formatDate(dateStr: string | null) {
 
 function invStatusLabel(status: CandidateInvitationStatus) {
   const map: Record<CandidateInvitationStatus, string> = {
-    invited: 'Diundang',
-    credentials_sent: 'Credential Terkirim',
-    form_in_progress: 'Mengisi Form',
-    form_completed: 'Form Selesai',
-    interview_scheduled: 'Interview Dijadwalkan',
-    confirmed: 'Hadir Dikonfirmasi',
-    rejected: 'Ditolak',
+    invited: 'Invited',
+    credentials_sent: 'Credentials Sent',
+    form_in_progress: 'Filling Form',
+    form_completed: 'Form Completed',
+    interview_scheduled: 'Interview Scheduled',
+    confirmed: 'Attendance Confirmed',
+    rejected: 'Rejected',
   }
   return map[status] || status
 }
@@ -340,10 +340,10 @@ function invStatusLabel(status: CandidateInvitationStatus) {
 async function handleCreateInvitation() {
   try {
     await createInvitation({ ...invForm })
-    appToast.created('Kandidat')
+    appToast.created('Candidate')
     router.push('/recruitment/pipeline')
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Gagal menambah kandidat.'
+    const message = err instanceof Error ? err.message : 'Failed to add candidate.'
     appToast.error(message)
   }
 }
@@ -352,10 +352,10 @@ async function handleSendCredentials() {
   if (!selectedInvitationId.value || !credentialUserId.value) return
   try {
     await sendCredentials(selectedInvitationId.value, credentialUserId.value)
-    appToast.success('Credential berhasil dikirim.')
+    appToast.success('Credentials sent successfully.')
     credentialUserId.value = ''
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Gagal kirim credential.'
+    const message = err instanceof Error ? err.message : 'Failed to send credentials.'
     appToast.error(message)
   }
 }
@@ -370,13 +370,13 @@ async function handleScheduleInterview() {
       scheduled_at: interviewForm.scheduled_at,
       notes: interviewForm.notes,
     })
-    appToast.success('Link interview berhasil dikirim.')
+    appToast.success('Interview link sent successfully.')
     interviewForm.meeting_link = ''
     interviewForm.meeting_type = 'zoom'
     interviewForm.scheduled_at = ''
     interviewForm.notes = ''
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Gagal jadwalkan interview.'
+    const message = err instanceof Error ? err.message : 'Failed to schedule interview.'
     appToast.error(message)
   }
 }
@@ -384,9 +384,9 @@ async function handleScheduleInterview() {
 async function handleConfirmAttendance(scheduleId: string) {
   try {
     await confirmAttendance(scheduleId)
-    appToast.success('Kehadiran dikonfirmasi.')
+    appToast.success('Attendance confirmed.')
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Gagal konfirmasi kehadiran.'
+    const message = err instanceof Error ? err.message : 'Failed to confirm attendance.'
     appToast.error(message)
   }
 }

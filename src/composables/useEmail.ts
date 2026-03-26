@@ -27,10 +27,10 @@ export function useEmail() {
     error.value = null
     try {
       if (!emailApiUrl) {
-        throw new Error("VITE_EMAIL_API_URL tidak diatur")
+        throw new Error("VITE_EMAIL_API_URL is not set")
       }
       if (!emailApiKey) {
-        throw new Error("VITE_EMAIL_API_KEY tidak diatur")
+        throw new Error("VITE_EMAIL_API_KEY is not set")
       }
       const res = await fetch(`${emailApiUrl}/send-email`, {
         method: "POST",
@@ -49,10 +49,10 @@ export function useEmail() {
         error?: string
       }
       if (!res.ok || !data.ok) {
-        throw new Error(data.error || `Gagal mengirim email (${res.status})`)
+        throw new Error(data.error || `Failed to send email (${res.status})`)
       }
     } catch (e) {
-      error.value = e instanceof Error ? e.message : "Gagal mengirim email"
+      error.value = e instanceof Error ? e.message : "Failed to send email"
       throw e
     } finally {
       loading.value = false
@@ -66,10 +66,10 @@ export function useEmail() {
     error.value = null
     try {
       if (!emailApiUrl) {
-        throw new Error("VITE_EMAIL_API_URL tidak diatur")
+        throw new Error("VITE_EMAIL_API_URL is not set")
       }
       if (!emailApiKey) {
-        throw new Error("VITE_EMAIL_API_KEY tidak diatur")
+        throw new Error("VITE_EMAIL_API_KEY is not set")
       }
       const res = await fetch(`${emailApiUrl}/candidate-approval/issue`, {
         method: "POST",
@@ -93,11 +93,11 @@ export function useEmail() {
         expiresAt?: string
       }
       if (!res.ok || !data.ok || !data.tokenRequestId || !data.expiresAt) {
-        throw new Error(data.error || `Gagal mengirim email approval (${res.status})`)
+        throw new Error(data.error || `Failed to send approval email (${res.status})`)
       }
       return { tokenRequestId: data.tokenRequestId, expiresAt: data.expiresAt }
     } catch (e) {
-      error.value = e instanceof Error ? e.message : "Gagal mengirim email approval"
+      error.value = e instanceof Error ? e.message : "Failed to send approval email"
       throw e
     } finally {
       loading.value = false

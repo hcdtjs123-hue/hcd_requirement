@@ -26,7 +26,7 @@ export function useUserManagementViewModel() {
     try {
       users.value = await getAllUsers(userManagementRepo)
     } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Gagal memuat daftar user.'
+      error.value = err instanceof Error ? err.message : 'Failed to load user list.'
     } finally {
       loading.value = false
     }
@@ -36,7 +36,7 @@ export function useUserManagementViewModel() {
     try {
       roles.value = await userManagementRepo.getRoles()
     } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Gagal memuat roles.'
+      error.value = err instanceof Error ? err.message : 'Failed to load roles.'
     }
   }
 
@@ -47,7 +47,7 @@ export function useUserManagementViewModel() {
       await createManagedUser(userManagementRepo, data)
       await refreshUsers()
     } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Gagal membuat user.'
+      error.value = err instanceof Error ? err.message : 'Failed to create user.'
       throw err
     } finally {
       saving.value = false
@@ -61,7 +61,7 @@ export function useUserManagementViewModel() {
       await deleteManagedUser(userManagementRepo, userId)
       await refreshUsers()
     } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Gagal menghapus user.'
+      error.value = err instanceof Error ? err.message : 'Failed to delete user.'
       throw err
     } finally {
       saving.value = false
@@ -75,7 +75,7 @@ export function useUserManagementViewModel() {
       await updateManagedUser(userManagementRepo, userId, data)
       await refreshUsers()
     } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Gagal memperbarui user.'
+      error.value = err instanceof Error ? err.message : 'Failed to update user.'
       throw err
     } finally {
       saving.value = false
@@ -89,7 +89,7 @@ export function useUserManagementViewModel() {
       await updateManagedUserRole(userManagementRepo, userId, roleId)
       await refreshUsers()
     } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Gagal update role.'
+      error.value = err instanceof Error ? err.message : 'Failed to update role.'
       throw err
     } finally {
       saving.value = false

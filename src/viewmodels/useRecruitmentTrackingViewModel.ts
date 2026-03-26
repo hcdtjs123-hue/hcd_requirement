@@ -29,7 +29,7 @@ export function useRecruitmentTrackingViewModel() {
     try {
       trackings.value = await getRecruitmentTrackings(recruitmentTrackingRepo)
     } catch (err) {
-      error.value = err instanceof Error ? err.message : "Gagal memuat data tracking."
+      error.value = err instanceof Error ? err.message : "Failed to load tracking data."
     } finally {
       loading.value = false
     }
@@ -41,7 +41,7 @@ export function useRecruitmentTrackingViewModel() {
     try {
       invitations.value = await getAllCandidateInvitations(recruitmentTrackingRepo)
     } catch (err) {
-      error.value = err instanceof Error ? err.message : "Gagal memuat data kandidat."
+      error.value = err instanceof Error ? err.message : "Failed to load candidate data."
     } finally {
       loading.value = false
     }
@@ -54,7 +54,7 @@ export function useRecruitmentTrackingViewModel() {
       await approveRecruitmentTracking(recruitmentTrackingRepo, id, notes)
       await refreshTrackings()
     } catch (err) {
-      error.value = err instanceof Error ? err.message : "Gagal approve tracking."
+      error.value = err instanceof Error ? err.message : "Failed to approve tracking."
       throw err
     } finally {
       saving.value = false
@@ -68,7 +68,7 @@ export function useRecruitmentTrackingViewModel() {
       await uploadPostingFiles(recruitmentTrackingRepo, trackingId, files)
       await refreshTrackings()
     } catch (err) {
-      error.value = err instanceof Error ? err.message : "Gagal upload file."
+      error.value = err instanceof Error ? err.message : "Failed to upload file."
       throw err
     } finally {
       saving.value = false
@@ -82,7 +82,7 @@ export function useRecruitmentTrackingViewModel() {
       await createCandidateInvitation(recruitmentTrackingRepo, data)
       await refreshInvitations()
     } catch (err) {
-      error.value = err instanceof Error ? err.message : "Gagal membuat undangan kandidat."
+      error.value = err instanceof Error ? err.message : "Failed to create candidate invitation."
       throw err
     } finally {
       saving.value = false
@@ -96,7 +96,7 @@ export function useRecruitmentTrackingViewModel() {
       await sendCandidateCredentials(recruitmentTrackingRepo, invitationId, userId)
       await refreshInvitations()
     } catch (err) {
-      error.value = err instanceof Error ? err.message : "Gagal mengirim credential."
+      error.value = err instanceof Error ? err.message : "Failed to send credentials."
       throw err
     } finally {
       saving.value = false
@@ -110,7 +110,7 @@ export function useRecruitmentTrackingViewModel() {
       await scheduleInterview(recruitmentTrackingRepo, data)
       await refreshInvitations()
     } catch (err) {
-      error.value = err instanceof Error ? err.message : "Gagal menjadwalkan interview."
+      error.value = err instanceof Error ? err.message : "Failed to schedule interview."
       throw err
     } finally {
       saving.value = false
@@ -124,7 +124,7 @@ export function useRecruitmentTrackingViewModel() {
       await confirmInterviewAttendance(recruitmentTrackingRepo, scheduleId)
       await refreshInvitations()
     } catch (err) {
-      error.value = err instanceof Error ? err.message : "Gagal konfirmasi kehadiran."
+      error.value = err instanceof Error ? err.message : "Failed to confirm attendance."
       throw err
     } finally {
       saving.value = false

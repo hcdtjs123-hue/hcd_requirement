@@ -244,7 +244,7 @@ const jobRequestFields = computed(() => {
 
 function formatDate(dateStr: string | null) {
   if (!dateStr) return '-'
-  return new Date(dateStr).toLocaleString('id-ID', {
+  return new Date(dateStr).toLocaleString('en-US', {
     day: '2-digit',
     month: 'short',
     year: 'numeric',

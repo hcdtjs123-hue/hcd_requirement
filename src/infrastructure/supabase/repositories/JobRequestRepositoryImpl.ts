@@ -6,7 +6,15 @@ import { approvalRepo } from '@/infrastructure/container'
 export class JobRequestRepositoryImpl implements JobRequestRepository {
   async getAll(): Promise<JobRequest[]> {
     const accessScope = await this.getAccessScope()
-    let query = supabase.from('new_employee_application_form').select('*')
+    let query = supabase.from('new_employee_application_form').select(`
+      *,
+      custom_grup_1:master_custom_grup_1(name),
+      custom_grup_2:master_custom_grup_2(name),
+      custom_grup_3:master_custom_grup_3(name),
+      custom_grup_4:master_custom_grup_4(name),
+      custom_grup_5:master_custom_grup_5(name),
+      custom_grup_6:master_custom_grup_6(name)
+    `)
 
     if (accessScope.isManager && accessScope.userId) {
       query = query.eq('created_by', accessScope.userId)
@@ -18,12 +26,20 @@ export class JobRequestRepositoryImpl implements JobRequestRepository {
       throw new Error(error.message)
     }
 
-    return data ?? []
+    return (data ?? []).map(this.flattenCustomGroups)
   }
 
   async getById(id: string): Promise<JobRequest | null> {
     const accessScope = await this.getAccessScope()
-    let query = supabase.from('new_employee_application_form').select('*').eq('id', id)
+    let query = supabase.from('new_employee_application_form').select(`
+      *,
+      custom_grup_1:master_custom_grup_1(name),
+      custom_grup_2:master_custom_grup_2(name),
+      custom_grup_3:master_custom_grup_3(name),
+      custom_grup_4:master_custom_grup_4(name),
+      custom_grup_5:master_custom_grup_5(name),
+      custom_grup_6:master_custom_grup_6(name)
+    `).eq('id', id)
 
     if (accessScope.isManager && accessScope.userId) {
       query = query.eq('created_by', accessScope.userId)
@@ -35,7 +51,19 @@ export class JobRequestRepositoryImpl implements JobRequestRepository {
       throw new Error(error.message)
     }
 
-    return data
+    return data ? this.flattenCustomGroups(data) : null
+  }
+
+  private flattenCustomGroups(item: any): JobRequest {
+    return {
+      ...item,
+      custom_grup_1: item.custom_grup_1?.name ?? null,
+      custom_grup_2: item.custom_grup_2?.name ?? null,
+      custom_grup_3: item.custom_grup_3?.name ?? null,
+      custom_grup_4: item.custom_grup_4?.name ?? null,
+      custom_grup_5: item.custom_grup_5?.name ?? null,
+      custom_grup_6: item.custom_grup_6?.name ?? null,
+    }
   }
 
   async create(data: JobRequestInput): Promise<JobRequest> {
@@ -45,8 +73,7 @@ export class JobRequestRepositoryImpl implements JobRequestRepository {
     const { data: gmHrdApprover } = await supabase
       .from('approver_master')
       .select('employee:employees(first_name, middle_name, last_name, email)')
-      .ilike('jabatan', '%GM HRD%')
-      .order('step_order', { ascending: true })
+      .eq('step_order', 1)
       .limit(1)
       .maybeSingle()
 
@@ -54,8 +81,7 @@ export class JobRequestRepositoryImpl implements JobRequestRepository {
     const { data: directorHrdApprover } = await supabase
       .from('approver_master')
       .select('employee:employees(first_name, middle_name, last_name, email)')
-      .ilike('jabatan', '%Direktur HRD%')
-      .order('step_order', { ascending: true })
+      .eq('step_order', 2)
       .limit(1)
       .maybeSingle()
 
@@ -126,7 +152,7 @@ export class JobRequestRepositoryImpl implements JobRequestRepository {
     }
 
     if (!updated) {
-      throw new Error('Data job request tidak ditemukan atau tidak dapat diakses.')
+      throw new Error('Job request data not found or inaccessible.')
     }
 
     return updated
@@ -147,7 +173,24 @@ export class JobRequestRepositoryImpl implements JobRequestRepository {
     }
 
     if (accessScope.isManager && (!data || data.length === 0)) {
-      throw new Error('Data job request tidak ditemukan atau tidak dapat dihapus.')
+      throw new Error('Job request data not found or could not be deleted.')
+    }
+  }
+
+  async close(id: string, category: 'employee hired' | 'canceled', reason: string): Promise<void> {
+    const { error } = await supabase
+      .from('new_employee_application_form')
+      .update({
+        status: 'closed',
+        closed_date: new Date().toISOString(),
+        closed_category: category,
+        reason: reason,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', id)
+
+    if (error) {
+      throw new Error(error.message)
     }
   }
 
@@ -201,6 +244,10 @@ export class JobRequestRepositoryImpl implements JobRequestRepository {
       custom_grup_4_id: data.custom_grup_4_id || null,
       custom_grup_5_id: data.custom_grup_5_id || null,
       custom_grup_6_id: data.custom_grup_6_id || null,
+      status: data.status ?? 'open',
+      closed_date: data.closed_date || null,
+      closed_category: data.closed_category || null,
+      reason: data.reason || null,
       required_date: data.required_date || null,
       position_status: data.position_status || null,
       periode_probation: data.periode_probation ?? null,

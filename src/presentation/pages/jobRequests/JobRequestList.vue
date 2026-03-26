@@ -65,7 +65,7 @@
               v-model="employmentFilter"
               class="h-11 rounded-2xl border border-gray-200 bg-white px-3 text-sm outline-none focus:border-blue-600"
             >
-              <option value="">Semua Employment</option>
+              <option value="">All Employment</option>
               <option v-for="opt in employmentOptions" :key="opt" :value="opt">{{ opt }}</option>
             </select>
           </div>
@@ -83,12 +83,13 @@
               <th class="px-4 py-3 font-medium min-w-[160px]">Employment</th>
               <th class="px-4 py-3 font-medium min-w-[140px]">Required Date</th>
               <th class="px-4 py-3 font-medium min-w-[160px]">Approval Dir. BU</th>
-              <th class="px-4 py-3 font-medium min-w-[160px]">Tanggal Dir. BU</th>
+              <th class="px-4 py-3 font-medium min-w-[160px]">Dir. BU Date</th>
               <th class="px-4 py-3 font-medium min-w-[160px]">Approval GM HRD</th>
-              <th class="px-4 py-3 font-medium min-w-[160px]">Tanggal GM HRD</th>
-              <th class="px-4 py-3 font-medium min-w-[160px]">Approval Direktur HRD</th>
-              <th class="px-4 py-3 font-medium min-w-[160px]">Tanggal Direktur HRD</th>
-              <th class="px-4 py-3 font-medium text-right min-w-[220px]">Actions</th>
+              <th class="px-4 py-3 font-medium min-w-[160px]">GM HRD Date</th>
+              <th class="px-4 py-3 font-medium min-w-[160px]">Approval HRD Director</th>
+              <th class="px-4 py-3 font-medium min-w-[160px]">HRD Director Date</th>
+              <th class="px-4 py-3 font-medium min-w-[120px]">Status</th>
+              <th class="px-4 py-3 text-right min-w-[220px]">Actions</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200">
@@ -139,10 +140,22 @@
                   <td class="px-4 py-3 align-middle">
                     <p class="whitespace-nowrap">{{ job.approval_director_hrd_date || '-' }}</p>
                   </td>
+                  <td class="px-4 py-3 align-middle">
+                    <span
+                      class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
+                      :class="job.status === 'closed' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'"
+                    >
+                      {{ job.status || 'open' }}
+                    </span>
+                  </td>
                   <td class="px-4 py-3 text-right align-middle">
                     <RowActionsMenu
                       :actions="[
                         { label: 'Edit / Detail', onClick: () => goToEdit(job.id) },
+                        ...(job.status !== 'closed' ? [{
+                          label: 'Close Job',
+                          onClick: () => openCloseModal(job.id),
+                        }] : []),
                         {
                           label: 'Export PDF',
                           disabled: saving,
@@ -176,6 +189,52 @@
       </div>
     </section>
   </div>
+
+  <!-- Close Job Request Modal -->
+  <div v-if="showCloseModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div class="w-full max-w-md rounded-3xl bg-white p-6 shadow-xl">
+      <h3 class="mb-4 text-xl font-semibold text-gray-900 text-center">Close Job Request</h3>
+      <p class="mb-6 text-sm text-gray-600 text-center">Please provide a reason for closing this job request.</p>
+      
+      <form @submit.prevent="handleClose" class="space-y-4">
+        <label class="block space-y-2">
+          <span class="text-sm font-medium text-gray-700">Category *</span>
+          <select v-model="closeForm.category" required class="w-full h-11 rounded-2xl border border-gray-200 bg-white px-4 text-sm outline-none focus:border-blue-600">
+            <option value="" disabled>Select category</option>
+            <option value="employee hired">Employee Hired</option>
+            <option value="canceled">Canceled</option>
+          </select>
+        </label>
+
+        <label class="block space-y-2">
+          <span class="text-sm font-medium text-gray-700">Reason *</span>
+          <textarea
+            v-model="closeForm.reason"
+            required
+            placeholder="Why is this job request being closed?"
+            class="w-full min-h-[120px] rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-blue-600 resize-none"
+          ></textarea>
+        </label>
+
+        <div class="mt-8 flex gap-3">
+          <button
+            type="button"
+            @click="showCloseModal = false"
+            class="flex-1 rounded-2xl border border-gray-200 bg-white py-3 text-sm font-semibold text-gray-600 transition hover:bg-gray-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            :disabled="saving"
+            class="flex-1 rounded-2xl bg-red-600 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-60"
+          >
+            {{ saving ? 'Closing...' : 'Close Job Request' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -190,8 +249,16 @@ import { exportJobRequestPdf } from '@/presentation/utils/jobRequestPdfTemplate'
 import { useJobRequestViewModel } from '@/viewmodels/useJobRequestViewModel'
 
 const router = useRouter()
-const { jobs, loading, error, saving, remove, refresh } = useJobRequestViewModel()
+const { jobs, loading, error, saving, remove, refresh, close } = useJobRequestViewModel()
 const appToast = useAppToast()
+
+// Close Modal State
+const showCloseModal = ref(false)
+const selectedJobId = ref('')
+const closeForm = ref({
+  category: '' as 'employee hired' | 'canceled' | '',
+  reason: ''
+})
 
 const searchQuery = ref('')
 const siteFilter = ref('')
@@ -289,7 +356,7 @@ async function handleDelete(id: string, mainPosition: string) {
   if (!confirm(`Delete job request ${mainPosition}?`)) return
   try {
     await remove(id)
-    appToast.deleted('Job request')
+    appToast.success('Job request deleted successfully.')
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to delete job request.'
     appToast.error(message)
@@ -302,6 +369,29 @@ function handleExportPdf(job: JobRequest) {
     appToast.success('PDF template opened successfully.')
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to export the PDF template.'
+    appToast.error(message)
+  }
+}
+
+function openCloseModal(id: string) {
+  selectedJobId.value = id
+  closeForm.value = { category: '', reason: '' }
+  showCloseModal.value = true
+}
+
+async function handleClose() {
+  if (!closeForm.value.category || !closeForm.value.reason) return
+  
+  try {
+    await close(
+      selectedJobId.value,
+      closeForm.value.category as 'employee hired' | 'canceled',
+      closeForm.value.reason
+    )
+    appToast.success('Job request closed successfully.')
+    showCloseModal.value = false
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to close job request.'
     appToast.error(message)
   }
 }

@@ -227,7 +227,7 @@ const { chains } = useApprovalViewModel()
 const { invitations } = useRecruitmentTrackingViewModel()
 
 const currentDate = computed(() =>
-  new Date().toLocaleDateString('id-ID', {
+  new Date().toLocaleDateString('en-US', {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -253,40 +253,40 @@ const isAdminRole = computed(() =>
 const dashboardIntro = computed(() => {
   if (isCandidateRole.value) {
     return {
-      title: 'Ringkasan data kandidat Anda',
+      title: 'Summary of your candidate data',
       description:
-        'Dashboard ini difokuskan untuk memantau profil kandidat Anda, status proses rekrutmen, dan akses cepat ke form yang perlu diperbarui.',
+        'This dashboard focuses on monitoring your candidate profile, recruitment status, and quick access to forms that need updating.',
     }
   }
 
   if (isManagerRole.value) {
     return {
-      title: 'Pantau approval dan approver yang Anda kelola',
+      title: 'Monitor approvals and approvers you manage',
       description:
-        'Sebagai manager, Anda difokuskan pada pengajuan yang membutuhkan monitoring approval serta master approver yang Anda input sendiri.',
+        'As a manager, you are focused on submissions requiring approval monitoring and the master approvers you have entered.',
     }
   }
 
   if (isAdminRole.value) {
     return {
-      title: 'Kelola operasional dan akses sistem',
+      title: 'Manage operations and system access',
       description:
-        'Dashboard administrator menonjolkan modul lintas proses, mulai dari job request, approval, rekrutmen, hingga pengelolaan user dan role.',
+        'The administrator dashboard highlights cross-process modules, from job request, approval, recruitment, up to user and role management.',
     }
   }
 
   if (canReadRecruitment.value) {
     return {
-      title: 'Fokus pada eksekusi pipeline rekrutmen',
+      title: 'Focus on recruitment pipeline execution',
       description:
-        'Dashboard ini menyorot kandidat yang sedang diproses, posisi yang siap direkrut, dan pintasan ke modul rekrutmen yang paling sering dipakai.',
+        'This dashboard highlights candidates currently being processed, positions ready for recruitment, and shortcuts to the most frequently used recruitment modules.',
     }
   }
 
   return {
-    title: 'Ringkasan kerja sesuai hak akses Anda',
+    title: 'Work summary according to your access rights',
     description:
-      'Konten dashboard disesuaikan dengan modul yang dapat Anda akses, sehingga Anda bisa langsung masuk ke pekerjaan yang paling relevan.',
+      'Dashboard content is tailored based on the modules you can access, allowing you to jump straight into the most relevant work.',
   }
 })
 
@@ -303,9 +303,9 @@ const kpiCards = computed(() => {
 
   if (showJobRequestsPanel.value) {
     cards.push({
-      label: 'Total Job Request',
+      label: 'Total Job Requests',
       value: jobs.value.length,
-      sub: 'Semua permintaan posisi',
+      sub: 'All position requests',
       icon: FileText,
       bg: 'bg-blue-50',
       color: 'text-blue-600',
@@ -315,9 +315,9 @@ const kpiCards = computed(() => {
 
   if (canReadApprovals.value) {
     cards.push({
-      label: 'Menunggu Approval',
+      label: 'Awaiting Approval',
       value: chains.value.filter((c) => c.status === 'pending').length,
-      sub: isManagerRole.value ? 'Approval yang Anda monitor' : 'Perlu tindakan approver',
+      sub: isManagerRole.value ? 'Approvals you monitor' : 'Requires approver action',
       icon: Clock,
       bg: 'bg-amber-50',
       color: 'text-amber-600',
@@ -326,7 +326,7 @@ const kpiCards = computed(() => {
     cards.push({
       label: 'Approved',
       value: chains.value.filter((c) => c.status === 'approved').length,
-      sub: 'Pengajuan yang sudah disetujui',
+      sub: 'Approved submissions',
       icon: CheckCircle2,
       bg: 'bg-emerald-50',
       color: 'text-emerald-600',
@@ -336,9 +336,9 @@ const kpiCards = computed(() => {
 
   if (canReadRecruitment.value) {
     cards.push({
-      label: isCandidateRole.value ? 'Status Rekrutmen' : 'Total Kandidat',
+      label: isCandidateRole.value ? 'Recruitment Status' : 'Total Candidates',
       value: invitations.value.length,
-      sub: isCandidateRole.value ? 'Data proses rekrutmen Anda' : 'Dalam pipeline rekrutmen',
+      sub: isCandidateRole.value ? 'Your recruitment process data' : 'In recruitment pipeline',
       icon: Users,
       bg: 'bg-purple-50',
       color: 'text-purple-600',
@@ -348,11 +348,11 @@ const kpiCards = computed(() => {
 
   if (canReadCandidates.value) {
     cards.push({
-      label: isCandidateRole.value ? 'Profil Kandidat' : 'Data Kandidat',
+      label: isCandidateRole.value ? 'Candidate Profile' : 'Candidate Data',
       value: invitations.value.filter((invitation) => invitation.status === 'confirmed').length,
       sub: isCandidateRole.value
-        ? 'Form dan tahapan yang sudah terkonfirmasi'
-        : 'Kandidat terkonfirmasi di pipeline',
+        ? 'Confirmed forms and stages'
+        : 'Confirmed candidates in pipeline',
       icon: ClipboardList,
       bg: 'bg-indigo-50',
       color: 'text-indigo-600',
@@ -362,9 +362,9 @@ const kpiCards = computed(() => {
 
   if (canManageUsers.value) {
     cards.push({
-      label: 'Administrasi User',
+      label: 'User Administration',
       value: 'RBAC',
-      sub: 'Kelola akun dan akses pengguna',
+      sub: 'Manage user accounts and access',
       icon: Settings,
       bg: 'bg-slate-100',
       color: 'text-slate-700',
@@ -397,21 +397,21 @@ const approvalStats = computed(() => [
     color: 'text-gray-500',
   },
   {
-    label: 'Menunggu',
+    label: 'Awaiting',
     count: chains.value.filter((c) => c.status === 'pending').length,
     icon: AlertCircle,
     bg: 'bg-amber-100',
     color: 'text-amber-600',
   },
   {
-    label: 'Disetujui',
+    label: 'Approved',
     count: chains.value.filter((c) => c.status === 'approved').length,
     icon: CheckCircle2,
     bg: 'bg-emerald-100',
     color: 'text-emerald-600',
   },
   {
-    label: 'Ditolak',
+    label: 'Rejected',
     count: chains.value.filter((c) => c.status === 'rejected').length,
     icon: XCircle,
     bg: 'bg-red-100',
@@ -424,22 +424,22 @@ const totalCandidates = computed(() => invitations.value.length)
 
 const candidatePipeline = computed(() => [
   {
-    label: 'Diundang',
+    label: 'Invited',
     count: invitations.value.filter((i) => i.status === 'invited').length,
     barColor: 'bg-gray-400',
   },
   {
-    label: 'Cred. Terkirim',
+    label: 'Creds Sent',
     count: invitations.value.filter((i) => i.status === 'credentials_sent').length,
     barColor: 'bg-blue-400',
   },
   {
-    label: 'Isi Form',
+    label: 'Fill Form',
     count: invitations.value.filter((i) => i.status === 'form_in_progress').length,
     barColor: 'bg-amber-400',
   },
   {
-    label: 'Form Selesai',
+    label: 'Form Completed',
     count: invitations.value.filter((i) => i.status === 'form_completed').length,
     barColor: 'bg-indigo-500',
   },
@@ -449,7 +449,7 @@ const candidatePipeline = computed(() => [
     barColor: 'bg-purple-500',
   },
   {
-    label: 'Dikonfirmasi',
+    label: 'Confirmed',
     count: invitations.value.filter((i) => i.status === 'confirmed').length,
     barColor: 'bg-emerald-500',
   },
@@ -460,8 +460,8 @@ const quickLinks = computed(() => {
   const all = [
     {
       to: '/job-requests/create',
-      label: 'Buat Job Request',
-      desc: 'Form permintaan posisi baru',
+      label: 'Create Job Request',
+      desc: 'New position request form',
       icon: FileText,
       bg: 'bg-blue-100',
       color: 'text-blue-700',
@@ -469,8 +469,8 @@ const quickLinks = computed(() => {
     },
     {
       to: '/approver-master/create',
-      label: 'Tambah Approver',
-      desc: 'Daftarkan approver baru',
+      label: 'Add Approver',
+      desc: 'Register new approver',
       icon: UserCheck,
       bg: 'bg-amber-100',
       color: 'text-amber-700',
@@ -478,8 +478,8 @@ const quickLinks = computed(() => {
     },
     {
       to: '/recruitment',
-      label: 'Dashboard Rekrutmen',
-      desc: 'Pantau posisi yang siap diproses',
+      label: 'Recruitment Dashboard',
+      desc: 'Monitor positions ready for processing',
       icon: Briefcase,
       bg: 'bg-emerald-100',
       color: 'text-emerald-700',
@@ -487,8 +487,8 @@ const quickLinks = computed(() => {
     },
     {
       to: '/recruitment/pipeline',
-      label: 'Pipeline Rekrutmen',
-      desc: 'Kelola kandidat dalam proses rekrutmen',
+      label: 'Recruitment Pipeline',
+      desc: 'Manage candidates in recruitment process',
       icon: Users,
       bg: 'bg-purple-100',
       color: 'text-purple-700',
@@ -496,8 +496,8 @@ const quickLinks = computed(() => {
     },
     {
       to: '/candidates',
-      label: 'Database Kandidat',
-      desc: 'Kelola profil dan form kandidat',
+      label: 'Candidate Database',
+      desc: 'Manage candidate profiles and forms',
       icon: ClipboardList,
       bg: 'bg-indigo-100',
       color: 'text-indigo-700',
@@ -505,8 +505,8 @@ const quickLinks = computed(() => {
     },
     {
       to: '/user-management/create',
-      label: 'Tambah User',
-      desc: 'Daftarkan akun staf baru',
+      label: 'Add User',
+      desc: 'Register new staff account',
       icon: Settings,
       bg: 'bg-gray-100',
       color: 'text-gray-700',
@@ -514,8 +514,8 @@ const quickLinks = computed(() => {
     },
     {
       to: '/role-management',
-      label: 'Atur Role RBAC',
-      desc: 'Kelola hak akses system',
+      label: 'Configure RBAC Role',
+      desc: 'Manage system access rights',
       icon: ShieldCheck,
       bg: 'bg-red-100',
       color: 'text-red-700',

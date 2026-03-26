@@ -1,9 +1,9 @@
-export const employmentStatusOptions = ["Harian", "Probation", "Kontrak"] as const
+export const employmentStatusOptions = ["Daily", "Probation", "Contract"] as const
 export const positionStatusOptions = [
-  "Pengganti",
-  "Posisi Baru MPP",
-  "Posisi Baru Non MPP",
-  "Magang",
+  "Replacement",
+  "New Position MPP",
+  "New Position Non-MPP",
+  "Internship",
 ] as const
 
 export type EmploymentStatus = (typeof employmentStatusOptions)[number]
@@ -28,11 +28,21 @@ export interface JobRequest {
   custom_grup_4_id: string | null
   custom_grup_5_id: string | null
   custom_grup_6_id: string | null
+  custom_grup_1?: string | null
+  custom_grup_2?: string | null
+  custom_grup_3?: string | null
+  custom_grup_4?: string | null
+  custom_grup_5?: string | null
+  custom_grup_6?: string | null
   required_date: string | null
   position_status: PositionStatus | null
   periode_probation: number | null
   main_position: string | null
   created_by: string | null
+  status: 'open' | 'closed'
+  closed_date: string | null
+  closed_category: 'employee hired' | 'canceled' | null
+  reason: string | null
   created_at: string | null
   updated_at: string | null
 }
@@ -55,4 +65,8 @@ export interface JobRequestInput {
   position_status: PositionStatus | ""
   periode_probation: number | null
   main_position: string
+  status: 'open' | 'closed'
+  closed_date?: string | null
+  closed_category?: 'employee hired' | 'canceled' | null
+  reason?: string | null
 }

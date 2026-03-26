@@ -59,7 +59,6 @@ export interface ApprovalChain {
 export interface ApproverMaster {
   id: string
   employee_id: string
-  jabatan: string | null
   step_order: number
   created_by: string | null
   created_at: string | null
@@ -79,7 +78,6 @@ export interface ApproverMaster {
 
 export interface ApproverMasterInput {
   employee_id: string
-  jabatan?: string
   step_order: number
 }
 

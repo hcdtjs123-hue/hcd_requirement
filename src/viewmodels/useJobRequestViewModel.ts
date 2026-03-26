@@ -6,6 +6,7 @@ import { GetJobRequests } from '@/application/usecases/getJobRequests'
 import { createJobRequest } from '@/application/usecases/createJobRequest'
 import { updateJobRequest } from '@/application/usecases/updateJobRequest'
 import { deleteJobRequest } from '@/application/usecases/deleteJobRequest'
+import { closeJobRequest } from '@/application/usecases/closeJobRequest'
 
 export function useJobRequestViewModel() {
   const jobs = ref<JobRequest[]>([])
@@ -67,6 +68,20 @@ export function useJobRequestViewModel() {
     }
   }
 
+  async function close(id: string, category: 'employee hired' | 'canceled', reason: string) {
+    saving.value = true
+    error.value = ''
+    try {
+      await closeJobRequest(jobRequestRepo, id, category, reason)
+      await refresh()
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to close the job request.'
+      throw err
+    } finally {
+      saving.value = false
+    }
+  }
+
   onMounted(refresh)
 
   return {
@@ -76,6 +91,7 @@ export function useJobRequestViewModel() {
     loading,
     refresh,
     remove,
+    close,
     saving,
     update,
   }

@@ -10,15 +10,15 @@ export function useAppToast() {
   }
 
   function created(subject: string) {
-    success(`${subject} berhasil dibuat.`)
+    success(`${subject} created successfully.`)
   }
 
   function updated(subject: string) {
-    success(`${subject} berhasil diperbarui.`)
+    success(`${subject} updated successfully.`)
   }
 
   function deleted(subject: string) {
-    success(`${subject} berhasil dihapus.`)
+    success(`${subject} deleted successfully.`)
   }
 
   return {

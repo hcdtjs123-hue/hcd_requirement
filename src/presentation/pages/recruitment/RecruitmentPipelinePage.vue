@@ -45,7 +45,7 @@
             <input
               v-model="searchQuery"
               type="search"
-              placeholder="Search nama, email, posisi..."
+              placeholder="Search name, email, position..."
               class="h-11 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm outline-none focus:border-blue-600"
             />
             <select
@@ -229,13 +229,13 @@ function invStatusBadge(status: CandidateInvitationStatus) {
 
 function invStatusLabel(status: CandidateInvitationStatus) {
   const map: Record<CandidateInvitationStatus, string> = {
-    invited: 'Diundang',
-    credentials_sent: 'Credential Terkirim',
-    form_in_progress: 'Mengisi Form',
-    form_completed: 'Form Selesai',
-    interview_scheduled: 'Interview Dijadwalkan',
-    confirmed: 'Hadir Dikonfirmasi',
-    rejected: 'Ditolak',
+    invited: 'Invited',
+    credentials_sent: 'Credentials Sent',
+    form_in_progress: 'Filling Form',
+    form_completed: 'Form Completed',
+    interview_scheduled: 'Interview Scheduled',
+    confirmed: 'Attendance Confirmed',
+    rejected: 'Rejected',
   }
   return map[status] || status
 }

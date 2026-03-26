@@ -30,8 +30,12 @@ const chainWithJobRequestSelect = `
     approval_director_hrd_date,
     direct_manager, pt_pembebanan, working_location, required_date,
     position_status, periode_probation,
-    custom_grup_1, custom_grup_2, custom_grup_3,
-    custom_grup_4, custom_grup_5, custom_grup_6
+    custom_grup_1:master_custom_grup_1(name),
+    custom_grup_2:master_custom_grup_2(name),
+    custom_grup_3:master_custom_grup_3(name),
+    custom_grup_4:master_custom_grup_4(name),
+    custom_grup_5:master_custom_grup_5(name),
+    custom_grup_6:master_custom_grup_6(name)
   )
 `
 
@@ -77,7 +81,7 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
     if (approverError) throw new Error(approverError.message)
     if (!approverMasters || approverMasters.length === 0) {
       throw new Error(
-        'Belum ada approver yang terdaftar. Tambahkan approver di Master Data terlebih dahulu.',
+        'No approvers registered. Please add approvers in Master Data first.',
       )
     }
 
@@ -119,7 +123,7 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
 
     // 5. Return the full chain with steps
     const result = await this.getChainByJobRequest(input.job_request_id)
-    if (!result) throw new Error('Gagal memuat approval chain yang baru dibuat.')
+    if (!result) throw new Error('Failed to load newly created approval chain.')
 
     // 6. Send email to the first approver
     const firstStep = result.steps.find((s) => s.step_order === 1)
@@ -175,7 +179,7 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
 
     if (stepError) throw new Error(stepError.message)
     if (step.status !== 'pending') {
-      throw new Error('Step ini sudah diproses sebelumnya.')
+      throw new Error('This step has been processed already.')
     }
 
     // 2. Check sequential: all previous steps must be approved
@@ -188,7 +192,7 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
 
     if (prevError) throw new Error(prevError.message)
     if (previousSteps && previousSteps.length > 0) {
-      throw new Error('Menunggu approval dari tahap sebelumnya.')
+      throw new Error('Waiting for approval from previous stage.')
     }
 
     // 3. Approve this step
@@ -329,7 +333,6 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
       .from('approver_master')
       .insert({
         employee_id: input.employee_id,
-        jabatan: input.jabatan || null,
         step_order: input.step_order,
         created_by: user.data.user?.id ?? null,
       })
@@ -347,7 +350,6 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
       .from('approver_master')
       .update({
         employee_id: input.employee_id,
-        jabatan: input.jabatan || null,
         step_order: input.step_order,
       })
       .eq('id', id)
@@ -362,7 +364,7 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
 
     if (error) throw new Error(error.message)
     if (!data) {
-      throw new Error('Data approver tidak ditemukan atau tidak dapat diakses.')
+      throw new Error('Approver data not found or inaccessible.')
     }
 
     return data as ApproverMaster
@@ -380,7 +382,7 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
 
     if (error) throw new Error(error.message)
     if (accessScope.isManager && (!data || data.length === 0)) {
-      throw new Error('Data approver tidak ditemukan atau tidak dapat dihapus.')
+      throw new Error('Approver data not found or could not be deleted.')
     }
   }
 
@@ -393,8 +395,23 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
       ? (data.steps as ApprovalStep[]).sort((a, b) => a.step_order - b.step_order)
       : []
 
+    const chain = data as unknown as any
+    const jobRequest = chain.job_request
+
+    if (jobRequest) {
+      chain.job_request = {
+        ...jobRequest,
+        custom_grup_1: jobRequest.custom_grup_1?.name ?? null,
+        custom_grup_2: jobRequest.custom_grup_2?.name ?? null,
+        custom_grup_3: jobRequest.custom_grup_3?.name ?? null,
+        custom_grup_4: jobRequest.custom_grup_4?.name ?? null,
+        custom_grup_5: jobRequest.custom_grup_5?.name ?? null,
+        custom_grup_6: jobRequest.custom_grup_6?.name ?? null,
+      }
+    }
+
     return {
-      ...(data as unknown as ApprovalChain),
+      ...chain,
       steps,
     }
   }
@@ -465,12 +482,12 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
     const approvalLink = `${window.location.origin}/approve/${token}`
     const html = `
       <div style="font-family: sans-serif; padding: 20px;">
-        <h2>Permintaan Approval (HCD)</h2>
-        <p>Halo ${name},</p>
-        <p>Terdapat pengajuan Job Request baru yang membutuhkan persetujuan Anda.</p>
-        <p>Silakan klik tautan di bawah ini untuk melihat detail dan memberikan keputusan:</p>
-        <a href="${approvalLink}" style="display:inline-block; padding:10px 20px; background-color:#2563eb; color:white; text-decoration:none; border-radius:5px;">Buka Formulir Approval</a>
-        <p style="margin-top:20px; font-size: 12px; color: #666;">Jika tombol tidak berfungsi, salin link berikut: <br/>${approvalLink}</p>
+        <h2>Approval Request (HCD)</h2>
+        <p>Hello ${name},</p>
+        <p>There is a new Job Request submission that requires your approval.</p>
+        <p>Please click the link below to view the details and provide your decision:</p>
+        <a href="${approvalLink}" style="display:inline-block; padding:10px 20px; background-color:#2563eb; color:white; text-decoration:none; border-radius:5px;">Open Approval Form</a>
+        <p style="margin-top:20px; font-size: 12px; color: #666;">If the button doesn't work, copy the following link: <br/>${approvalLink}</p>
       </div>
     `
 
@@ -478,12 +495,12 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
       await supabase.functions.invoke('resend-email', {
         body: {
           to: email,
-          subject: 'Pemberitahuan Approval Job Request (HCD)',
+          subject: 'Job Request Approval Notification (HCD)',
           html,
         },
       })
     } catch (err) {
-      console.error('Gagal mengirim email ke', email, err)
+      console.error('Failed to send email to', email, err)
     }
   }
 }

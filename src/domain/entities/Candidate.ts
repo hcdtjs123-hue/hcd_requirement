@@ -1,7 +1,15 @@
 export const genderOptions = ['Male', 'Female'] as const
 export const maritalStatusOptions = ['Single', 'Married', 'Divorced'] as const
 export const bloodTypeOptions = ['A', 'B', 'AB', 'O'] as const
-export const educationLevelOptions = ['SD', 'SMP', 'SMA', 'Diploma', 'S1', 'S2', 'S3'] as const
+export const educationLevelOptions = [
+  'Elementary',
+  'Junior High',
+  'Senior High',
+  'Diploma',
+  'Bachelor',
+  'Master',
+  'Doctorate',
+] as const
 
 export type Gender = (typeof genderOptions)[number]
 export type MaritalStatus = (typeof maritalStatusOptions)[number]

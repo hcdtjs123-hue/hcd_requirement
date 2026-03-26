@@ -24,7 +24,7 @@ export function useRoleManagementViewModel() {
     try {
       roles.value = await getAllRoles(roleRepo)
     } catch (err) {
-      error.value = err instanceof Error ? err.message : "Gagal memuat daftar role."
+      error.value = err instanceof Error ? err.message : "Failed to load role list."
     } finally {
       loading.value = false
     }
@@ -34,7 +34,7 @@ export function useRoleManagementViewModel() {
     try {
       permissions.value = await getAllPermissions(roleRepo)
     } catch (err) {
-      error.value = err instanceof Error ? err.message : "Gagal memuat master permissions."
+      error.value = err instanceof Error ? err.message : "Failed to load master permissions."
     }
   }
 
@@ -54,7 +54,7 @@ export function useRoleManagementViewModel() {
         await authStore.fetchUserProfile(authStore.user!.id)
       }
     } catch (err) {
-      error.value = err instanceof Error ? err.message : "Gagal membuat role."
+      error.value = err instanceof Error ? err.message : "Failed to create role."
       throw err
     } finally {
       saving.value = false
@@ -78,7 +78,7 @@ export function useRoleManagementViewModel() {
         }
       }
     } catch (err) {
-      error.value = err instanceof Error ? err.message : "Gagal update role permissions."
+      error.value = err instanceof Error ? err.message : "Failed to update role permissions."
       throw err
     } finally {
       saving.value = false
@@ -92,7 +92,7 @@ export function useRoleManagementViewModel() {
       await deleteRoleUseCase(roleRepo, roleId)
       await refreshRoles()
     } catch (err) {
-      error.value = err instanceof Error ? err.message : "Gagal menghapus role."
+      error.value = err instanceof Error ? err.message : "Failed to delete role."
       throw err
     } finally {
       saving.value = false

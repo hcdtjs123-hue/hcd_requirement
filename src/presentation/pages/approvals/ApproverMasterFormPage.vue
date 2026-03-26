@@ -181,16 +181,15 @@ type EmployeeOption = {
   email: string | null
 }
 
-function createEmptyForm(jabatan: string, step: number): ApproverMasterInput & { id?: string } {
+function createEmptyForm(step: number): ApproverMasterInput & { id?: string } {
   return {
     employee_id: '',
-    jabatan: jabatan,
     step_order: step,
   }
 }
 
-const gmForm = reactive(createEmptyForm('GM HRD', 1))
-const directorForm = reactive(createEmptyForm('Director HRD', 2))
+const gmForm = reactive(createEmptyForm(1))
+const directorForm = reactive(createEmptyForm(2))
 
 async function loadEmployees() {
   const { data, error } = await supabase
@@ -249,26 +248,22 @@ function handleClickOutside(event: MouseEvent) {
 
 function loadData() {
   if (!loading.value && approvers.value.length > 0) {
-    const gm = approvers.value.find((a) => a.jabatan?.toLowerCase().includes('gm hrd'))
+    const gm = approvers.value.find((a) => a.step_order === 1)
     if (gm) {
       Object.assign(gmForm, {
         id: gm.id,
         employee_id: gm.employee_id,
-        jabatan: gm.jabatan ?? 'GM HRD',
         step_order: gm.step_order,
       })
       const emp = employees.value.find(e => e.id === gm.employee_id)
       if (emp) searchGm.value = emp.rawName
     }
 
-    const director = approvers.value.find((a) => 
-      a.jabatan?.toLowerCase().includes('director hrd') || a.jabatan?.toLowerCase().includes('direktur hrd')
-    )
+    const director = approvers.value.find((a) => a.step_order === 2)
     if (director) {
       Object.assign(directorForm, {
         id: director.id,
         employee_id: director.employee_id,
-        jabatan: director.jabatan ?? 'Director HRD',
         step_order: director.step_order,
       })
       const emp = employees.value.find(e => e.id === director.employee_id)

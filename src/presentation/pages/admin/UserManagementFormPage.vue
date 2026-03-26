@@ -210,7 +210,7 @@
         <label v-for="index in 6" :key="index" class="space-y-2 text-gray-700">
           <span class="text-sm font-medium">Custom Group {{ index }}</span>
           <select v-model="form[`custom_grup_${index}_id` as keyof typeof form]" class="field">
-            <option :value="null">Pilih...</option>
+            <option :value="null">Select...</option>
             <option v-for="opt in groupedOptions[index]" :key="opt.id" :value="opt.id">
               {{ opt.name }}
             </option>

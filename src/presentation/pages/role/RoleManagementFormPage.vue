@@ -343,7 +343,7 @@ function mapLegacyPermissionsToCurrentIds(permissionNames: string[]) {
 
 // Load initial data
 onMounted(async () => {
-  // pastikan list roles dan permisions termuat
+  // ensure roles and permissions are loaded
   if (permissions.value.length === 0) {
     await refreshPermissions()
   }
@@ -393,14 +393,14 @@ async function handleSubmit() {
         formData.description,
         selectedPermissionIds.value,
       )
-      appToast.updated(`Hak akses role ${formData.name}`)
+      appToast.updated(`Access rights for role ${formData.name}`)
     } else {
       await createRole(formData.name, formData.description, selectedPermissionIds.value)
       appToast.created(`Role ${formData.name}`)
     }
     router.push('/role-management')
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Gagal menyimpan role.'
+    const message = err instanceof Error ? err.message : 'Failed to save role.'
     appToast.error(message)
   }
 }

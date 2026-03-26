@@ -12,7 +12,7 @@ function escapeHtml(value: unknown) {
 function formatDate(value: string | null | undefined) {
   if (!value) return '........................................'
 
-  return new Date(value).toLocaleDateString('id-ID', {
+  return new Date(value).toLocaleDateString('en-US', {
     day: '2-digit',
     month: 'long',
     year: 'numeric',
@@ -56,7 +56,7 @@ function buildTemplate(job: JobRequest) {
   <html lang="en">
     <head>
       <meta charset="UTF-8" />
-      <title>Formulir Permohonan Kebutuhan Tenaga Kerja</title>
+      <title>Job Request Form</title>
       <style>
         @page { size: A4; margin: 14mm 12mm; }
         * { box-sizing: border-box; }
@@ -160,41 +160,41 @@ function buildTemplate(job: JobRequest) {
     <body>
       <div class="sheet">
         <div class="header">
-          <h1>FORMULIR PERMOHONAN KEBUTUHAN TENAGA KERJA</h1>
+          <h1>JOB REQUEST FORM</h1>
         </div>
 
-        ${buildRow('Tanggal permohonan', formatDate(job.created_at))}
-        ${buildRow('Posisi yang diperlukan', lineValue(job.main_position))}
+        ${buildRow('Request Date', formatDate(job.created_at))}
+        ${buildRow('Required Position', lineValue(job.main_position))}
         ${buildRow('Direct manager', lineValue(job.direct_manager))}
-        ${buildRow('Approval Direktur BU', lineValue(job.approval_director_bu))}
-        ${buildRow('Tanggal approval Direktur BU', formatDate(job.approval_director_bu_date))}
-        ${buildRow('Approval GM HRD', lineValue(job.approval_gm_hrd))}
-        ${buildRow('Tanggal approval GM HRD', formatDate(job.approval_gm_hrd_date))}
-        ${buildRow('Approval Direktur HRD', lineValue(job.approval_director_hrd))}
-        ${buildRow('Tanggal approval Direktur HRD', formatDate(job.approval_director_hrd_date))}
+        ${buildRow('BU Director Approval', lineValue(job.approval_director_bu))}
+        ${buildRow('BU Director Approval Date', formatDate(job.approval_director_bu_date))}
+        ${buildRow('GM HRD Approval', lineValue(job.approval_gm_hrd))}
+        ${buildRow('GM HRD Approval Date', formatDate(job.approval_gm_hrd_date))}
+        ${buildRow('HRD Director Approval', lineValue(job.approval_director_hrd))}
+        ${buildRow('HRD Director Approval Date', formatDate(job.approval_director_hrd_date))}
         ${buildRow('Site', lineValue(job.site))}
         ${buildRow('Working location', lineValue(job.working_location))}
         ${buildRow('Required date', formatDate(job.required_date))}
         ${buildRow('Employment status', lineValue(job.employment_status))}
-        ${buildRow('PT pembebanan', lineValue(job.pt_pembebanan))}
+        ${buildRow('Cost Center PT', lineValue(job.pt_pembebanan))}
         ${buildRow(
-          'Periode probation',
-          job.periode_probation ? `${escapeHtml(job.periode_probation)} bulan` : lineValue(''),
+          'Probation period',
+          job.periode_probation ? `${escapeHtml(job.periode_probation)} months` : lineValue(''),
         )}
 
         <div class="section">
-          <p class="section-title">Kategori kebutuhan tenaga kerja</p>
+          <p class="section-title">Manpower Requirement Category</p>
           <div class="checkbox-grid">
-            <div class="checkbox-item"><span class="checkbox">${checkMark(positionStatus === 'posisi baru mpp')}</span><span>MPP</span></div>
-            <div class="checkbox-item"><span class="checkbox">${checkMark(positionStatus === 'posisi baru non mpp')}</span><span>Non-MPP</span></div>
-            <div class="checkbox-item"><span class="checkbox">${checkMark(positionStatus === 'pengganti')}</span><span>Pengganti</span></div>
-            <div class="checkbox-item"><span class="checkbox">${checkMark(positionStatus === 'magang')}</span><span>Magang</span></div>
+            <div class="checkbox-item"><span class="checkbox">${checkMark(positionStatus === 'new position mpp')}</span><span>MPP</span></div>
+            <div class="checkbox-item"><span class="checkbox">${checkMark(positionStatus === 'new position non mpp')}</span><span>Non-MPP</span></div>
+            <div class="checkbox-item"><span class="checkbox">${checkMark(positionStatus === 'replacement')}</span><span>Replacement</span></div>
+            <div class="checkbox-item"><span class="checkbox">${checkMark(positionStatus === 'internship')}</span><span>Internship</span></div>
           </div>
           <p class="note">Current mapping is still provisional and follows the available fields in the application.</p>
         </div>
 
         <div class="section">
-          <p class="section-title">Custom group / keterangan</p>
+          <p class="section-title">Custom group / Remarks</p>
           <div class="two-col">
             <div>
               ${buildRow('Custom group 1', lineValue(customGroups[0]))}
@@ -211,26 +211,26 @@ function buildTemplate(job: JobRequest) {
 
         <div class="section">
           <p class="section-title">Placeholder fields from template</p>
-          ${buildRow('Alasan / business justification', lineValue(''))}
-          ${buildRow('Kriteria kandidat', lineValue(''))}
-          ${buildRow('Catatan budget controller', lineValue(''))}
+          ${buildRow('Business Justification / Reason', lineValue(''))}
+          ${buildRow('Candidate Criteria', lineValue(''))}
+          ${buildRow('Budget Controller Notes', lineValue(''))}
         </div>
 
         <div class="signatures">
           <div class="signature-card">
-            <div class="signature-title">Yang mengajukan</div>
+            <div class="signature-title">Requested by</div>
             <div class="signature-line">${lineValue(job.direct_manager || '')}</div>
           </div>
           <div class="signature-card">
-            <div class="signature-title">Diperiksa</div>
+            <div class="signature-title">Checked by</div>
             <div class="signature-line">&nbsp;</div>
           </div>
           <div class="signature-card">
-            <div class="signature-title">Disetujui</div>
+            <div class="signature-title">Approved by</div>
             <div class="signature-line">&nbsp;</div>
           </div>
           <div class="signature-card">
-            <div class="signature-title">Diketahui</div>
+            <div class="signature-title">Acknowledged by</div>
             <div class="signature-line">&nbsp;</div>
           </div>
         </div>

@@ -259,7 +259,7 @@ watch(
 
 function formatDate(dateStr: string | null) {
   if (!dateStr) return '-'
-  return new Date(dateStr).toLocaleString('id-ID', {
+  return new Date(dateStr).toLocaleString('en-US', {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
@@ -279,7 +279,7 @@ async function handleDownload(filePath: string) {
       window.open(data.signedUrl, '_blank')
     }
   } catch (err) {
-    appToast.error('Gagal membuka file. Pastikan Anda memiliki akses.')
+    appToast.error('Failed to open file. Ensure you have access.')
   }
 }
 
@@ -295,10 +295,10 @@ function trackingStatusClass(status: RecruitmentStatus) {
 
 function trackingStatusLabel(status: RecruitmentStatus) {
   const map: Record<RecruitmentStatus, string> = {
-    pending_review: 'Menunggu Review',
+    pending_review: 'Pending Review',
     approved: 'Approved - Upload Posting',
     posting_uploaded: 'Posting Uploaded',
-    candidates_invited: 'Kandidat Diundang',
+    candidates_invited: 'Candidates Invited',
   }
   return map[status] || status
 }
@@ -312,9 +312,9 @@ function handleFileSelect(event: Event, trackingId: string) {
 async function handleApprove(trackingId: string) {
   try {
     await approveTracking(trackingId)
-    appToast.success('Job request berhasil diapprove oleh staff.')
+    appToast.success('Job request successfully approved by staff.')
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Gagal approve.'
+    const message = err instanceof Error ? err.message : 'Failed to approve.'
     appToast.error(message)
   }
 }
@@ -322,11 +322,11 @@ async function handleApprove(trackingId: string) {
 async function handleUpload(trackingId: string) {
   try {
     await uploadPostingFiles(trackingId, selectedFiles.value)
-    appToast.success('File lowongan berhasil diupload.')
+    appToast.success('Vacancy file successfully uploaded.')
     selectedFiles.value = []
     selectedTrackingId.value = ''
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Gagal upload file.'
+    const message = err instanceof Error ? err.message : 'Failed to upload file.'
     appToast.error(message)
   }
 }

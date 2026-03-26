@@ -20,13 +20,13 @@ export function usePublicApprovalViewModel() {
     try {
       const result = await repo.getStepByToken(token)
       if (!result) {
-        error.value = "Link approval tidak valid atau sudah kadaluarsa."
+        error.value = "Approval link is invalid or has expired."
         return
       }
       step.value = result.step
       chain.value = result.chain
     } catch (err) {
-      error.value = err instanceof Error ? err.message : "Gagal memuat data approval."
+      error.value = err instanceof Error ? err.message : "Failed to load approval data."
     } finally {
       loading.value = false
     }
@@ -41,7 +41,7 @@ export function usePublicApprovalViewModel() {
       // Reload to show updated status
       await loadByToken(token)
     } catch (err) {
-      error.value = err instanceof Error ? err.message : "Gagal melakukan approval."
+      error.value = err instanceof Error ? err.message : "Failed to approve."
       throw err
     } finally {
       saving.value = false
@@ -56,7 +56,7 @@ export function usePublicApprovalViewModel() {
       rejected.value = true
       await loadByToken(token)
     } catch (err) {
-      error.value = err instanceof Error ? err.message : "Gagal melakukan reject."
+      error.value = err instanceof Error ? err.message : "Failed to reject."
       throw err
     } finally {
       saving.value = false

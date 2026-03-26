@@ -145,7 +145,7 @@ export class UserManagementRepositoryImpl implements UserManagementRepository {
     })
 
     if (authError) throw new Error(authError.message)
-    if (!authData.user) throw new Error('Gagal membuat akun user.')
+    if (!authData.user) throw new Error('Failed to create user account.')
 
     const userId = authData.user.id
 

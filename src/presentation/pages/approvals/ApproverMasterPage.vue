@@ -153,14 +153,11 @@ onMounted(() => {
 })
 
 const gmApprover = computed(() => 
-  approvers.value.find(a => a.jabatan?.toLowerCase().includes('gm hrd'))
+  approvers.value.find(a => a.step_order === 1)
 )
 
 const directorApprover = computed(() => 
-  approvers.value.find(a => 
-    a.jabatan?.toLowerCase().includes('director hrd') || 
-    a.jabatan?.toLowerCase().includes('direktur hrd')
-  )
+  approvers.value.find(a => a.step_order === 2)
 )
 
 function getFullName(emp: any) {

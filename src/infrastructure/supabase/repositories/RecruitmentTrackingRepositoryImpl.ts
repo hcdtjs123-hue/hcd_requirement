@@ -85,7 +85,7 @@ export class RecruitmentTrackingRepositoryImpl implements RecruitmentTrackingRep
         .from("job-postings")
         .upload(filePath, file)
 
-      if (uploadError) throw new Error(`Gagal upload file ${file.name}: ${uploadError.message}`)
+      if (uploadError) throw new Error(`Failed to upload file ${file.name}: ${uploadError.message}`)
 
       // Record in database
       const { error: insertError } = await supabase

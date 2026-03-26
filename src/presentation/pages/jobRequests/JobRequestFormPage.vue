@@ -9,7 +9,7 @@
       <div>
         <p class="text-sm uppercase tracking-[0.3em] text-blue-600">Job Request</p>
         <h1 class="mt-1 text-2xl font-semibold tracking-tight">
-          {{ isEdit ? 'Edit Job Request' : 'Formulir Job Request Baru' }}
+          {{ isEdit ? 'Edit Job Request' : 'New Job Request Form' }}
         </h1>
       </div>
     </div>
@@ -22,40 +22,40 @@
       <form v-if="!loading" class="grid gap-5 md:grid-cols-2" @submit.prevent="handleSubmit">
         <label class="space-y-2 md:col-span-2">
           <span class="text-sm font-medium text-gray-700">Cost Center PT</span>
-          <input v-model="form.pt_pembebanan" class="field" type="text" placeholder="Masukkan PT" />
+          <input v-model="form.pt_pembebanan" class="field" type="text" placeholder="Enter PT" />
         </label>
         <label class="space-y-2">
-          <span class="text-sm font-medium text-gray-700">Posisi Utama *</span>
+          <span class="text-sm font-medium text-gray-700">Main Position *</span>
           <input v-model="form.main_position" class="field" type="text" required
-            placeholder="Contoh: Software Engineer" />
+            placeholder="e.g. Software Engineer" />
         </label>
         <label class="space-y-2">
-          <span class="text-sm font-medium text-gray-700">Status Kepegawaian</span>
+          <span class="text-sm font-medium text-gray-700">Employment Status</span>
           <select v-model="form.employment_status" class="field">
-            <option value="">Pilih status...</option>
+            <option value="">Select status...</option>
             <option v-for="option in employmentStatusOptions" :key="option" :value="option">
               {{ option }}
             </option>
           </select>
         </label>
         <label class="space-y-2">
-          <span class="text-sm font-medium text-gray-700">Status Posisi</span>
+          <span class="text-sm font-medium text-gray-700">Position Status</span>
           <select v-model="form.position_status" class="field">
-            <option value="">Pilih status...</option>
+            <option value="">Select status...</option>
             <option v-for="option in positionStatusOptions" :key="option" :value="option">
               {{ option }}
             </option>
           </select>
         </label>
         <label class="space-y-2">
-          <span class="text-sm font-medium text-gray-700">Masa Probasi (Bulan)</span>
+          <span class="text-sm font-medium text-gray-700">Probation Period (Months)</span>
           <input v-model.number="form.periode_probation" class="field" type="number" min="0"
             @input="sanitizeNumberField(form, 'periode_probation')" />
         </label>
         <label class="space-y-2">
           <span class="text-sm font-medium text-gray-700">Direct Manager</span>
           <div class="relative" ref="managerFieldRef">
-            <input v-model="searchDirectManager" type="text" class="field" placeholder="Cari nama manager..."
+            <input v-model="searchDirectManager" type="text" class="field" placeholder="Search for manager..."
               @focus="openManagerDropdown" @input="openManagerDropdown" autocomplete="off" />
             <ul v-show="isManagerDropdownOpen && filteredDirectManagers.length > 0"
               class="absolute z-20 mt-1 max-h-52 w-full overflow-auto rounded-2xl border border-gray-200 bg-white shadow-lg">
@@ -67,10 +67,10 @@
           </div>
         </label>
         <label class="space-y-2">
-          <span class="text-sm font-medium text-gray-700">Approval Direktur BU</span>
+          <span class="text-sm font-medium text-gray-700">BU Director Approval</span>
           <div class="relative" ref="approvalDirectorBuFieldRef">
             <input v-model="searchApprovalDirectorBu" type="text" class="field"
-              placeholder="Cari nama direktur BU..." @focus="openApprovalDirectorBuDropdown"
+              placeholder="Search for BU director..." @focus="openApprovalDirectorBuDropdown"
               @input="openApprovalDirectorBuDropdown" autocomplete="off" />
             <ul v-show="isApprovalDirectorBuOpen && filteredApprovalDirectorBu.length > 0"
               class="absolute z-20 mt-1 max-h-52 w-full overflow-auto rounded-2xl border border-gray-200 bg-white shadow-lg">
@@ -83,14 +83,14 @@
         </label>
         <label class="space-y-2">
           <span class="text-sm font-medium text-gray-700">Site</span>
-          <input v-model="form.site" class="field" type="text" placeholder="Lokasi site" />
+          <input v-model="form.site" class="field" type="text" placeholder="Site location" />
         </label>
         <label class="space-y-2">
-          <span class="text-sm font-medium text-gray-700">Lokasi Kerja</span>
-          <input v-model="form.working_location" class="field" type="text" placeholder="Lokasi kerja" />
+          <span class="text-sm font-medium text-gray-700">Working Location</span>
+          <input v-model="form.working_location" class="field" type="text" placeholder="Working location" />
         </label>
         <label class="space-y-2">
-          <span class="text-sm font-medium text-gray-700">Tanggal Dibutuhkan</span>
+          <span class="text-sm font-medium text-gray-700">Required Date</span>
           <input v-model="form.required_date" class="field" type="date" />
         </label>
 
@@ -98,9 +98,9 @@
         <div class="md:col-span-2 rounded-2xl border border-blue-100 bg-blue-50 px-5 py-4 flex gap-3">
           <div class="mt-0.5 text-blue-500 shrink-0">ℹ</div>
           <div>
-            <p class="text-sm font-semibold text-blue-800">Approval Otomatis</p>
+            <p class="text-sm font-semibold text-blue-800">Automatic Approval</p>
             <p class="mt-1 text-sm text-blue-700 leading-relaxed">
-              <strong>GM HRD</strong> dan <strong>Direktur HRD</strong> diisi otomatis dari Approver Master yang aktif sesuai jabatan masing-masing. Tanggal approval terisi saat sudah disetujui.
+              <strong>GM HRD</strong> and <strong>HRD Director</strong> are automatically filled from the active Approver Master according to their respective positions. Approval date is filled once approved.
             </p>
           </div>
         </div>
@@ -112,7 +112,7 @@
         <label v-for="index in 6" :key="index" class="space-y-2">
           <span class="text-sm font-medium text-gray-700">Custom Group {{ index }}</span>
           <select v-model="form[`custom_grup_${index}_id` as keyof typeof form]" class="field">
-            <option :value="null">Pilih...</option>
+            <option :value="null">Select...</option>
             <option v-for="opt in groupedOptions[index]" :key="opt.id" :value="opt.id">
               {{ opt.name }}
             </option>
@@ -123,16 +123,16 @@
           <button type="submit"
             class="rounded-2xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
             :disabled="saving">
-            {{ saving ? 'Menyimpan...' : isEdit ? 'Update Job Request' : 'Simpan Job Request' }}
+            {{ saving ? 'Saving...' : isEdit ? 'Update Job Request' : 'Save Job Request' }}
           </button>
           <button type="button"
             class="rounded-2xl border border-gray-200 px-6 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
             :disabled="saving" @click="router.back()">
-            Batal
+            Cancel
           </button>
         </div>
       </form>
-      <div v-else class="py-10 text-center text-sm text-gray-500">Memuat data...</div>
+      <div v-else class="py-10 text-center text-sm text-gray-500">Loading data...</div>
     </section>
   </div>
 </template>
@@ -179,6 +179,7 @@ function createEmptyForm(): JobRequestInput {
     custom_grup_6_id: null,
     required_date: '',
     periode_probation: 0,
+    status: 'open',
   }
 }
 
@@ -284,7 +285,7 @@ function loadData() {
       searchDirectManager.value = job.direct_manager ?? ''
       searchApprovalDirectorBu.value = job.approval_director_bu ?? ''
     } else if (!loading.value) {
-      appToast.error('Data job request tidak ditemukan.')
+      appToast.error('Job request data not found.')
       router.back()
     }
   }
@@ -314,7 +315,7 @@ async function handleSubmit() {
     }
     router.push('/job-requests')
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Gagal menyimpan job request.'
+    const message = err instanceof Error ? err.message : 'Failed to save job request.'
     appToast.error(message)
   }
 }

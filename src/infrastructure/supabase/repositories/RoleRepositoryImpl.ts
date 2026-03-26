@@ -43,35 +43,35 @@ export class RoleRepositoryImpl implements RoleRepository {
     const requiredPermissions = [
       {
         name: 'recruitment:create',
-        description: 'Menambahkan kandidat ke pipeline rekrutmen',
+        description: 'Add candidates to the recruitment pipeline',
       },
       {
         name: 'recruitment:read',
-        description: 'Melihat dashboard dan pipeline rekrutmen',
+        description: 'View recruitment dashboard and pipeline',
       },
       {
         name: 'recruitment:update',
-        description: 'Mengubah proses pipeline rekrutmen kandidat',
+        description: 'Modify candidate recruitment pipeline process',
       },
       {
         name: 'recruitment:delete',
-        description: 'Menghapus data pipeline rekrutmen kandidat',
+        description: 'Delete candidate recruitment pipeline data',
       },
       {
         name: 'candidate_data:create',
-        description: 'Menambahkan data kandidat baru',
+        description: 'Add new candidate data',
       },
       {
         name: 'candidate_data:read',
-        description: 'Melihat daftar dan detail data kandidat',
+        description: 'View list and details of candidate data',
       },
       {
         name: 'candidate_data:update',
-        description: 'Mengubah data profil dan form kandidat',
+        description: 'Modify candidate profile and form data',
       },
       {
         name: 'candidate_data:delete',
-        description: 'Menghapus data kandidat',
+        description: 'Delete candidate data',
       },
     ]
 
@@ -101,7 +101,7 @@ export class RoleRepositoryImpl implements RoleRepository {
       .select()
       .single()
 
-    if (error) throw new Error(`Gagal membuat role: ${error.message}`)
+    if (error) throw new Error(`Failed to create role: ${error.message}`)
     return { ...data, permissions: [] }
   }
 
@@ -114,7 +114,7 @@ export class RoleRepositoryImpl implements RoleRepository {
       .delete()
       .eq('role_id', role_id)
 
-    if (delError) throw new Error(`Gagal reset permission lama: ${delError.message}`)
+    if (delError) throw new Error(`Failed to reset old permissions: ${delError.message}`)
 
     // 2. Insert konfigurasi permission baru (jika ada)
     if (permission_ids && permission_ids.length > 0) {
@@ -124,12 +124,12 @@ export class RoleRepositoryImpl implements RoleRepository {
       }))
       const { error: insError } = await supabase.from('role_permissions').insert(inserts)
 
-      if (insError) throw new Error(`Gagal menyimpan permission baru: ${insError.message}`)
+      if (insError) throw new Error(`Failed to save new permissions: ${insError.message}`)
     }
   }
 
   async deleteRole(id: string): Promise<void> {
     const { error } = await supabase.from('roles').delete().eq('id', id)
-    if (error) throw new Error(`Gagal menghapus role: ${error.message}`)
+    if (error) throw new Error(`Failed to delete role: ${error.message}`)
   }
 }

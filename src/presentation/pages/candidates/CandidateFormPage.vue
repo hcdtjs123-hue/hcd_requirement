@@ -9,9 +9,9 @@
         ←
       </button>
       <div>
-        <p class="text-sm uppercase tracking-[0.3em] text-blue-600">Modul Kandidat</p>
+        <p class="text-sm uppercase tracking-[0.3em] text-blue-600">Candidate Module</p>
         <h1 class="mt-1 text-2xl font-semibold tracking-tight">
-          {{ isEdit ? 'Edit Data Kandidat' : 'Form Kandidat Baru' }}
+          {{ isEdit ? 'Edit Candidate Data' : 'New Candidate Form' }}
         </h1>
       </div>
     </div>
@@ -29,14 +29,14 @@
           <label class="space-y-2 md:col-span-2">
             <span class="text-sm font-medium text-gray-700">Job Request</span>
             <select v-model="form.job_request_id" class="field" required>
-              <option value="">Pilih job request</option>
+              <option value="">Select job request</option>
               <option v-for="job in jobs" :key="job.id" :value="job.id">
                 {{ job.main_position || '-' }}
               </option>
             </select>
           </label>
           <label class="space-y-2">
-            <span class="text-sm font-medium text-gray-700">Tanggal Masuk</span>
+            <span class="text-sm font-medium text-gray-700">Application Date</span>
             <input v-model="form.date_application" class="field" type="date" />
           </label>
           <label class="space-y-2">
@@ -78,7 +78,7 @@
           <label class="space-y-2">
             <span class="text-sm font-medium text-gray-700">Gender</span>
             <select v-model="form.gender" class="field">
-              <option value="">Pilih gender</option>
+              <option value="">Select gender</option>
               <option v-for="option in genderOptions" :key="option" :value="option">
                 {{ option }}
               </option>
@@ -87,7 +87,7 @@
           <label class="space-y-2">
             <span class="text-sm font-medium text-gray-700">Marital Status</span>
             <select v-model="form.marital_status" class="field">
-              <option value="">Pilih status</option>
+              <option value="">Select status</option>
               <option v-for="option in maritalStatusOptions" :key="option" :value="option">
                 {{ option }}
               </option>
@@ -100,7 +100,7 @@
           <label class="space-y-2">
             <span class="text-sm font-medium text-gray-700">Blood Type</span>
             <select v-model="form.blood_type" class="field">
-              <option value="">Pilih golongan darah</option>
+              <option value="">Select blood type</option>
               <option v-for="option in bloodTypeOptions" :key="option" :value="option">
                 {{ option }}
               </option>
@@ -190,7 +190,7 @@
               class="rounded-2xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium transition hover:bg-gray-50"
               @click="addFamilyItem"
             >
-              Tambah
+              Add
             </button>
           </div>
           <div class="space-y-4">
@@ -210,7 +210,7 @@
               <label class="space-y-2"
                 ><span class="text-sm font-medium text-gray-700">Gender</span
                 ><select v-model="item.gender" class="field">
-                  <option value="">Pilih gender</option>
+                  <option value="">Select gender</option>
                   <option v-for="option in genderOptions" :key="option" :value="option">
                     {{ option }}
                   </option>
@@ -233,7 +233,7 @@
                 class="justify-self-start rounded-xl text-rose-600 px-3 py-2 text-sm font-medium transition hover:bg-rose-50"
                 @click="removeFamilyItem(index)"
               >
-                Hapus item
+                Remove item
               </button>
             </div>
           </div>
@@ -250,7 +250,7 @@
               class="rounded-2xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium transition hover:bg-gray-50"
               @click="addEducationItem"
             >
-              Tambah
+              Add
             </button>
           </div>
           <div class="space-y-4">
@@ -262,7 +262,7 @@
               <label class="space-y-2"
                 ><span class="text-sm font-medium text-gray-700">Level</span
                 ><select v-model="item.level" class="field">
-                  <option value="">Pilih level</option>
+                  <option value="">Select level</option>
                   <option v-for="option in educationLevelOptions" :key="option" :value="option">
                     {{ option }}
                   </option>
@@ -283,7 +283,7 @@
               <label class="space-y-2">
                 <span class="text-sm font-medium text-gray-700">From Year</span>
                 <select v-model="item.from_year" class="field">
-                  <option :value="null">Pilih tahun</option>
+                  <option :value="null">Select year</option>
                   <option v-for="year in yearOptions" :key="`education-from-${year}`" :value="year">
                     {{ year }}
                   </option>
@@ -292,7 +292,7 @@
               <label class="space-y-2">
                 <span class="text-sm font-medium text-gray-700">To Year</span>
                 <select v-model="item.to_year" class="field">
-                  <option :value="null">Pilih tahun</option>
+                  <option :value="null">Select year</option>
                   <option v-for="year in yearOptions" :key="`education-to-${year}`" :value="year">
                     {{ year }}
                   </option>
@@ -311,7 +311,7 @@
                 class="justify-self-start rounded-xl text-rose-600 px-3 py-2 text-sm font-medium transition hover:bg-rose-50"
                 @click="removeEducationItem(index)"
               >
-                Hapus item
+                Remove item
               </button>
             </div>
           </div>
@@ -328,7 +328,7 @@
               class="rounded-2xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium transition hover:bg-gray-50"
               @click="addWorkHistoryItem"
             >
-              Tambah
+              Add
             </button>
           </div>
           <div class="space-y-4">
@@ -348,7 +348,7 @@
               <label class="space-y-2">
                 <span class="text-sm font-medium text-gray-700">From Year</span>
                 <select v-model="item.from_year" class="field">
-                  <option :value="null">Pilih tahun</option>
+                  <option :value="null">Select year</option>
                   <option v-for="year in yearOptions" :key="`work-from-${year}`" :value="year">
                     {{ year }}
                   </option>
@@ -357,7 +357,7 @@
               <label class="space-y-2">
                 <span class="text-sm font-medium text-gray-700">To Year</span>
                 <select v-model="item.to_year" class="field">
-                  <option :value="null">Pilih tahun</option>
+                  <option :value="null">Select year</option>
                   <option v-for="year in yearOptions" :key="`work-to-${year}`" :value="year">
                     {{ year }}
                   </option>
@@ -389,7 +389,7 @@
                 class="justify-self-start rounded-xl text-rose-600 px-3 py-2 text-sm font-medium transition hover:bg-rose-50"
                 @click="removeWorkHistoryItem(index)"
               >
-                Hapus item
+                Remove item
               </button>
             </div>
           </div>
@@ -409,7 +409,7 @@
                 type="checkbox"
                 class="h-4 w-4 rounded border-gray-300 text-blue-600"
               />
-              <span class="text-sm font-medium text-gray-900">Bersedia kontrak</span>
+              <span class="text-sm font-medium text-gray-900">Willing to be contracted</span>
             </label>
             <label
               class="flex items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 px-4 py-4"
@@ -419,7 +419,7 @@
                 type="checkbox"
                 class="h-4 w-4 rounded border-gray-300 text-blue-600"
               />
-              <span class="text-sm font-medium text-gray-900">Bersedia business trip</span>
+              <span class="text-sm font-medium text-gray-900">Willing for business trips</span>
             </label>
             <label class="space-y-2"
               ><span class="text-sm font-medium text-gray-700">Contract Period</span
@@ -478,10 +478,10 @@
           >
             {{
               candidateSaving
-                ? 'Menyimpan...'
+                ? 'Saving...'
                 : isEdit
-                  ? 'Update Data Kandidat'
-                  : 'Simpan Data Kandidat'
+                  ? 'Update Candidate Data'
+                  : 'Save Candidate Data'
             }}
           </button>
           <button
@@ -490,11 +490,11 @@
             :disabled="candidateSaving"
             @click="router.back()"
           >
-            Batal
+            Cancel
           </button>
         </div>
       </form>
-      <div v-else class="py-10 text-center text-sm text-gray-500">Memuat data...</div>
+      <div v-else class="py-10 text-center text-sm text-gray-500">Loading data...</div>
     </section>
   </div>
 </template>
@@ -711,7 +711,7 @@ function loadData() {
     if (candidate) {
       populateForm(candidate)
     } else if (!candidateLoading.value) {
-      appToast.error('Data kandidat tidak ditemukan.')
+      appToast.error('Candidate data not found.')
       router.back()
     }
   }
@@ -878,14 +878,14 @@ async function handleSubmit() {
   try {
     if (isEdit.value && id.value) {
       await update(id.value, buildPayload())
-      appToast.updated('Kandidat')
+      appToast.updated('Candidate')
     } else {
       await create(buildPayload())
-      appToast.created('Kandidat')
+      appToast.created('Candidate')
     }
     router.push('/candidates')
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Gagal menyimpan data kandidat.'
+    const message = err instanceof Error ? err.message : 'Failed to save candidate data.'
     appToast.error(message)
   }
 }
