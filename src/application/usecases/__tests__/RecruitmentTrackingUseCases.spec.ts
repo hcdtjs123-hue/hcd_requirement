@@ -58,8 +58,8 @@ describe('RecruitmentTracking & Invitation Use Cases', () => {
 
   it('sendCandidateCredentials calls repo.sendCredentials', async () => {
     mockRepo.sendCredentials = vi.fn().mockResolvedValue(undefined)
-    await sendCandidateCredentials(mockRepo, 'inv-1', 'user-1')
-    expect(mockRepo.sendCredentials).toHaveBeenCalledWith('inv-1', 'user-1')
+    await sendCandidateCredentials(mockRepo, 'inv-1')
+    expect(mockRepo.sendCredentials).toHaveBeenCalledWith('inv-1')
   })
 
   it('scheduleInterview calls repo.scheduleInterview', async () => {

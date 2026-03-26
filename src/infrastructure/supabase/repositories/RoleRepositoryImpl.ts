@@ -54,6 +54,10 @@ export class RoleRepositoryImpl implements RoleRepository {
         description: 'Modify candidate recruitment pipeline process',
       },
       {
+        name: 'can:upload',
+        description: 'Upload recruitment posting files and evidence',
+      },
+      {
         name: 'recruitment:delete',
         description: 'Delete candidate recruitment pipeline data',
       },

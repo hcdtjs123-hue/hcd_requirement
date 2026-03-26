@@ -76,19 +76,28 @@ const router = createRouter({
           path: 'approver-master',
           name: 'approver-master',
           component: () => import('@/presentation/pages/approvals/ApproverMasterPage.vue'),
-          meta: { requiredPermissions: ['approval:read'] },
+          meta: {
+            requiredPermissions: ['approval:read'],
+            allowedRoles: ['admin', 'administrator', 'super admin', 'super_admin'],
+          },
         },
         {
           path: 'approver-master/configure',
           name: 'approver-master-configure',
           component: () => import('@/presentation/pages/approvals/ApproverMasterFormPage.vue'),
-          meta: { requiredPermissions: ['approval:read'] },
+          meta: {
+            requiredPermissions: ['approval:read'],
+            allowedRoles: ['admin', 'administrator', 'super admin', 'super_admin'],
+          },
         },
         {
           path: 'approver-master/:id/edit',
           name: 'approver-master-edit',
           component: () => import('@/presentation/pages/approvals/ApproverMasterFormPage.vue'),
-          meta: { requiredPermissions: ['approval:read'] },
+          meta: {
+            requiredPermissions: ['approval:read'],
+            allowedRoles: ['admin', 'administrator', 'super admin', 'super_admin'],
+          },
         },
         {
           path: 'approval-tracking',
@@ -240,6 +249,16 @@ router.beforeEach(async (to, _from, next) => {
   if (requiredPermissions && requiredPermissions.length > 0) {
     if (!authStore.hasAnyPermission(requiredPermissions)) {
       // Redirect to dashboard if no access
+      return next({ name: 'dashboard' })
+    }
+  }
+
+  const allowedRoles = to.meta.allowedRoles as string[] | undefined
+  if (allowedRoles && allowedRoles.length > 0) {
+    const normalizedRole = String(authStore.userRole ?? '').toLowerCase()
+    const normalizedAllowedRoles = allowedRoles.map((role) => role.toLowerCase())
+
+    if (!normalizedAllowedRoles.includes(normalizedRole)) {
       return next({ name: 'dashboard' })
     }
   }

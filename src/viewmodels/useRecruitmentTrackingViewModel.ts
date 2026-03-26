@@ -89,11 +89,11 @@ export function useRecruitmentTrackingViewModel() {
     }
   }
 
-  async function sendCredentials(invitationId: string, userId: string) {
+  async function sendCredentials(invitationId: string) {
     saving.value = true
     error.value = ""
     try {
-      await sendCandidateCredentials(recruitmentTrackingRepo, invitationId, userId)
+      await sendCandidateCredentials(recruitmentTrackingRepo, invitationId)
       await refreshInvitations()
     } catch (err) {
       error.value = err instanceof Error ? err.message : "Failed to send credentials."

@@ -3,7 +3,6 @@ import type { RecruitmentTrackingRepository } from "@/domain/repositories/Recrui
 export function sendCandidateCredentials(
   repo: RecruitmentTrackingRepository,
   invitationId: string,
-  userId: string,
 ): Promise<void> {
-  return repo.sendCredentials(invitationId, userId)
+  return repo.sendCredentials(invitationId)
 }

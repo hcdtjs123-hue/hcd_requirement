@@ -251,12 +251,17 @@ const appToast = useAppToast()
 
 const isMobileSidebarOpen = ref(false)
 const openSections = ref<string[]>(['Overview', 'ERF Management', 'Hiring'])
+const normalizedRole = computed(() => (userRole.value ?? '').toLowerCase())
+const isAdminRole = computed(() =>
+  ['admin', 'administrator', 'super admin', 'super_admin'].includes(normalizedRole.value),
+)
 
 interface NavItem {
   to: string
   label: string
   icon: Component
   permissions?: string[]
+  adminOnly?: boolean
   count?: number
   badgeClass?: string
 }
@@ -324,6 +329,7 @@ const navigationSections = computed((): NavSection[] => [
         label: 'Approver Master',
         icon: UserCheck,
         permissions: ['approval:read'],
+        adminOnly: true,
       },
       {
         to: '/custom-group-management',
@@ -369,7 +375,9 @@ const filteredNavigationSections = computed(() =>
     .map((section) => ({
       ...section,
       items: section.items.filter(
-        (item) => !item.permissions || hasAnyPermission(item.permissions),
+        (item) =>
+          (!item.permissions || hasAnyPermission(item.permissions)) &&
+          (!item.adminOnly || isAdminRole.value),
       ),
     }))
     .filter((section) => section.items.length > 0),

@@ -130,7 +130,12 @@
               <!-- Col 3: Actions -->
               <td class="px-4 py-3 align-top">
                 <!-- Approve (if pending_review) -->
-                <div v-if="tracking.status === 'pending_review'">
+                <div v-if="tracking.status === 'pending_review' && canUpdateRecruitment">
+                  <textarea
+                    v-model="reviewNotesByTracking[tracking.id]"
+                    class="mb-2 min-h-[84px] w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs text-gray-700 outline-none focus:border-blue-600"
+                    placeholder="Add review notes before approval..."
+                  />
                   <button
                     type="button"
                     class="w-full rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
@@ -142,7 +147,7 @@
                 </div>
 
                 <!-- Upload Files (if approved) -->
-                <div v-if="tracking.status === 'approved'" class="space-y-2">
+                <div v-if="tracking.status === 'approved' && canUploadPostingFiles" class="space-y-2">
                   <p class="text-xs font-medium text-gray-700">Upload Posting Evidence:</p>
                   <input
                     type="file"
@@ -160,6 +165,13 @@
                   >
                     {{ saving ? 'Uploading...' : `Upload ${selectedFiles.length} File(s)` }}
                   </button>
+                </div>
+
+                <div
+                  v-else-if="tracking.status === 'approved' && !canUploadPostingFiles"
+                  class="rounded-xl border border-dashed border-gray-200 px-3 py-3 text-xs text-gray-400"
+                >
+                  You do not have permission to upload hiring files.
                 </div>
               </td>
             </tr>
@@ -187,19 +199,24 @@ import { computed, ref, watch } from 'vue'
 import type { RecruitmentStatus } from '@/domain/entities/RecruitmentTracking'
 import { useAppToast } from '@/presentation/components/feedback/useAppToast'
 import TablePagination from '@/presentation/components/tables/TablePagination.vue'
+import { useAuthViewModel } from '@/viewmodels/useAuthViewModel'
 import { useRecruitmentTrackingViewModel } from '@/viewmodels/useRecruitmentTrackingViewModel'
 import { supabase } from '@/infrastructure/supabase/client'
 
 const { trackings, loading, saving, error, refreshTrackings, approveTracking, uploadPostingFiles } =
   useRecruitmentTrackingViewModel()
+const { hasPermission } = useAuthViewModel()
 const appToast = useAppToast()
 
 const selectedFiles = ref<File[]>([])
 const selectedTrackingId = ref('')
+const reviewNotesByTracking = ref<Record<string, string>>({})
 const searchQuery = ref('')
 const statusFilter = ref('')
 const pageSize = 10
 const page = ref(1)
+const canUpdateRecruitment = computed(() => hasPermission('recruitment:update'))
+const canUploadPostingFiles = computed(() => hasPermission('can:upload'))
 
 function normalize(value: unknown) {
   return String(value ?? '')
@@ -310,8 +327,14 @@ function handleFileSelect(event: Event, trackingId: string) {
 }
 
 async function handleApprove(trackingId: string) {
+  if (!canUpdateRecruitment.value) {
+    appToast.error('You do not have permission to update hiring data.')
+    return
+  }
+
   try {
-    await approveTracking(trackingId)
+    await approveTracking(trackingId, reviewNotesByTracking.value[trackingId]?.trim() || undefined)
+    delete reviewNotesByTracking.value[trackingId]
     appToast.success('ERF successfully approved by staff.')
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to approve.'
@@ -320,6 +343,11 @@ async function handleApprove(trackingId: string) {
 }
 
 async function handleUpload(trackingId: string) {
+  if (!canUploadPostingFiles.value) {
+    appToast.error('You do not have permission to upload hiring files.')
+    return
+  }
+
   try {
     await uploadPostingFiles(trackingId, selectedFiles.value)
     appToast.success('Vacancy file successfully uploaded.')

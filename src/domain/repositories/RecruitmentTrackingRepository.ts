@@ -17,7 +17,7 @@ export interface RecruitmentTrackingRepository {
   getInvitationsByTracking(trackingId: string): Promise<CandidateInvitation[]>
   getAllInvitations(): Promise<CandidateInvitation[]>
   createInvitation(data: CandidateInvitationInput): Promise<CandidateInvitation>
-  sendCredentials(invitationId: string, userId: string): Promise<void>
+  sendCredentials(invitationId: string): Promise<void>
   updateInvitationStatus(id: string, status: string): Promise<void>
 
   // Interview Scheduling

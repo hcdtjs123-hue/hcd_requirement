@@ -475,6 +475,7 @@ const quickLinks = computed(() => {
       bg: 'bg-amber-100',
       color: 'text-amber-700',
       permissions: ['approval:read'],
+      adminOnly: true,
     },
     {
       to: '/recruitment',
@@ -522,7 +523,11 @@ const quickLinks = computed(() => {
       permissions: ['role:manage'],
     },
   ]
-  const filtered = all.filter((link) => !link.permissions || hasAnyPermission(link.permissions))
+  const filtered = all.filter(
+    (link) =>
+      (!link.permissions || hasAnyPermission(link.permissions)) &&
+      (!link.adminOnly || isAdminRole.value),
+  )
 
   if (isCandidateRole.value) {
     return filtered.filter((link) => ['/candidates', '/recruitment/pipeline'].includes(link.to))

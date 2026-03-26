@@ -126,17 +126,22 @@
           <h3 class="mb-4 text-lg font-semibold text-blue-900">
             Send Application Form Credentials
           </h3>
-          <div class="flex flex-col sm:flex-row gap-3">
-            <input
-              v-model="credentialUserId"
-              class="flex-1 rounded-xl border border-blue-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-              type="text"
-              placeholder="User ID (from the admin panel for candidate sign-in)"
-            />
+          <div class="space-y-3">
+            <div class="rounded-xl border border-blue-100 bg-white px-4 py-3">
+              <p class="text-xs font-semibold uppercase tracking-wider text-blue-700">
+                Candidate Account Email
+              </p>
+              <p class="mt-1 text-sm font-medium text-gray-900">
+                {{ selectedInvitation.candidate_email }}
+              </p>
+              <p class="mt-1 text-xs text-gray-500">
+                The system will match the candidate account using this email address.
+              </p>
+            </div>
             <button
               type="button"
               class="rounded-xl bg-blue-600 px-8 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
-              :disabled="saving || !credentialUserId"
+              :disabled="saving"
               @click="handleSendCredentials"
             >
               Send Credentials
@@ -284,7 +289,6 @@ const appToast = useAppToast()
 
 const id = computed(() => route.params.id as string | undefined)
 const isEdit = computed(() => !!id.value)
-const credentialUserId = ref('')
 
 const selectedInvitationId = computed(() => id.value ?? '')
 
@@ -349,11 +353,10 @@ async function handleCreateInvitation() {
 }
 
 async function handleSendCredentials() {
-  if (!selectedInvitationId.value || !credentialUserId.value) return
+  if (!selectedInvitationId.value) return
   try {
-    await sendCredentials(selectedInvitationId.value, credentialUserId.value)
+    await sendCredentials(selectedInvitationId.value)
     appToast.success('Credentials sent successfully.')
-    credentialUserId.value = ''
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to send credentials.'
     appToast.error(message)

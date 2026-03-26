@@ -159,11 +159,37 @@ export class RecruitmentTrackingRepositoryImpl implements RecruitmentTrackingRep
     return this.normalizeInvitation(data)
   }
 
-  async sendCredentials(invitationId: string, userId: string): Promise<void> {
+  async sendCredentials(invitationId: string): Promise<void> {
+    const { data: invitation, error: invitationError } = await supabase
+      .from("candidate_invitations")
+      .select("id, candidate_email")
+      .eq("id", invitationId)
+      .single()
+
+    if (invitationError) throw new Error(invitationError.message)
+
+    const candidateEmail = invitation.candidate_email?.trim().toLowerCase()
+    if (!candidateEmail) {
+      throw new Error("Candidate email is missing. Please complete the invitation data first.")
+    }
+
+    const { data: candidateAccount, error: accountError } = await supabase
+      .from("employees")
+      .select("id, email")
+      .ilike("email", candidateEmail)
+      .maybeSingle()
+
+    if (accountError) throw new Error(accountError.message)
+    if (!candidateAccount?.id) {
+      throw new Error(
+        `No candidate account was found for ${candidateEmail}. Please create the candidate user account first.`,
+      )
+    }
+
     const { error } = await supabase
       .from("candidate_invitations")
       .update({
-        user_id: userId,
+        user_id: candidateAccount.id,
         status: "credentials_sent",
         credential_sent_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),

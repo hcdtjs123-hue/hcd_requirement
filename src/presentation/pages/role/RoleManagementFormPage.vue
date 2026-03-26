@@ -67,7 +67,7 @@
           <div>
             <h2 class="text-xl font-semibold">Permission Settings</h2>
             <p class="mt-1 text-sm text-gray-500">
-              Select which modules can be accessed by this role.
+              Select which modules and actions can be accessed by this role.
             </p>
           </div>
           <button
@@ -80,11 +80,14 @@
         </div>
 
         <div class="grid gap-6 sm:grid-cols-2">
-          <!-- Modul ERF -->
-          <div class="space-y-4">
+          <!-- ERF Management -->
+          <div class="space-y-3 rounded-xl bg-gray-50 p-4 border border-gray-100">
             <h3 class="text-sm font-semibold text-gray-900 border-l-4 border-blue-500 pl-3">
-              ERF Module
+              ERF Management
             </h3>
+            <p class="text-xs text-gray-500">
+              Access to ERF submissions, creation, update, and request handling.
+            </p>
             <div class="space-y-2">
               <label
                 v-for="perm in getPermissionsByPrefix('job_request')"
@@ -105,9 +108,12 @@
             </div>
           </div>
 
-          <!-- Modul Approval -->
+          <!-- Approval -->
           <div class="space-y-3 rounded-xl bg-gray-50 p-4 border border-gray-100">
-            <h3 class="font-medium text-gray-900 border-b border-gray-200 pb-2">Approval Module</h3>
+            <h3 class="font-medium text-gray-900 border-b border-gray-200 pb-2">Approval</h3>
+            <p class="text-xs text-gray-500">
+              Access to approval tracking, approval flow monitoring, and approver configuration.
+            </p>
             <div class="space-y-2">
               <label
                 v-for="perm in getPermissionsByPrefix('approval')"
@@ -128,14 +134,15 @@
             </div>
           </div>
 
-          <!-- Modul Rekrutmen -->
+          <!-- Hiring -->
           <div class="space-y-3 rounded-xl bg-gray-50 p-4 border border-gray-100">
-            <h3 class="font-medium text-gray-900 border-b border-gray-200 pb-2">
-              Recruitment Module
-            </h3>
+            <h3 class="font-medium text-gray-900 border-b border-gray-200 pb-2">Hiring</h3>
+            <p class="text-xs text-gray-500">
+              Access to hiring dashboard, pipeline updates, and posting file uploads.
+            </p>
             <div class="space-y-2">
               <label
-                v-for="perm in getRecruitmentPermissions()"
+                v-for="perm in getHiringPermissions()"
                 :key="perm.id"
                 class="flex items-start gap-3 cursor-pointer"
               >
@@ -153,11 +160,12 @@
             </div>
           </div>
 
-          <!-- Modul Kandidat -->
+          <!-- Candidate Data -->
           <div class="space-y-3 rounded-xl bg-gray-50 p-4 border border-gray-100">
-            <h3 class="font-medium text-gray-900 border-b border-gray-200 pb-2">
-              Candidate Module
-            </h3>
+            <h3 class="font-medium text-gray-900 border-b border-gray-200 pb-2">Candidate Data</h3>
+            <p class="text-xs text-gray-500">
+              Access to candidate profiles, forms, and candidate-related data changes.
+            </p>
             <div class="space-y-2">
               <label
                 v-for="perm in getPermissionsByPrefix('candidate_data')"
@@ -178,15 +186,15 @@
             </div>
           </div>
 
-          <!-- Modul Administrator / Others -->
+          <!-- System Admin -->
           <div class="space-y-3 rounded-xl bg-gray-50 p-4 border border-gray-100">
-            <h3 class="font-medium text-gray-900 border-b border-gray-200 pb-2">
-              Administration & Others
-            </h3>
+            <h3 class="font-medium text-gray-900 border-b border-gray-200 pb-2">System Admin</h3>
+            <p class="text-xs text-gray-500">
+              Access to user management, role management, and other administrative settings.
+            </p>
             <div class="space-y-2">
-              <!-- Helper method that gets any perm starting with 'user', 'role', or 'document' -->
               <label
-                v-for="perm in getAdminPermissions()"
+                v-for="perm in getSystemAdminPermissions()"
                 :key="perm.id"
                 class="flex items-start gap-3 cursor-pointer"
               >
@@ -299,7 +307,7 @@ function getPermissionsByPrefix(prefix: string) {
   return permissions.value.filter((p) => p.name.startsWith(`${prefix}:`))
 }
 
-function getAdminPermissions() {
+function getSystemAdminPermissions() {
   return permissions.value.filter((p) => {
     return (
       p.name.startsWith('user:') || p.name.startsWith('role:') || p.name.startsWith('document:')
@@ -307,9 +315,9 @@ function getAdminPermissions() {
   })
 }
 
-function getRecruitmentPermissions() {
+function getHiringPermissions() {
   return permissions.value.filter((p) => {
-    return p.name.startsWith('recruitment:')
+    return p.name.startsWith('recruitment:') || p.name === 'can:upload'
   })
 }
 
