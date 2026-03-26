@@ -1,6 +1,6 @@
 <template>
   <div class="mx-auto flex max-w-4xl flex-col gap-6 text-gray-900">
-    <section class="rounded-3xl border border-gray-200 bg-gray-50 p-8 shadow-2xl shadow-gray-200">
+    <section class="rounded-xl border border-gray-200 bg-gray-50 p-8 shadow-2xl shadow-gray-200">
       <div class="flex items-center justify-between">
         <div>
           <p class="text-sm uppercase tracking-[0.25em] text-blue-600">Account Details</p>
@@ -8,7 +8,7 @@
         </div>
         <div
           v-if="userRole"
-          class="rounded-2xl bg-white px-4 py-2 border border-gray-200 shadow-sm"
+          class="rounded-xl bg-white px-4 py-2 border border-gray-200 shadow-sm"
         >
           <p class="text-[10px] uppercase tracking-[0.2em] text-gray-400">Your Role</p>
           <p class="text-sm font-bold text-blue-600 uppercase">{{ userRole }}</p>
@@ -21,7 +21,7 @@
       </p>
 
       <div class="mt-8 grid gap-6 md:grid-cols-2">
-        <div class="rounded-2xl border border-gray-200 bg-white p-6">
+        <div class="rounded-xl border border-gray-200 bg-white p-6">
           <p class="text-[10px] uppercase tracking-[0.2em] text-gray-400 font-bold mb-4">
             Basic Information
           </p>
@@ -37,7 +37,7 @@
           </div>
         </div>
 
-        <div class="rounded-2xl border border-gray-200 bg-white p-6">
+        <div class="rounded-xl border border-gray-200 bg-white p-6">
           <div class="flex items-center justify-between mb-4">
             <p class="text-[10px] uppercase tracking-[0.2em] text-gray-400 font-bold">
               Permissions

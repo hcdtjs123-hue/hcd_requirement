@@ -15,11 +15,11 @@
       </section>
 
       <section
-        class="rounded-[2rem] border border-gray-200 bg-white p-6 shadow-2xl shadow-gray-200 sm:p-8"
+        class="rounded-xl border border-gray-200 bg-white p-6 shadow-2xl shadow-gray-200 sm:p-8"
       >
         <div class="mb-8 flex items-center gap-3">
           <div
-            class="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600"
+            class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600"
           >
             <ShieldCheck class="h-6 w-6" />
           </div>
@@ -35,7 +35,7 @@
               >Email or Username</label
             >
             <div
-              class="flex items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 px-4 transition focus-within:border-blue-600"
+              class="flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 transition focus-within:border-blue-600"
             >
               <Mail class="h-4 w-4 text-gray-500" />
               <Field
@@ -53,7 +53,7 @@
           <div class="space-y-2">
             <label class="text-sm font-medium text-gray-700" for="password">Password</label>
             <div
-              class="flex items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 px-4 transition focus-within:border-blue-600"
+              class="flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 transition focus-within:border-blue-600"
             >
               <LockKeyhole class="h-4 w-4 text-gray-500" />
               <Field
@@ -77,14 +77,14 @@
 
           <p
             v-if="error"
-            class="rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800"
+            class="rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800"
           >
             {{ error }}
           </p>
 
           <button
             type="submit"
-            class="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-300"
+            class="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-300"
             :disabled="isLoading"
           >
             <LoaderCircle v-if="isLoading" class="h-4 w-4 animate-spin" />

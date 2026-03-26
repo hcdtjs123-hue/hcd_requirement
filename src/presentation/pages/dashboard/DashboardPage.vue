@@ -15,7 +15,7 @@
 
     <section
       v-if="dashboardIntro"
-      class="rounded-3xl border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-cyan-50 p-6 shadow-sm"
+      class="rounded-xl border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-cyan-50 p-6 shadow-sm"
     >
       <p class="text-xs font-semibold uppercase tracking-[0.25em] text-blue-600">Dashboard Focus</p>
       <h2 class="mt-2 text-2xl font-semibold tracking-tight text-gray-900">
@@ -31,7 +31,7 @@
       <div
         v-for="kpi in kpiCards"
         :key="kpi.label"
-        class="relative overflow-hidden rounded-3xl border border-gray-200 bg-white p-5 shadow-sm transition hover:shadow-md"
+        class="relative overflow-hidden rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:shadow-md"
       >
         <div class="flex items-start justify-between">
           <div>
@@ -40,7 +40,7 @@
             </p>
             <p class="mt-2 text-3xl font-bold text-gray-900">{{ kpi.value }}</p>
           </div>
-          <div class="flex h-10 w-10 items-center justify-center rounded-2xl" :class="kpi.bg">
+          <div class="flex h-10 w-10 items-center justify-center rounded-xl" :class="kpi.bg">
             <component :is="kpi.icon" class="h-5 w-5" :class="kpi.color" />
           </div>
         </div>
@@ -54,7 +54,7 @@
     <!-- Latest ERF Submissions -->
       <div
         v-if="showJobRequestsPanel"
-        class="rounded-3xl border border-gray-200 bg-white shadow-sm"
+        class="rounded-xl border border-gray-200 bg-white shadow-sm"
         :class="showApprovalPanel ? 'lg:col-span-2' : 'lg:col-span-3'"
       >
         <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4">
@@ -93,7 +93,7 @@
       </div>
 
       <!-- Status Approval -->
-      <div v-if="showApprovalPanel" class="rounded-3xl border border-gray-200 bg-white shadow-sm">
+      <div v-if="showApprovalPanel" class="rounded-xl border border-gray-200 bg-white shadow-sm">
         <div class="flex items-center gap-2 border-b border-gray-100 px-6 py-4">
           <CheckSquare class="h-4 w-4 text-emerald-600" />
           <h2 class="text-sm font-semibold text-gray-900">Approval Status</h2>
@@ -102,7 +102,7 @@
           <div
             v-for="stat in approvalStats"
             :key="stat.label"
-            class="flex items-center gap-3 rounded-2xl bg-gray-50 px-4 py-3"
+            class="flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3"
           >
             <div
               class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl"
@@ -118,7 +118,7 @@
         </div>
         <RouterLink
           to="/approval-tracking"
-          class="mx-5 mb-5 flex items-center justify-center rounded-2xl border border-gray-200 py-2.5 text-xs font-medium text-gray-600 transition hover:bg-gray-50"
+          class="mx-5 mb-5 flex items-center justify-center rounded-xl border border-gray-200 py-2.5 text-xs font-medium text-gray-600 transition hover:bg-gray-50"
         >
           View Approval Tracking
         </RouterLink>
@@ -130,7 +130,7 @@
       <!-- Candidate Pipeline -->
       <div
         v-if="showRecruitmentPanel"
-        class="rounded-3xl border border-gray-200 bg-white shadow-sm"
+        class="rounded-xl border border-gray-200 bg-white shadow-sm"
       >
         <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4">
           <div class="flex items-center gap-2">
@@ -169,7 +169,7 @@
 
       <!-- Quick Access -->
       <div
-        class="rounded-3xl border border-gray-200 bg-white shadow-sm"
+        class="rounded-xl border border-gray-200 bg-white shadow-sm"
         :class="showRecruitmentPanel ? '' : 'lg:col-span-2'"
       >
         <div class="flex items-center gap-2 border-b border-gray-100 px-6 py-4">
@@ -181,7 +181,7 @@
             v-for="card in quickLinks"
             :key="card.to"
             :to="card.to"
-            class="flex flex-col items-start gap-2.5 rounded-2xl border border-gray-100 bg-gray-50 p-4 transition hover:border-blue-200 hover:bg-blue-50"
+            class="flex flex-col items-start gap-2.5 rounded-xl border border-gray-100 bg-gray-50 p-4 transition hover:border-blue-200 hover:bg-blue-50"
           >
             <div class="flex h-9 w-9 items-center justify-center rounded-xl" :class="card.bg">
               <component :is="card.icon" class="h-4 w-4" :class="card.color" />

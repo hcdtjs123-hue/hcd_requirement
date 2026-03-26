@@ -7,7 +7,7 @@
       </div>
       <button
         type="button"
-        class="rounded-2xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-blue-700"
+        class="rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-blue-700"
         @click="goToEdit"
       >
         Edit Configuration
@@ -16,7 +16,7 @@
 
     <p
       v-if="error"
-      class="rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800"
+      class="rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800"
     >
       {{ error }}
     </p>
@@ -26,13 +26,13 @@
     <div v-else class="grid gap-6 md:grid-cols-2">
       <!-- GM HRD Card -->
       <div 
-        class="group relative overflow-hidden rounded-3xl border border-gray-200 bg-white p-8 shadow-sm transition hover:shadow-xl hover:border-blue-200"
+        class="group relative overflow-hidden rounded-xl border border-gray-200 bg-white p-8 shadow-sm transition hover:shadow-xl hover:border-blue-200"
       >
         <div class="absolute right-0 top-0 h-24 w-24 translate-x-8 translate-y--8 rounded-full bg-blue-50 opacity-50 transition group-hover:scale-150"></div>
         
         <div class="relative items-start justify-between flex mb-6">
           <div class="flex items-center gap-3">
-            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100 text-blue-600">
+            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
               <span class="text-xl font-bold">1</span>
             </div>
             <div>
@@ -77,13 +77,13 @@
 
       <!-- Director HRD Card -->
       <div 
-        class="group relative overflow-hidden rounded-3xl border border-gray-200 bg-white p-8 shadow-sm transition hover:shadow-xl hover:border-indigo-200"
+        class="group relative overflow-hidden rounded-xl border border-gray-200 bg-white p-8 shadow-sm transition hover:shadow-xl hover:border-indigo-200"
       >
         <div class="absolute right-0 top-0 h-24 w-24 translate-x-8 translate-y--8 rounded-full bg-indigo-50 opacity-50 transition group-hover:scale-150"></div>
         
         <div class="relative items-start justify-between flex mb-6">
           <div class="flex items-center gap-3">
-            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-600">
+            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600">
               <span class="text-xl font-bold">2</span>
             </div>
             <div>
@@ -128,7 +128,7 @@
     </div>
 
     <!-- Info Section -->
-    <div class="rounded-3xl border border-blue-50 bg-blue-50/30 p-8 flex gap-4">
+    <div class="rounded-xl border border-blue-50 bg-blue-50/30 p-8 flex gap-4">
       <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600">ℹ</div>
       <div>
         <h3 class="font-bold text-blue-900">Configuration Guide</h3>

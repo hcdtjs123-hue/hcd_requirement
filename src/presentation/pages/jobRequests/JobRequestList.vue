@@ -7,7 +7,7 @@
       </div>
       <button
         type="button"
-        class="rounded-2xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
+        class="rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
         @click="goToCreate"
       >
         Create ERF
@@ -16,13 +16,13 @@
 
     <p
       v-if="error"
-      class="rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800"
+      class="rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800"
     >
       {{ error }}
     </p>
 
     <section class="max-w-full">
-      <div class="rounded-3xl border border-gray-200 bg-gray-50 p-5">
+      <div class="rounded-xl border border-gray-200 bg-gray-50 p-5">
         <div class="mb-4 flex items-center justify-between">
           <h2 class="text-xl font-semibold">Request List</h2>
           <button
@@ -41,20 +41,20 @@
                 v-model="searchQuery"
                 type="search"
                 placeholder="Search position, site, approval..."
-              class="h-11 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm outline-none focus:border-blue-600"
+              class="h-11 w-full rounded-xl border border-gray-200 bg-white px-4 text-sm outline-none focus:border-blue-600"
             />
           </div>
           <div class="flex flex-wrap items-center gap-2">
             <select
               v-model="siteFilter"
-              class="h-11 rounded-2xl border border-gray-200 bg-white px-3 text-sm outline-none focus:border-blue-600"
+              class="h-11 rounded-xl border border-gray-200 bg-white px-3 text-sm outline-none focus:border-blue-600"
             >
               <option value="">All Sites</option>
               <option v-for="opt in siteOptions" :key="opt" :value="opt">{{ opt }}</option>
             </select>
             <select
               v-model="positionStatusFilter"
-              class="h-11 rounded-2xl border border-gray-200 bg-white px-3 text-sm outline-none focus:border-blue-600"
+              class="h-11 rounded-xl border border-gray-200 bg-white px-3 text-sm outline-none focus:border-blue-600"
             >
               <option value="">All Position Statuses</option>
               <option v-for="opt in positionStatusOptions" :key="opt" :value="opt">
@@ -63,7 +63,7 @@
             </select>
             <select
               v-model="employmentFilter"
-              class="h-11 rounded-2xl border border-gray-200 bg-white px-3 text-sm outline-none focus:border-blue-600"
+              class="h-11 rounded-xl border border-gray-200 bg-white px-3 text-sm outline-none focus:border-blue-600"
             >
               <option value="">All Employment</option>
               <option v-for="opt in employmentOptions" :key="opt" :value="opt">{{ opt }}</option>
@@ -71,7 +71,7 @@
           </div>
         </div>
 
-        <div class="rounded-2xl border border-gray-200 bg-white overflow-hidden">
+        <div class="rounded-xl border border-gray-200 bg-white overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full text-left text-sm text-gray-600">
               <thead class="bg-gray-50 text-xs uppercase text-gray-500">
@@ -192,14 +192,14 @@
 
   <!-- Close ERF Modal -->
   <div v-if="showCloseModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-    <div class="w-full max-w-md rounded-3xl bg-white p-6 shadow-xl">
+    <div class="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
       <h3 class="mb-4 text-xl font-semibold text-gray-900 text-center">Close ERF</h3>
       <p class="mb-6 text-sm text-gray-600 text-center">Please provide a reason for closing this employee request form.</p>
       
       <form @submit.prevent="handleClose" class="space-y-4">
         <label class="block space-y-2">
           <span class="text-sm font-medium text-gray-700">Category *</span>
-          <select v-model="closeForm.category" required class="w-full h-11 rounded-2xl border border-gray-200 bg-white px-4 text-sm outline-none focus:border-blue-600">
+          <select v-model="closeForm.category" required class="w-full h-11 rounded-xl border border-gray-200 bg-white px-4 text-sm outline-none focus:border-blue-600">
             <option value="" disabled>Select category</option>
             <option value="employee hired">Employee Hired</option>
             <option value="canceled">Canceled</option>
@@ -212,7 +212,7 @@
             v-model="closeForm.reason"
             required
             placeholder="Why is this ERF being closed?"
-            class="w-full min-h-[120px] rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-blue-600 resize-none"
+            class="w-full min-h-[120px] rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-blue-600 resize-none"
           ></textarea>
         </label>
 
@@ -220,14 +220,14 @@
           <button
             type="button"
             @click="showCloseModal = false"
-            class="flex-1 rounded-2xl border border-gray-200 bg-white py-3 text-sm font-semibold text-gray-600 transition hover:bg-gray-50"
+            class="flex-1 rounded-xl border border-gray-200 bg-white py-3 text-sm font-semibold text-gray-600 transition hover:bg-gray-50"
           >
             Cancel
           </button>
           <button
             type="submit"
             :disabled="saving"
-            class="flex-1 rounded-2xl bg-red-600 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-60"
+            class="flex-1 rounded-xl bg-red-600 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-60"
           >
             {{ saving ? 'Closing...' : 'Close ERF' }}
           </button>

@@ -1,6 +1,6 @@
 <template>
   <div class="flex min-h-screen items-start justify-center bg-gray-50 px-4 py-12">
-    <div class="w-full max-w-lg rounded-3xl border border-gray-200 bg-white p-8 text-center shadow-sm">
+    <div class="w-full max-w-lg rounded-xl border border-gray-200 bg-white p-8 text-center shadow-sm">
       <template v-if="outcome === 'approved'">
         <div
           class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500 text-2xl text-white"

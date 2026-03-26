@@ -16,7 +16,7 @@
       <div
         v-show="open"
         ref="menuEl"
-        class="fixed z-[9999] w-56 rounded-2xl border border-gray-200 bg-white p-1 shadow-lg shadow-gray-200"
+        class="fixed z-[9999] w-56 rounded-xl border border-gray-200 bg-white p-1 shadow-lg shadow-gray-200"
         :style="menuStyle"
         role="menu"
         @keydown.esc.prevent.stop="close"

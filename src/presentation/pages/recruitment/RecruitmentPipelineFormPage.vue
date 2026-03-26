@@ -3,7 +3,7 @@
     <div class="flex items-center gap-4">
       <button
         type="button"
-        class="flex h-10 w-10 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-50"
+        class="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-50"
         @click="router.back()"
       >
         ←
@@ -18,7 +18,7 @@
 
     <p
       v-if="error"
-      class="rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800"
+      class="rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800"
     >
       {{ error }}
     </p>
@@ -29,7 +29,7 @@
 
     <template v-else>
       <!-- Create Invitation Form -->
-      <section v-if="!isEdit" class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+      <section v-if="!isEdit" class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
         <form class="grid gap-4 md:grid-cols-2" @submit.prevent="handleCreateInvitation">
           <label class="space-y-2">
             <span class="text-sm font-medium text-gray-700">Full Name *</span>
@@ -55,14 +55,14 @@
           <div class="flex gap-3 pt-4 border-t border-gray-100 md:col-span-2">
             <button
               type="submit"
-              class="rounded-2xl bg-blue-600 px-8 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
+              class="rounded-xl bg-blue-600 px-8 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
               :disabled="saving"
             >
               {{ saving ? 'Saving...' : 'Add Candidate' }}
             </button>
             <button
               type="button"
-              class="rounded-2xl border border-gray-200 px-8 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
+              class="rounded-xl border border-gray-200 px-8 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
               :disabled="saving"
               @click="router.back()"
             >
@@ -74,11 +74,11 @@
 
       <!-- Selected Invitation Detail -->
       <section v-else-if="selectedInvitation" class="space-y-6">
-        <div class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
           <h2 class="mb-4 text-xl font-semibold">{{ selectedInvitation.candidate_name }}</h2>
 
           <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <div class="rounded-2xl bg-gray-50 px-4 py-3">
+            <div class="rounded-xl bg-gray-50 px-4 py-3">
               <p class="text-xs uppercase tracking-wider text-gray-500 font-medium">Email</p>
               <p
                 class="mt-1 text-sm font-medium truncate"
@@ -87,13 +87,13 @@
                 {{ selectedInvitation.candidate_email }}
               </p>
             </div>
-            <div class="rounded-2xl bg-gray-50 px-4 py-3">
+            <div class="rounded-xl bg-gray-50 px-4 py-3">
               <p class="text-xs uppercase tracking-wider text-gray-500 font-medium">Status</p>
               <p class="mt-1 text-sm font-medium text-blue-700">
                 {{ invStatusLabel(selectedInvitation.status) }}
               </p>
             </div>
-            <div class="rounded-2xl bg-gray-50 px-4 py-3">
+            <div class="rounded-xl bg-gray-50 px-4 py-3">
               <p class="text-xs uppercase tracking-wider text-gray-500 font-medium">
                 Credential Sent
               </p>
@@ -101,7 +101,7 @@
                 {{ formatDate(selectedInvitation.credential_sent_at) }}
               </p>
             </div>
-            <div class="rounded-2xl bg-gray-50 px-4 py-3">
+            <div class="rounded-xl bg-gray-50 px-4 py-3">
               <p class="text-xs uppercase tracking-wider text-gray-500 font-medium">
                 Form Progress
               </p>
@@ -121,7 +121,7 @@
         <!-- Send Credentials -->
         <div
           v-if="selectedInvitation.status === 'invited'"
-          class="rounded-3xl border border-blue-200 bg-blue-50/50 p-6 shadow-sm"
+          class="rounded-xl border border-blue-200 bg-blue-50/50 p-6 shadow-sm"
         >
           <h3 class="mb-4 text-lg font-semibold text-blue-900">
             Send Application Form Credentials
@@ -129,13 +129,13 @@
           <div class="flex flex-col sm:flex-row gap-3">
             <input
               v-model="credentialUserId"
-              class="flex-1 rounded-2xl border border-blue-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              class="flex-1 rounded-xl border border-blue-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               type="text"
               placeholder="User ID (from the admin panel for candidate sign-in)"
             />
             <button
               type="button"
-              class="rounded-2xl bg-blue-600 px-8 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
+              class="rounded-xl bg-blue-600 px-8 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
               :disabled="saving || !credentialUserId"
               @click="handleSendCredentials"
             >
@@ -145,7 +145,7 @@
         </div>
 
         <!-- Schedule Interview -->
-        <div class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
           <h3 class="mb-4 text-lg font-semibold text-gray-900">Schedule Interview</h3>
           <form class="grid gap-4 md:grid-cols-2" @submit.prevent="handleScheduleInterview">
             <label class="space-y-2">
@@ -182,7 +182,7 @@
             <div class="pt-2 md:col-span-2">
               <button
                 type="submit"
-                class="rounded-2xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
+                class="rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
                 :disabled="saving"
               >
                 Send Interview Link
@@ -199,7 +199,7 @@
             <div
               v-for="interview in selectedInvitation.interviews"
               :key="interview.id"
-              class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-gray-200 bg-gray-50 px-5 py-4"
+              class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-gray-200 bg-gray-50 px-5 py-4"
             >
               <div class="flex-1">
                 <p class="text-sm font-medium text-gray-900">

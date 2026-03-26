@@ -10,7 +10,7 @@
       </div>
       <button
         type="button"
-        class="rounded-2xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
+        class="rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
         :disabled="loading"
         @click="goToCreate"
       >
@@ -20,14 +20,14 @@
 
     <p
       v-if="error"
-      class="rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800"
+      class="rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800"
     >
       {{ error }}
     </p>
 
     <!-- Roles List -->
     <section class="max-w-5xl">
-      <div class="rounded-3xl border border-gray-200 bg-gray-50 p-5">
+      <div class="rounded-xl border border-gray-200 bg-gray-50 p-5">
         <div class="mb-4 flex items-center justify-between">
           <h2 class="text-xl font-semibold">Role List</h2>
           <button
@@ -45,11 +45,11 @@
             v-model="searchQuery"
             type="search"
             placeholder="Search nama role, deskripsi, permission..."
-            class="h-11 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm outline-none focus:border-blue-600"
+            class="h-11 w-full rounded-xl border border-gray-200 bg-white px-4 text-sm outline-none focus:border-blue-600"
           />
           <select
             v-model="permissionFilter"
-            class="h-11 w-full rounded-2xl border border-gray-200 bg-white px-3 text-sm outline-none focus:border-blue-600 sm:w-64"
+            class="h-11 w-full rounded-xl border border-gray-200 bg-white px-3 text-sm outline-none focus:border-blue-600 sm:w-64"
           >
             <option value="">All</option>
             <option value="with">With permissions</option>
@@ -57,7 +57,7 @@
           </select>
         </div>
 
-        <div class="rounded-2xl border border-gray-200 bg-white overflow-hidden">
+        <div class="rounded-xl border border-gray-200 bg-white overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full text-left text-sm text-gray-600">
               <thead class="bg-gray-50 text-xs uppercase text-gray-500">

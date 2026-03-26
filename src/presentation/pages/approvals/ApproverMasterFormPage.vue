@@ -3,7 +3,7 @@
     <div class="flex items-center gap-4">
       <button
         type="button"
-        class="flex h-10 w-10 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-50"
+        class="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-50"
         @click="router.back()"
       >
         ←
@@ -16,7 +16,7 @@
 
     <p
       v-if="error"
-      class="rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800"
+      class="rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800"
     >
       {{ error }}
     </p>
@@ -25,7 +25,7 @@
 
     <form v-else class="space-y-8 font-inter" @submit.prevent="handleSubmit">
       <!-- Section 1: GM HRD -->
-      <section class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+      <section class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
         <div class="mb-5 flex items-center gap-3">
           <span class="h-8 w-1 rounded-full bg-purple-500"></span>
           <h2 class="text-lg font-semibold text-gray-800">1. GM HRD</h2>
@@ -50,7 +50,7 @@
               />
               <ul
                 v-show="isGmDropdownOpen && filteredGmEmployees.length > 0"
-                class="absolute z-20 mt-1 max-h-52 w-full overflow-auto rounded-2xl border border-gray-200 bg-white shadow-xl"
+                class="absolute z-20 mt-1 max-h-52 w-full overflow-auto rounded-xl border border-gray-200 bg-white shadow-xl"
               >
                 <li
                   v-for="emp in filteredGmEmployees"
@@ -64,7 +64,7 @@
             </div>
           </label>
           
-          <div v-if="gmForm.employee_id" class="grid grid-cols-2 gap-4 rounded-2xl bg-gray-50 p-4 border border-gray-100">
+          <div v-if="gmForm.employee_id" class="grid grid-cols-2 gap-4 rounded-xl bg-gray-50 p-4 border border-gray-100">
             <div class="space-y-1">
               <p class="text-[10px] font-bold uppercase text-gray-400">Position</p>
               <p class="text-sm font-medium">{{ getSelectedEmployee('gm')?.rawPosition || '-' }}</p>
@@ -78,7 +78,7 @@
       </section>
 
       <!-- Section 2: Director HRD -->
-      <section class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+      <section class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
         <div class="mb-5 flex items-center gap-3">
           <span class="h-8 w-1 rounded-full bg-indigo-500"></span>
           <h2 class="text-lg font-semibold text-gray-800">2. Director HRD</h2>
@@ -103,7 +103,7 @@
               />
               <ul
                 v-show="isDirectorDropdownOpen && filteredDirectorEmployees.length > 0"
-                class="absolute z-20 mt-1 max-h-52 w-full overflow-auto rounded-2xl border border-gray-200 bg-white shadow-xl"
+                class="absolute z-20 mt-1 max-h-52 w-full overflow-auto rounded-xl border border-gray-200 bg-white shadow-xl"
               >
                 <li
                   v-for="emp in filteredDirectorEmployees"
@@ -117,7 +117,7 @@
             </div>
           </label>
 
-          <div v-if="directorForm.employee_id" class="grid grid-cols-2 gap-4 rounded-2xl bg-gray-50 p-4 border border-gray-100">
+          <div v-if="directorForm.employee_id" class="grid grid-cols-2 gap-4 rounded-xl bg-gray-50 p-4 border border-gray-100">
             <div class="space-y-1">
               <p class="text-[10px] font-bold uppercase text-gray-400">Position</p>
               <p class="text-sm font-medium">{{ getSelectedEmployee('director')?.rawPosition || '-' }}</p>
@@ -133,14 +133,14 @@
       <div class="flex gap-4 sticky bottom-4">
         <button
           type="submit"
-          class="flex-1 rounded-2xl bg-blue-600 px-6 py-4 text-sm font-bold text-white shadow-2xl transition hover:bg-blue-700 disabled:opacity-60"
+          class="flex-1 rounded-xl bg-blue-600 px-6 py-4 text-sm font-bold text-white shadow-2xl transition hover:bg-blue-700 disabled:opacity-60"
           :disabled="saving"
         >
           {{ saving ? 'Saving Changes...' : 'Save All Configuration' }}
         </button>
         <button
           type="button"
-          class="rounded-2xl border border-gray-200 bg-white px-8 py-4 text-sm font-semibold text-gray-700 shadow-md transition hover:bg-gray-50"
+          class="rounded-xl border border-gray-200 bg-white px-8 py-4 text-sm font-semibold text-gray-700 shadow-md transition hover:bg-gray-50"
           :disabled="saving"
           @click="router.back()"
         >

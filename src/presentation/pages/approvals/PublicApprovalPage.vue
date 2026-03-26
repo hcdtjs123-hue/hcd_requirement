@@ -2,14 +2,14 @@
   <div class="flex min-h-screen items-start justify-center bg-gray-50 px-4 py-12">
     <div class="w-full max-w-2xl">
       <!-- Loading -->
-      <div v-if="loading" class="rounded-3xl border border-gray-200 bg-white p-8 text-center">
+      <div v-if="loading" class="rounded-xl border border-gray-200 bg-white p-8 text-center">
         <p class="text-gray-600">Loading approval data...</p>
       </div>
 
       <!-- Error -->
       <div
         v-else-if="error && !chain"
-        class="rounded-3xl border border-red-200 bg-red-50 p-8 text-center"
+        class="rounded-xl border border-red-200 bg-red-50 p-8 text-center"
       >
         <h1 class="text-2xl font-semibold text-red-800">Invalid Link</h1>
         <p class="mt-3 text-red-700">{{ error }}</p>
@@ -18,7 +18,7 @@
       <!-- Success message -->
       <div
         v-else-if="success"
-        class="rounded-3xl border border-emerald-200 bg-emerald-50 p-8 text-center"
+        class="rounded-xl border border-emerald-200 bg-emerald-50 p-8 text-center"
       >
         <div
           class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500 text-2xl text-white"
@@ -30,7 +30,7 @@
       </div>
 
       <!-- Rejected message -->
-      <div v-else-if="rejected" class="rounded-3xl border border-red-200 bg-red-50 p-8 text-center">
+      <div v-else-if="rejected" class="rounded-xl border border-red-200 bg-red-50 p-8 text-center">
         <div
           class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-500 text-2xl text-white"
         >
@@ -43,7 +43,7 @@
       <!-- Already processed -->
       <div
         v-else-if="step && step.status !== 'pending'"
-        class="rounded-3xl border border-gray-200 bg-white p-8 text-center"
+        class="rounded-xl border border-gray-200 bg-white p-8 text-center"
       >
         <h1 class="text-2xl font-semibold text-gray-900">Already Processed</h1>
         <p class="mt-3 text-gray-600">
@@ -64,7 +64,7 @@
       <!-- Waiting for previous step -->
       <div
         v-else-if="step && !canApprove"
-        class="rounded-3xl border border-amber-200 bg-amber-50 p-8 text-center"
+        class="rounded-xl border border-amber-200 bg-amber-50 p-8 text-center"
       >
         <h1 class="text-2xl font-semibold text-amber-800">Waiting for Previous Approval</h1>
         <p class="mt-3 text-amber-700">
@@ -76,7 +76,7 @@
       <!-- Main Approval View -->
       <div v-else-if="chain && step" class="space-y-6">
         <!-- Header -->
-        <div class="rounded-3xl border border-gray-200 bg-white p-8">
+        <div class="rounded-xl border border-gray-200 bg-white p-8">
           <p class="text-sm uppercase tracking-[0.3em] text-blue-600">Approval Request</p>
           <h1 class="mt-3 text-3xl font-semibold tracking-tight text-gray-900">
             New Employee Application
@@ -85,7 +85,7 @@
             You are requested to review and approve the following request.
           </p>
 
-          <div class="mt-4 rounded-2xl bg-blue-50 px-4 py-3">
+          <div class="mt-4 rounded-xl bg-blue-50 px-4 py-3">
             <p class="text-sm text-blue-800">
               <span class="font-medium">Approver:</span>
               {{ step.approver_name || step.approver_email }} (Step {{ step.step_order }} dari
@@ -95,13 +95,13 @@
         </div>
 
         <!-- ERF Data -->
-        <div class="rounded-3xl border border-gray-200 bg-white p-8">
+        <div class="rounded-xl border border-gray-200 bg-white p-8">
           <h2 class="mb-6 text-xl font-semibold text-gray-900">ERF Details</h2>
           <div class="grid gap-4 md:grid-cols-2">
             <div
               v-for="field in jobRequestFields"
               :key="field.label"
-              class="rounded-2xl bg-gray-50 px-4 py-3"
+              class="rounded-xl bg-gray-50 px-4 py-3"
             >
               <p class="text-xs uppercase tracking-wider text-gray-500">{{ field.label }}</p>
               <p class="mt-1 font-medium text-gray-900">{{ field.value || '-' }}</p>
@@ -110,13 +110,13 @@
         </div>
 
         <!-- Other Steps Status -->
-        <div class="rounded-3xl border border-gray-200 bg-white p-8">
+        <div class="rounded-xl border border-gray-200 bg-white p-8">
           <h2 class="mb-4 text-xl font-semibold text-gray-900">Approval Status</h2>
           <div class="space-y-2">
             <div
               v-for="s in chain.steps"
               :key="s.id"
-              class="flex items-center gap-3 rounded-2xl border px-4 py-3"
+              class="flex items-center gap-3 rounded-xl border px-4 py-3"
               :class="s.id === step.id ? 'border-blue-300 bg-blue-50' : 'border-gray-200'"
             >
               <div
@@ -156,13 +156,13 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="rounded-3xl border border-gray-200 bg-white p-8">
+        <div class="rounded-xl border border-gray-200 bg-white p-8">
           <h2 class="mb-4 text-xl font-semibold text-gray-900">Notes & Decision</h2>
           <label class="block space-y-2">
             <span class="text-sm text-gray-600">Notes (optional)</span>
             <textarea
               v-model="notes"
-              class="w-full rounded-2xl border border-gray-200 bg-gray-50 p-4 text-gray-900 outline-none focus:border-blue-500"
+              class="w-full rounded-xl border border-gray-200 bg-gray-50 p-4 text-gray-900 outline-none focus:border-blue-500"
               rows="3"
               placeholder="Add notes if needed..."
             />
@@ -178,7 +178,7 @@
           <div class="mt-6 flex gap-3">
             <button
               type="button"
-              class="rounded-2xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
+              class="rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
               :disabled="saving"
               @click="handleApprove"
             >
@@ -186,7 +186,7 @@
             </button>
             <button
               type="button"
-              class="rounded-2xl border border-red-300 bg-red-50 px-6 py-3 text-sm font-semibold text-red-800 transition hover:bg-red-100 disabled:opacity-60"
+              class="rounded-xl border border-red-300 bg-red-50 px-6 py-3 text-sm font-semibold text-red-800 transition hover:bg-red-100 disabled:opacity-60"
               :disabled="saving"
               @click="handleReject"
             >

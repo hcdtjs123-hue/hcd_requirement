@@ -17,14 +17,14 @@
           aria-label="Navigation"
         >
           <div class="flex items-start justify-between gap-3">
-            <div class="rounded-3xl border border-gray-100 bg-gray-50/50 p-5">
+            <div class="rounded-xl border border-gray-100 bg-gray-50/50 p-5">
               <p class="text-[10px] uppercase tracking-[0.4em] font-bold text-blue-600">HCD Platform</p>
               <h1 class="mt-2 text-xl font-bold tracking-tight text-gray-900">HCD Workspace</h1>
             </div>
 
             <button
               type="button"
-              class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-gray-100 bg-gray-50 text-gray-900 transition hover:bg-gray-100"
+              class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-gray-100 bg-gray-50 text-gray-900 transition hover:bg-gray-100"
               @click="closeMobileSidebar"
               aria-label="Close menu"
             >
@@ -42,7 +42,7 @@
               <button
                 v-if="section.items.length > 0"
                 @click="toggleSection(section.label)"
-                class="flex w-full items-center justify-between rounded-2xl px-4 py-3 text-xs font-bold uppercase tracking-widest text-gray-400 transition hover:text-gray-900"
+                class="flex w-full items-center justify-between rounded-xl px-4 py-3 text-xs font-bold uppercase tracking-widest text-gray-400 transition hover:text-gray-900"
               >
                 <div class="flex items-center gap-3">
                    <component :is="section.icon" v-if="section.icon" class="h-4 w-4 shrink-0" />
@@ -86,7 +86,7 @@
           </nav>
 
           <footer class="mt-auto pt-6 border-t border-gray-50">
-             <div class="rounded-3xl border border-gray-100 bg-gray-50/50 p-4">
+             <div class="rounded-xl border border-gray-100 bg-gray-50/50 p-4">
               <p class="text-[10px] uppercase tracking-widest font-bold text-gray-400">Signed In</p>
               <p class="mt-2 break-all text-xs font-semibold text-gray-900">{{ user?.email ?? '-' }}</p>
               <p
@@ -104,7 +104,7 @@
       <aside
         class="hidden w-72 shrink-0 border-r border-gray-200 bg-gray-50/30 px-5 py-6 lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col"
       >
-        <div class="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm">
+        <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
           <p class="text-[10px] uppercase tracking-[0.4em] font-bold text-blue-600">HCD Platform</p>
           <h1 class="mt-2 text-xl font-extrabold tracking-tight text-gray-900">HCD Workspace</h1>
         </div>
@@ -114,7 +114,7 @@
             <!-- Section Header -->
             <button
               @click="toggleSection(section.label)"
-              class="flex w-full items-center justify-between rounded-2xl px-2 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 transition hover:text-gray-900"
+              class="flex w-full items-center justify-between rounded-xl px-2 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 transition hover:text-gray-900"
             >
               <div class="flex items-center gap-2">
                  <component :is="section.icon" v-if="section.icon" class="h-3.5 w-3.5" />
@@ -161,7 +161,7 @@
         </nav>
 
         <footer class="mt-6 pt-6 border-t border-gray-100">
-          <div class="rounded-3xl border border-gray-100 bg-white p-4 shadow-sm">
+          <div class="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
             <p class="text-[10px] uppercase tracking-widest font-bold text-gray-400">Signed In</p>
             <p class="mt-2 break-all text-xs font-semibold text-gray-900">{{ user?.email ?? '-' }}</p>
             <div class="mt-3 flex items-center justify-between">
@@ -184,7 +184,7 @@
             <div class="flex min-w-0 items-start gap-4">
               <button
                 type="button"
-                class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-gray-200 bg-gray-50 text-gray-900 transition hover:bg-gray-100 lg:hidden"
+                class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-gray-200 bg-gray-50 text-gray-900 transition hover:bg-gray-100 lg:hidden"
                 @click="openMobileSidebar"
                 aria-label="Open menu"
               >
@@ -199,7 +199,7 @@
             <div class="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
               <button
                 type="button"
-                class="inline-flex h-11 items-center justify-center rounded-2xl border border-gray-200 bg-gray-50 px-5 text-sm font-bold text-gray-900 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
+                class="inline-flex h-11 items-center justify-center rounded-xl border border-gray-200 bg-gray-50 px-5 text-sm font-bold text-gray-900 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
                 :disabled="isLoading"
                 @click="handleLogout"
               >

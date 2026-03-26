@@ -3,7 +3,7 @@
     <div class="flex items-center gap-4">
       <button
         type="button"
-        class="flex h-10 w-10 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-50"
+        class="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-50"
         @click="router.back()"
       >
         ←
@@ -20,19 +20,19 @@
 
     <p
       v-if="error"
-      class="rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800"
+      class="rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800"
     >
       {{ error }}
     </p>
 
     <p
       v-if="isEditMode && !targetUser && !loading"
-      class="rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+      class="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800"
     >
       User not found.
     </p>
 
-    <section class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+    <section class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
       <form class="grid gap-5 md:grid-cols-2" @submit.prevent="handleSubmit">
         <label class="space-y-2 md:col-span-2">
           <span class="text-sm font-medium text-gray-700">Email *</span>
@@ -220,7 +220,7 @@
         <div class="mt-6 flex gap-3 md:col-span-2">
           <button
             type="submit"
-            class="rounded-2xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
+            class="rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
             :disabled="saving || loading || (isEditMode && !targetUser)"
           >
             {{
@@ -235,7 +235,7 @@
           </button>
           <button
             type="button"
-            class="rounded-2xl border border-gray-200 px-6 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
+            class="rounded-xl border border-gray-200 px-6 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
             :disabled="saving"
             @click="router.back()"
           >
@@ -246,7 +246,7 @@
 
       <div
         v-if="lastCreated && !isEditMode"
-        class="mt-8 rounded-2xl border border-emerald-200 bg-emerald-50 p-5"
+        class="mt-8 rounded-xl border border-emerald-200 bg-emerald-50 p-5"
       >
         <h3 class="mb-3 font-semibold text-emerald-800">✓ Account Created Successfully</h3>
         <div class="space-y-2 text-sm text-emerald-700">

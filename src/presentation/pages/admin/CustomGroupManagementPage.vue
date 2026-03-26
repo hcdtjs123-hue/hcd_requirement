@@ -23,7 +23,7 @@
     </div>
 
     <section class="max-w-4xl">
-      <div class="rounded-3xl border border-gray-200 bg-gray-50 p-5">
+      <div class="rounded-xl border border-gray-200 bg-gray-50 p-5">
         <div class="mb-6 flex items-center justify-between">
           <h2 class="text-xl font-semibold">Custom Group {{ activeTab }} List</h2>
           <button
@@ -39,7 +39,7 @@
         <div v-else-if="items.length === 0" class="py-10 text-center text-sm text-gray-500">
           No items found in Group {{ activeTab }}.
         </div>
-        <div v-else class="rounded-2xl border border-gray-200 bg-white overflow-hidden">
+        <div v-else class="rounded-xl border border-gray-200 bg-white overflow-hidden">
           <table class="w-full text-left text-sm">
             <thead class="bg-gray-50 text-xs uppercase text-gray-500">
               <tr>
@@ -67,7 +67,7 @@
 
     <!-- Modal (Simple) -->
     <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div class="w-full max-w-md rounded-3xl bg-white p-6 shadow-xl">
+      <div class="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
         <h3 class="mb-4 text-xl font-semibold">{{ editingItem ? 'Edit Item' : 'Add New Item' }}</h3>
         <form @submit.prevent="handleSubmit" class="space-y-4">
           <label class="block space-y-2">

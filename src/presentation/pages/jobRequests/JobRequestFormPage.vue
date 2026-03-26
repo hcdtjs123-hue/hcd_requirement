@@ -2,7 +2,7 @@
   <div class="mx-auto flex max-w-4xl flex-col gap-8 text-gray-900">
     <div class="flex items-center gap-4">
       <button type="button"
-        class="flex h-10 w-10 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-50"
+        class="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-50"
         @click="router.back()">
         ←
       </button>
@@ -14,11 +14,11 @@
       </div>
     </div>
 
-    <p v-if="error" class="rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
+    <p v-if="error" class="rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
       {{ error }}
     </p>
 
-    <section class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+    <section class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
       <form v-if="!loading" class="grid gap-5 md:grid-cols-2" @submit.prevent="handleSubmit">
         <label class="space-y-2 md:col-span-2">
           <span class="text-sm font-medium text-gray-700">Cost Center PT</span>
@@ -58,7 +58,7 @@
             <input v-model="searchDirectManager" type="text" class="field" placeholder="Search for manager..."
               @focus="openManagerDropdown" @input="openManagerDropdown" autocomplete="off" />
             <ul v-show="isManagerDropdownOpen && filteredDirectManagers.length > 0"
-              class="absolute z-20 mt-1 max-h-52 w-full overflow-auto rounded-2xl border border-gray-200 bg-white shadow-lg">
+              class="absolute z-20 mt-1 max-h-52 w-full overflow-auto rounded-xl border border-gray-200 bg-white shadow-lg">
               <li v-for="manager in filteredDirectManagers" :key="manager.id"
                 class="cursor-pointer px-4 py-2 hover:bg-blue-50" @click="selectManager(manager)">
                 {{ manager.label }}
@@ -73,7 +73,7 @@
               placeholder="Search for BU director..." @focus="openApprovalDirectorBuDropdown"
               @input="openApprovalDirectorBuDropdown" autocomplete="off" />
             <ul v-show="isApprovalDirectorBuOpen && filteredApprovalDirectorBu.length > 0"
-              class="absolute z-20 mt-1 max-h-52 w-full overflow-auto rounded-2xl border border-gray-200 bg-white shadow-lg">
+              class="absolute z-20 mt-1 max-h-52 w-full overflow-auto rounded-xl border border-gray-200 bg-white shadow-lg">
               <li v-for="manager in filteredApprovalDirectorBu" :key="`approval-${manager.id}`"
                 class="cursor-pointer px-4 py-2 hover:bg-blue-50" @click="selectApprovalDirectorBu(manager)">
                 {{ manager.label }}
@@ -95,7 +95,7 @@
         </label>
 
         <!-- Approval Auto Info Box -->
-        <div class="md:col-span-2 rounded-2xl border border-blue-100 bg-blue-50 px-5 py-4 flex gap-3">
+        <div class="md:col-span-2 rounded-xl border border-blue-100 bg-blue-50 px-5 py-4 flex gap-3">
           <div class="mt-0.5 text-blue-500 shrink-0">ℹ</div>
           <div>
             <p class="text-sm font-semibold text-blue-800">Automatic Approval</p>
@@ -121,12 +121,12 @@
 
         <div class="md:col-span-2 mt-6 flex gap-3">
           <button type="submit"
-            class="rounded-2xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
+            class="rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
             :disabled="saving">
             {{ saving ? 'Saving...' : isEdit ? 'Update ERF' : 'Save ERF' }}
           </button>
           <button type="button"
-            class="rounded-2xl border border-gray-200 px-6 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
+            class="rounded-xl border border-gray-200 px-6 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
             :disabled="saving" @click="router.back()">
             Cancel
           </button>

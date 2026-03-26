@@ -3,7 +3,7 @@
     <div class="flex items-center gap-4">
       <button
         type="button"
-        class="flex h-10 w-10 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-50"
+        class="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-50"
         @click="router.back()"
       >
         ←
@@ -18,12 +18,12 @@
 
     <p
       v-if="candidateError || jobRequestError"
-      class="rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800"
+      class="rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800"
     >
       {{ candidateError || jobRequestError }}
     </p>
 
-    <section class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+    <section class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
       <form v-if="!candidateLoading" class="space-y-8" @submit.prevent="handleSubmit">
         <section class="grid gap-4 md:grid-cols-2">
           <label class="space-y-2 md:col-span-2">
@@ -187,7 +187,7 @@
             <h3 class="text-xl font-semibold">Family & Emergency</h3>
             <button
               type="button"
-              class="rounded-2xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium transition hover:bg-gray-50"
+              class="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium transition hover:bg-gray-50"
               @click="addFamilyItem"
             >
               Add
@@ -197,7 +197,7 @@
             <div
               v-for="(item, index) in form.family_and_emergency"
               :key="`family-${index}`"
-              class="grid gap-4 rounded-2xl border border-gray-200 bg-gray-50 p-4 md:grid-cols-2"
+              class="grid gap-4 rounded-xl border border-gray-200 bg-gray-50 p-4 md:grid-cols-2"
             >
               <label class="space-y-2"
                 ><span class="text-sm font-medium text-gray-700">Name</span
@@ -247,7 +247,7 @@
             <h3 class="text-xl font-semibold">Education</h3>
             <button
               type="button"
-              class="rounded-2xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium transition hover:bg-gray-50"
+              class="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium transition hover:bg-gray-50"
               @click="addEducationItem"
             >
               Add
@@ -257,7 +257,7 @@
             <div
               v-for="(item, index) in form.education"
               :key="`education-${index}`"
-              class="grid gap-4 rounded-2xl border border-gray-200 bg-gray-50 p-4 md:grid-cols-2"
+              class="grid gap-4 rounded-xl border border-gray-200 bg-gray-50 p-4 md:grid-cols-2"
             >
               <label class="space-y-2"
                 ><span class="text-sm font-medium text-gray-700">Level</span
@@ -325,7 +325,7 @@
             <h3 class="text-xl font-semibold">Work History</h3>
             <button
               type="button"
-              class="rounded-2xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium transition hover:bg-gray-50"
+              class="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium transition hover:bg-gray-50"
               @click="addWorkHistoryItem"
             >
               Add
@@ -335,7 +335,7 @@
             <div
               v-for="(item, index) in form.work_history"
               :key="`work-${index}`"
-              class="grid gap-4 rounded-2xl border border-gray-200 bg-gray-50 p-4 md:grid-cols-2"
+              class="grid gap-4 rounded-xl border border-gray-200 bg-gray-50 p-4 md:grid-cols-2"
             >
               <label class="space-y-2"
                 ><span class="text-sm font-medium text-gray-700">Company</span
@@ -402,7 +402,7 @@
           <h3 class="text-xl font-semibold">Personal Statement</h3>
           <div class="grid gap-4 md:grid-cols-2">
             <label
-              class="flex items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 px-4 py-4"
+              class="flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-4"
             >
               <input
                 v-model="form.personal_statement.contract"
@@ -412,7 +412,7 @@
               <span class="text-sm font-medium text-gray-900">Willing to be contracted</span>
             </label>
             <label
-              class="flex items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 px-4 py-4"
+              class="flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-4"
             >
               <input
                 v-model="form.personal_statement.business_trip"
@@ -473,7 +473,7 @@
         <div class="flex gap-3 pt-6 border-t border-gray-100">
           <button
             type="submit"
-            class="rounded-2xl bg-blue-600 px-8 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
+            class="rounded-xl bg-blue-600 px-8 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
             :disabled="candidateSaving"
           >
             {{
@@ -486,7 +486,7 @@
           </button>
           <button
             type="button"
-            class="rounded-2xl border border-gray-200 px-8 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
+            class="rounded-xl border border-gray-200 px-8 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
             :disabled="candidateSaving"
             @click="router.back()"
           >

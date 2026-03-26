@@ -4,7 +4,7 @@
     <div class="flex items-center gap-4">
       <button
         type="button"
-        class="flex h-10 w-10 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-50"
+        class="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-50"
         @click="router.back()"
       >
         ←
@@ -19,7 +19,7 @@
 
     <p
       v-if="error"
-      class="rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800"
+      class="rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800"
     >
       {{ error }}
     </p>
@@ -31,7 +31,7 @@
 
     <form v-else @submit.prevent="handleSubmit" class="space-y-6">
       <!-- General Info -->
-      <section class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+      <section class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
         <h2 class="mb-4 text-xl font-semibold">Role Information</h2>
         <div class="grid gap-4 md:grid-cols-2">
           <label class="space-y-2">
@@ -62,7 +62,7 @@
       </section>
 
       <!-- Permissions Checklist -->
-      <section class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+      <section class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
         <div class="mb-6 border-b border-gray-100 pb-4 flex justify-between items-center">
           <div>
             <h2 class="text-xl font-semibold">Permission Settings</h2>
@@ -106,7 +106,7 @@
           </div>
 
           <!-- Modul Approval -->
-          <div class="space-y-3 rounded-2xl bg-gray-50 p-4 border border-gray-100">
+          <div class="space-y-3 rounded-xl bg-gray-50 p-4 border border-gray-100">
             <h3 class="font-medium text-gray-900 border-b border-gray-200 pb-2">Approval Module</h3>
             <div class="space-y-2">
               <label
@@ -129,7 +129,7 @@
           </div>
 
           <!-- Modul Rekrutmen -->
-          <div class="space-y-3 rounded-2xl bg-gray-50 p-4 border border-gray-100">
+          <div class="space-y-3 rounded-xl bg-gray-50 p-4 border border-gray-100">
             <h3 class="font-medium text-gray-900 border-b border-gray-200 pb-2">
               Recruitment Module
             </h3>
@@ -154,7 +154,7 @@
           </div>
 
           <!-- Modul Kandidat -->
-          <div class="space-y-3 rounded-2xl bg-gray-50 p-4 border border-gray-100">
+          <div class="space-y-3 rounded-xl bg-gray-50 p-4 border border-gray-100">
             <h3 class="font-medium text-gray-900 border-b border-gray-200 pb-2">
               Candidate Module
             </h3>
@@ -179,7 +179,7 @@
           </div>
 
           <!-- Modul Administrator / Others -->
-          <div class="space-y-3 rounded-2xl bg-gray-50 p-4 border border-gray-100">
+          <div class="space-y-3 rounded-xl bg-gray-50 p-4 border border-gray-100">
             <h3 class="font-medium text-gray-900 border-b border-gray-200 pb-2">
               Administration & Others
             </h3>
@@ -210,7 +210,7 @@
       <div class="flex items-center gap-4 pt-4 border-t border-gray-200">
         <button
           type="submit"
-          class="rounded-2xl bg-blue-600 px-8 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
+          class="rounded-xl bg-blue-600 px-8 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
           :disabled="saving"
         >
           {{ saving ? 'Saving...' : isEdit ? 'Save Access Changes' : 'Create Role' }}
