@@ -24,6 +24,12 @@ export interface ManagedUser {
   employment_start_date: string | null
   emergency_contact_name: string | null
   emergency_contact_phone: string | null
+  custom_grup_1_id: string | null
+  custom_grup_2_id: string | null
+  custom_grup_3_id: string | null
+  custom_grup_4_id: string | null
+  custom_grup_5_id: string | null
+  custom_grup_6_id: string | null
   is_active: boolean | null
   role: UserRole | null
   role_id: string | null
@@ -55,6 +61,12 @@ export interface CreateUserInput {
   employment_start_date?: string
   emergency_contact_name?: string
   emergency_contact_phone?: string
+  custom_grup_1_id: string | null
+  custom_grup_2_id: string | null
+  custom_grup_3_id: string | null
+  custom_grup_4_id: string | null
+  custom_grup_5_id: string | null
+  custom_grup_6_id: string | null
   is_active?: boolean
   role_id: string
 }
@@ -83,6 +95,12 @@ export interface UpdateUserInput {
   employment_start_date?: string
   emergency_contact_name?: string
   emergency_contact_phone?: string
+  custom_grup_1_id: string | null
+  custom_grup_2_id: string | null
+  custom_grup_3_id: string | null
+  custom_grup_4_id: string | null
+  custom_grup_5_id: string | null
+  custom_grup_6_id: string | null
   is_active?: boolean
   role_id: string
 }

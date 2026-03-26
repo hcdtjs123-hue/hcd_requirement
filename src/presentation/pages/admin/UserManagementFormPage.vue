@@ -207,6 +207,16 @@
           </select>
         </label>
 
+        <label v-for="index in 6" :key="index" class="space-y-2 text-gray-700">
+          <span class="text-sm font-medium">Custom Group {{ index }}</span>
+          <select v-model="form[`custom_grup_${index}_id` as keyof typeof form]" class="field">
+            <option :value="null">Pilih...</option>
+            <option v-for="opt in groupedOptions[index]" :key="opt.id" :value="opt.id">
+              {{ opt.name }}
+            </option>
+          </select>
+        </label>
+
         <div class="mt-6 flex gap-3 md:col-span-2">
           <button
             type="submit"
@@ -257,6 +267,7 @@ import { useRoute, useRouter } from 'vue-router'
 import type { CreateUserInput, UpdateUserInput } from '@/domain/entities/ManagedUser'
 import { useAppToast } from '@/presentation/components/feedback/useAppToast'
 import { useUserManagementViewModel } from '@/viewmodels/useUserManagementViewModel'
+import { useCustomGroupViewModel } from '@/viewmodels/useCustomGroupViewModel'
 
 type UserFormState = {
   email: string
@@ -278,12 +289,19 @@ type UserFormState = {
   blood_type: string
   no_id: string
   role_id: string
+  custom_grup_1_id: string | null
+  custom_grup_2_id: string | null
+  custom_grup_3_id: string | null
+  custom_grup_4_id: string | null
+  custom_grup_5_id: string | null
+  custom_grup_6_id: string | null
 }
 
 const router = useRouter()
 const route = useRoute()
 const { roles, users, loading, error, saving, createUser, updateUser, refreshUsers, refreshRoles } =
   useUserManagementViewModel()
+const { groupedOptions, loadAllOptions } = useCustomGroupViewModel()
 const appToast = useAppToast()
 
 const lastCreated = ref<{
@@ -317,6 +335,12 @@ function createEmptyForm(): UserFormState {
     blood_type: '',
     no_id: '',
     role_id: '',
+    custom_grup_1_id: null,
+    custom_grup_2_id: null,
+    custom_grup_3_id: null,
+    custom_grup_4_id: null,
+    custom_grup_5_id: null,
+    custom_grup_6_id: null,
   }
 }
 
@@ -343,6 +367,12 @@ function populateFormFromTarget() {
   form.blood_type = targetUser.value.blood_type ?? ''
   form.no_id = targetUser.value.no_id ?? ''
   form.role_id = targetUser.value.role_id ?? ''
+  form.custom_grup_1_id = targetUser.value.custom_grup_1_id ?? null
+  form.custom_grup_2_id = targetUser.value.custom_grup_2_id ?? null
+  form.custom_grup_3_id = targetUser.value.custom_grup_3_id ?? null
+  form.custom_grup_4_id = targetUser.value.custom_grup_4_id ?? null
+  form.custom_grup_5_id = targetUser.value.custom_grup_5_id ?? null
+  form.custom_grup_6_id = targetUser.value.custom_grup_6_id ?? null
 }
 
 function resetForm() {
@@ -357,6 +387,8 @@ async function loadDependencies() {
   if (users.value.length === 0 || (isEditMode.value && !targetUser.value)) {
     await refreshUsers()
   }
+
+  await loadAllOptions()
 
   if (isEditMode.value) {
     populateFormFromTarget()
@@ -396,6 +428,12 @@ async function handleSubmit() {
         blood_type: form.blood_type,
         no_id: form.no_id,
         role_id: form.role_id,
+        custom_grup_1_id: form.custom_grup_1_id,
+        custom_grup_2_id: form.custom_grup_2_id,
+        custom_grup_3_id: form.custom_grup_3_id,
+        custom_grup_4_id: form.custom_grup_4_id,
+        custom_grup_5_id: form.custom_grup_5_id,
+        custom_grup_6_id: form.custom_grup_6_id,
       }
 
       if (form.password.trim()) {
@@ -431,6 +469,12 @@ async function handleSubmit() {
       blood_type: form.blood_type,
       no_id: form.no_id,
       role_id: form.role_id,
+      custom_grup_1_id: form.custom_grup_1_id,
+      custom_grup_2_id: form.custom_grup_2_id,
+      custom_grup_3_id: form.custom_grup_3_id,
+      custom_grup_4_id: form.custom_grup_4_id,
+      custom_grup_5_id: form.custom_grup_5_id,
+      custom_grup_6_id: form.custom_grup_6_id,
     }
 
     await createUser(payload)

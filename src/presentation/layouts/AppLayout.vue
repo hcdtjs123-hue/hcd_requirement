@@ -267,6 +267,12 @@ const navigationSections: NavSection[] = [
         icon: ShieldCheck,
         permissions: ['role:manage'],
       },
+      {
+        to: '/custom-group-management',
+        label: 'Custom Groups',
+        icon: Settings,
+        permissions: ['user:read'],
+      },
     ],
   },
 ]
@@ -300,6 +306,7 @@ const pageTitle = computed(() => {
     { prefix: '/profile', title: 'Profile' },
     { prefix: '/user-management', title: 'User Management' },
     { prefix: '/role-management', title: 'Role Management' },
+    { prefix: '/custom-group-management', title: 'Custom Group Management' },
   ]
 
   const match = titleMatchers.find(

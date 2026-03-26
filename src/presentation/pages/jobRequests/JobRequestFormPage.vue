@@ -111,8 +111,12 @@
 
         <label v-for="index in 6" :key="index" class="space-y-2">
           <span class="text-sm font-medium text-gray-700">Custom Group {{ index }}</span>
-          <input v-model="form[`custom_grup_${index}` as keyof typeof form]" class="field" type="text"
-            placeholder="..." />
+          <select v-model="form[`custom_grup_${index}_id` as keyof typeof form]" class="field">
+            <option :value="null">Pilih...</option>
+            <option v-for="opt in groupedOptions[index]" :key="opt.id" :value="opt.id">
+              {{ opt.name }}
+            </option>
+          </select>
         </label>
 
         <div class="md:col-span-2 mt-6 flex gap-3">
@@ -144,11 +148,13 @@ import {
 } from '@/domain/entities/JobRequest'
 import { useAppToast } from '@/presentation/components/feedback/useAppToast'
 import { useJobRequestViewModel } from '@/viewmodels/useJobRequestViewModel'
+import { useCustomGroupViewModel } from '@/viewmodels/useCustomGroupViewModel'
 import { supabase } from '@/infrastructure/supabase/client'
 
 const route = useRoute()
 const router = useRouter()
 const { jobs, loading, saving, error, create, update, refresh } = useJobRequestViewModel()
+const { groupedOptions, loadAllOptions } = useCustomGroupViewModel()
 const appToast = useAppToast()
 
 const id = computed(() => route.params.id as string | undefined)
@@ -165,12 +171,12 @@ function createEmptyForm(): JobRequestInput {
     approval_director_bu_date: '',
     site: '',
     working_location: '',
-    custom_grup_1: '',
-    custom_grup_2: '',
-    custom_grup_3: '',
-    custom_grup_4: '',
-    custom_grup_5: '',
-    custom_grup_6: '',
+    custom_grup_1_id: null,
+    custom_grup_2_id: null,
+    custom_grup_3_id: null,
+    custom_grup_4_id: null,
+    custom_grup_5_id: null,
+    custom_grup_6_id: null,
     required_date: '',
     periode_probation: 0,
   }
@@ -266,12 +272,12 @@ function loadData() {
         approval_director_bu_date: job.approval_director_bu_date ?? '',
         site: job.site ?? '',
         working_location: job.working_location ?? '',
-        custom_grup_1: job.custom_grup_1 ?? '',
-        custom_grup_2: job.custom_grup_2 ?? '',
-        custom_grup_3: job.custom_grup_3 ?? '',
-        custom_grup_4: job.custom_grup_4 ?? '',
-        custom_grup_5: job.custom_grup_5 ?? '',
-        custom_grup_6: job.custom_grup_6 ?? '',
+        custom_grup_1_id: job.custom_grup_1_id ?? null,
+        custom_grup_2_id: job.custom_grup_2_id ?? null,
+        custom_grup_3_id: job.custom_grup_3_id ?? null,
+        custom_grup_4_id: job.custom_grup_4_id ?? null,
+        custom_grup_5_id: job.custom_grup_5_id ?? null,
+        custom_grup_6_id: job.custom_grup_6_id ?? null,
         required_date: job.required_date ?? '',
         periode_probation: job.periode_probation ?? 0,
       })
@@ -289,6 +295,7 @@ watch(() => jobs.value, loadData, { immediate: true })
 onMounted(() => {
   if (isEdit.value && jobs.value.length === 0) refresh()
   loadDirectManagers()
+  loadAllOptions()
   document.addEventListener('click', handleClickOutside)
 })
 

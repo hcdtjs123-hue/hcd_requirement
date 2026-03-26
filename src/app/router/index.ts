@@ -155,6 +155,12 @@ const router = createRouter({
           meta: { requiredPermissions: ['user:update'] },
         },
         {
+          path: 'custom-group-management',
+          name: 'custom-group-management',
+          component: () => import('@/presentation/pages/admin/CustomGroupManagementPage.vue'),
+          meta: { requiredPermissions: ['user:read'] },
+        },
+        {
           path: 'role-management',
           name: 'role-management',
           component: () => import('@/presentation/pages/role/RoleManagementPage.vue'),

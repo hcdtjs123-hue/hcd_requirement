@@ -22,12 +22,12 @@ export interface JobRequest {
   approval_director_hrd_date: string | null
   site: string | null
   working_location: string | null
-  custom_grup_1: string | null
-  custom_grup_2: string | null
-  custom_grup_3: string | null
-  custom_grup_4: string | null
-  custom_grup_5: string | null
-  custom_grup_6: string | null
+  custom_grup_1_id: string | null
+  custom_grup_2_id: string | null
+  custom_grup_3_id: string | null
+  custom_grup_4_id: string | null
+  custom_grup_5_id: string | null
+  custom_grup_6_id: string | null
   required_date: string | null
   position_status: PositionStatus | null
   periode_probation: number | null
@@ -45,12 +45,12 @@ export interface JobRequestInput {
   approval_director_bu_date?: string
   site: string
   working_location: string
-  custom_grup_1: string
-  custom_grup_2: string
-  custom_grup_3: string
-  custom_grup_4: string
-  custom_grup_5: string
-  custom_grup_6: string
+  custom_grup_1_id: string | null
+  custom_grup_2_id: string | null
+  custom_grup_3_id: string | null
+  custom_grup_4_id: string | null
+  custom_grup_5_id: string | null
+  custom_grup_6_id: string | null
   required_date: string
   position_status: PositionStatus | ""
   periode_probation: number | null
