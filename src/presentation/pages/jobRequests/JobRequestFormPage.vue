@@ -24,6 +24,15 @@
           <span class="text-sm font-medium text-gray-700">Cost Center PT</span>
           <input v-model="form.pt_pembebanan" class="field" type="text" placeholder="Enter PT" />
         </label>
+        <label class="space-y-2 md:col-span-2">
+          <span class="text-sm font-medium text-gray-700">Department</span>
+          <input
+            v-model="form.department"
+            class="field"
+            type="text"
+            placeholder="Enter department"
+          />
+        </label>
         <label class="space-y-2">
           <span class="text-sm font-medium text-gray-700">Main Position *</span>
           <input v-model="form.main_position" class="field" type="text" required
@@ -163,10 +172,12 @@ const isEdit = computed(() => !!id.value)
 function createEmptyForm(): JobRequestInput {
   return {
     pt_pembebanan: '',
+    department: '',
     main_position: '',
     employment_status: '',
     position_status: '',
     direct_manager: '',
+    approval_director_bu_id: null,
     approval_director_bu: '',
     approval_director_bu_date: '',
     site: '',
@@ -225,6 +236,7 @@ async function loadDirectManagers() {
       .join(' ')
       .trim()
     const position = employee.main_position ?? 'Unknown position'
+
     return {
       id: employee.id,
       label: `${fullName || 'Unnamed'} — ${position}`,
@@ -246,6 +258,7 @@ function closeApprovalDirectorBuDropdown() { isApprovalDirectorBuOpen.value = fa
 
 function selectApprovalDirectorBu(manager: DirectManagerOption) {
   searchApprovalDirectorBu.value = manager.label
+  form.approval_director_bu_id = manager.id
   form.approval_director_bu = manager.label
   isApprovalDirectorBuOpen.value = false
 }
@@ -265,10 +278,12 @@ function loadData() {
     if (job) {
       Object.assign(form, {
         pt_pembebanan: job.pt_pembebanan ?? '',
+        department: job.department ?? '',
         main_position: job.main_position,
         employment_status: job.employment_status ?? '',
         position_status: job.position_status ?? '',
         direct_manager: job.direct_manager ?? '',
+        approval_director_bu_id: job.approval_director_bu_id ?? null,
         approval_director_bu: job.approval_director_bu ?? '',
         approval_director_bu_date: job.approval_director_bu_date ?? '',
         site: job.site ?? '',

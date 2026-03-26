@@ -26,7 +26,7 @@ export class JobRequestRepositoryImpl implements JobRequestRepository {
       throw new Error(error.message)
     }
 
-    return (data ?? []).map(this.flattenCustomGroups)
+    return this.attachCreatorNames((data ?? []).map(this.flattenCustomGroups))
   }
 
   async getById(id: string): Promise<JobRequest | null> {
@@ -51,7 +51,10 @@ export class JobRequestRepositoryImpl implements JobRequestRepository {
       throw new Error(error.message)
     }
 
-    return data ? this.flattenCustomGroups(data) : null
+    if (!data) return null
+
+    const [job] = await this.attachCreatorNames([this.flattenCustomGroups(data)])
+    return job ?? null
   }
 
   private flattenCustomGroups(item: any): JobRequest {
@@ -64,6 +67,40 @@ export class JobRequestRepositoryImpl implements JobRequestRepository {
       custom_grup_5: item.custom_grup_5?.name ?? null,
       custom_grup_6: item.custom_grup_6?.name ?? null,
     }
+  }
+
+  private async attachCreatorNames(items: JobRequest[]): Promise<JobRequest[]> {
+    const creatorIds = Array.from(new Set(items.map((item) => item.created_by).filter(Boolean)))
+
+    if (creatorIds.length === 0) {
+      return items
+    }
+
+    const { data: creators, error } = await supabase
+      .from('employees')
+      .select('id, first_name, middle_name, last_name')
+      .in('id', creatorIds)
+
+    if (error) {
+      throw new Error(error.message)
+    }
+
+    const creatorNameMap = new Map<string, string>()
+    for (const creator of creators ?? []) {
+      const fullName = [creator.first_name, creator.middle_name, creator.last_name]
+        .filter(Boolean)
+        .join(' ')
+        .trim()
+
+      if (fullName) {
+        creatorNameMap.set(creator.id, fullName)
+      }
+    }
+
+    return items.map((item) => ({
+      ...item,
+      created_by_name: item.created_by ? creatorNameMap.get(item.created_by) ?? null : null,
+    }))
   }
 
   async create(data: JobRequestInput): Promise<JobRequest> {
@@ -116,15 +153,21 @@ export class JobRequestRepositoryImpl implements JobRequestRepository {
       throw new Error(error.message)
     }
 
-    // Automatically trigger approval chain
-    try {
-      if (created) {
+    // Automatically trigger approval chain.
+    // If approval or email delivery fails, surface the error so the user knows
+    // the ERF did not enter the approval flow correctly.
+    if (created) {
+      try {
         await approvalRepo.submitForApproval({ job_request_id: created.id })
+      } catch (err) {
+        console.error('Failed to start approval chain:', err)
+
+        const message = err instanceof Error
+          ? err.message
+          : 'Failed to start ERF approval flow.'
+
+        throw new Error(`ERF was saved, but approval flow could not start: ${message}`)
       }
-    } catch (err) {
-      console.error('Failed to start approval chain:', err)
-      // We don't throw here to avoid failing the Job Request creation itself,
-      // but in production we might want more robust error handling.
     }
 
     return created
@@ -232,8 +275,10 @@ export class JobRequestRepositoryImpl implements JobRequestRepository {
   private mapInput(data: JobRequestInput) {
     return {
       pt_pembebanan: data.pt_pembebanan || null,
+      department: data.department || null,
       employment_status: data.employment_status || null,
       direct_manager: data.direct_manager || null,
+      approval_director_bu_id: data.approval_director_bu_id || null,
       approval_director_bu: data.approval_director_bu || null,
       approval_director_bu_date: data.approval_director_bu_date || null,
       site: data.site || null,

@@ -12,8 +12,10 @@ export type PositionStatus = (typeof positionStatusOptions)[number]
 export interface JobRequest {
   id: string
   pt_pembebanan: string | null
+  department: string | null
   employment_status: EmploymentStatus | null
   direct_manager: string | null
+  approval_director_bu_id: string | null
   approval_director_bu: string | null
   approval_director_bu_date: string | null
   approval_gm_hrd: string | null
@@ -39,6 +41,7 @@ export interface JobRequest {
   periode_probation: number | null
   main_position: string | null
   created_by: string | null
+  created_by_name?: string | null
   status: 'open' | 'closed'
   closed_date: string | null
   closed_category: 'employee hired' | 'canceled' | null
@@ -49,8 +52,10 @@ export interface JobRequest {
 
 export interface JobRequestInput {
   pt_pembebanan: string
+  department: string
   employment_status: EmploymentStatus | ""
   direct_manager: string
+  approval_director_bu_id: string | null
   approval_director_bu?: string
   approval_director_bu_date?: string
   site: string

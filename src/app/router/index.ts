@@ -143,6 +143,12 @@ const router = createRouter({
           meta: { requiredPermissions: ['user:read'] },
         },
         {
+          path: 'user-management/history',
+          name: 'user-history',
+          component: () => import('@/presentation/pages/admin/UserHistoryPage.vue'),
+          meta: { requiredPermissions: ['user:read'] },
+        },
+        {
           path: 'user-management/create',
           name: 'user-management-create',
           component: () => import('@/presentation/pages/admin/UserManagementFormPage.vue'),

@@ -163,6 +163,7 @@ import { supabase } from '@/infrastructure/supabase/client'
 const router = useRouter()
 const { approvers, loading, error, saving, create, update, refresh } = useApproverMasterViewModel()
 const appToast = useAppToast()
+const isSubmittingConfig = ref(false)
 
 // Employee selection state
 const employees = ref<EmployeeOption[]>([])
@@ -190,6 +191,8 @@ function createEmptyForm(step: number): ApproverMasterInput & { id?: string } {
 
 const gmForm = reactive(createEmptyForm(1))
 const directorForm = reactive(createEmptyForm(2))
+
+type ApproverFormState = ApproverMasterInput & { id?: string }
 
 async function loadEmployees() {
   const { data, error } = await supabase
@@ -247,6 +250,8 @@ function handleClickOutside(event: MouseEvent) {
 }
 
 function loadData() {
+  if (isSubmittingConfig.value) return
+
   if (!loading.value && approvers.value.length > 0) {
     const gm = approvers.value.find((a) => a.step_order === 1)
     if (gm) {
@@ -288,7 +293,7 @@ onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside)
 })
 
-async function saveRecord(form: any) {
+async function saveRecord(form: ApproverFormState) {
   const { id, ...data } = form
   if (!data.employee_id) return // Skip if no employee selected
   
@@ -306,14 +311,31 @@ async function handleSubmit() {
   }
   
   try {
-    await saveRecord(gmForm)
-    await saveRecord(directorForm)
+    isSubmittingConfig.value = true
+
+    const gmPayload: ApproverFormState = {
+      id: gmForm.id,
+      employee_id: gmForm.employee_id,
+      step_order: gmForm.step_order,
+    }
+
+    const directorPayload: ApproverFormState = {
+      id: directorForm.id,
+      employee_id: directorForm.employee_id,
+      step_order: directorForm.step_order,
+    }
+
+    await saveRecord(gmPayload)
+    await saveRecord(directorPayload)
+    await refresh()
     
     appToast.success('Configuration updated successfully.')
     router.push('/approver-master')
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to save configuration.'
     appToast.error(message)
+  } finally {
+    isSubmittingConfig.value = false
   }
 }
 </script>

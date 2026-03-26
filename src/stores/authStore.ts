@@ -9,9 +9,11 @@ import { logoutUser } from "@/application/usecases/logoutUser"
 import { supabase } from "@/infrastructure/supabase/client"
 
 export const useAuthStore = defineStore("auth", () => {
+  const CANDIDATE_ACTIVE_DAYS = 3
   const user = ref<User | null>(null)
   const isLoading = ref(false)
   const error = ref("")
+  let candidateExpiryTimer: number | null = null
 
   const isAuthenticated = computed(() => user.value !== null)
   const userRole = computed(() => user.value?.role ?? null)
@@ -25,12 +27,19 @@ export const useAuthStore = defineStore("auth", () => {
     return permissions.some(p => hasPermission(p))
   }
 
+  function clearCandidateExpiryTimer() {
+    if (candidateExpiryTimer !== null) {
+      window.clearTimeout(candidateExpiryTimer)
+      candidateExpiryTimer = null
+    }
+  }
+
   async function fetchUserProfile(userId: string): Promise<Partial<User>> {
     // Fetch employee profile
     const { data: employee } = await supabase
       .from("employees")
       .select(
-        "username, first_name, middle_name, last_name, main_position, hire_location, date_of_birth, place_of_birth, nationality, marital_status, religion, gender, ethnic, blood_type, avatar_url",
+        "username, first_name, middle_name, last_name, main_position, hire_location, date_of_birth, place_of_birth, nationality, marital_status, religion, gender, ethnic, blood_type, avatar_url, is_active, created_at, updated_at",
       )
       .eq("id", userId)
       .maybeSingle()
@@ -82,9 +91,113 @@ export const useAuthStore = defineStore("auth", () => {
       ethnic: employee?.ethnic ?? undefined,
       blood_type: employee?.blood_type ?? undefined,
       avatar_url: employee?.avatar_url ?? undefined,
+      is_active: employee?.is_active ?? undefined,
+      created_at: employee?.created_at ?? undefined,
+      updated_at: employee?.updated_at ?? undefined,
       role: roleName as UserRole | undefined,
       permissions,
     }
+  }
+
+  async function expireCandidateIfNeeded(userId: string, profile: Partial<User>) {
+    const normalizedRole = String(profile.role ?? "").toLowerCase()
+    if (normalizedRole !== "candidate") {
+      return profile
+    }
+
+    if (profile.is_active === false) {
+      return profile
+    }
+
+    if (!profile.created_at) {
+      return profile
+    }
+
+    const createdAt = new Date(profile.created_at)
+    if (Number.isNaN(createdAt.getTime())) {
+      return profile
+    }
+
+    const expiresAt = createdAt.getTime() + CANDIDATE_ACTIVE_DAYS * 24 * 60 * 60 * 1000
+    if (Date.now() <= expiresAt) {
+      return profile
+    }
+
+    const { error: updateError } = await supabase
+      .from("employees")
+      .update({
+        is_active: false,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", userId)
+
+    if (updateError) {
+      throw new Error("Gagal menonaktifkan akun candidate yang sudah kedaluwarsa.")
+    }
+
+    return {
+      ...profile,
+      is_active: false,
+      updated_at: new Date().toISOString(),
+    }
+  }
+
+  async function forceCandidateLogout(message: string) {
+    clearCandidateExpiryTimer()
+    error.value = message
+    await supabase.auth.signOut()
+    user.value = null
+
+    if (window.location.pathname !== "/login") {
+      window.location.assign("/login")
+    }
+  }
+
+  async function enforceUserAccess(userId: string, profile: Partial<User>) {
+    const syncedProfile = await expireCandidateIfNeeded(userId, profile)
+    const normalizedRole = String(syncedProfile.role ?? "").toLowerCase()
+
+    if (normalizedRole === "candidate" && syncedProfile.is_active === false) {
+      await forceCandidateLogout("Akun candidate sudah tidak aktif. Masa akses kandidat hanya 3 hari.")
+      throw new Error("Akun candidate sudah tidak aktif. Masa akses kandidat hanya 3 hari.")
+    }
+
+    return syncedProfile
+  }
+
+  function scheduleCandidateExpiry(userId: string, profile: Partial<User>) {
+    clearCandidateExpiryTimer()
+
+    const normalizedRole = String(profile.role ?? "").toLowerCase()
+    if (normalizedRole !== "candidate" || profile.is_active === false || !profile.created_at) {
+      return
+    }
+
+    const createdAt = new Date(profile.created_at)
+    if (Number.isNaN(createdAt.getTime())) {
+      return
+    }
+
+    const expiresAt = createdAt.getTime() + CANDIDATE_ACTIVE_DAYS * 24 * 60 * 60 * 1000
+    const remainingMs = expiresAt - Date.now()
+
+    if (remainingMs <= 0) {
+      void forceCandidateLogout("Akun candidate sudah tidak aktif. Masa akses kandidat hanya 3 hari.")
+      return
+    }
+
+    candidateExpiryTimer = window.setTimeout(async () => {
+      try {
+        await expireCandidateIfNeeded(userId, profile)
+        await forceCandidateLogout("Akun candidate sudah tidak aktif. Masa akses kandidat hanya 3 hari.")
+      } catch (err) {
+        const message =
+          err instanceof Error
+            ? err.message
+            : "Gagal menonaktifkan akun candidate yang sudah kedaluwarsa."
+        error.value = message
+      }
+    }, remainingMs)
   }
 
   async function initAuth() {
@@ -92,12 +205,14 @@ export const useAuthStore = defineStore("auth", () => {
     try {
       const { data: { user: supabaseUser } } = await supabase.auth.getUser()
       if (supabaseUser?.email) {
-        const profile = await fetchUserProfile(supabaseUser.id)
+        const rawProfile = await fetchUserProfile(supabaseUser.id)
+        const profile = await enforceUserAccess(supabaseUser.id, rawProfile)
         user.value = {
           id: supabaseUser.id,
           email: supabaseUser.email,
           ...profile,
         }
+        scheduleCandidateExpiry(supabaseUser.id, profile)
       }
     } catch (err) {
       console.error("Failed to initialize auth:", err)
@@ -112,8 +227,10 @@ export const useAuthStore = defineStore("auth", () => {
 
     try {
       const authenticatedUser = await loginUser(authRepo, payload)
-      const profile = await fetchUserProfile(authenticatedUser.id)
+      const rawProfile = await fetchUserProfile(authenticatedUser.id)
+      const profile = await enforceUserAccess(authenticatedUser.id, rawProfile)
       user.value = { ...authenticatedUser, ...profile }
+      scheduleCandidateExpiry(authenticatedUser.id, profile)
       return user.value
     } catch (err) {
       const message = err instanceof Error ? err.message : "Login failed."
@@ -129,6 +246,7 @@ export const useAuthStore = defineStore("auth", () => {
     error.value = ""
 
     try {
+      clearCandidateExpiryTimer()
       await logoutUser(authRepo)
       user.value = null
     } catch (err) {

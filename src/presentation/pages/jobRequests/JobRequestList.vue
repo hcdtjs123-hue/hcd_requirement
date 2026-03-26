@@ -77,6 +77,7 @@
               <thead class="bg-gray-50 text-xs uppercase text-gray-500">
                 <tr>
               <th class="px-4 py-3 font-medium w-14">No</th>
+              <th class="px-4 py-3 font-medium min-w-[180px]">Department</th>
               <th class="px-4 py-3 font-medium min-w-[180px]">Position</th>
               <th class="px-4 py-3 font-medium min-w-[140px]">Site</th>
               <th class="px-4 py-3 font-medium min-w-[160px]">Position Status</th>
@@ -100,6 +101,11 @@
                 >
                   <td class="px-4 py-3 align-middle text-gray-500">
                     {{ (page - 1) * pageSize + idx + 1 }}
+                  </td>
+                  <td class="px-4 py-3 align-middle">
+                    <p class="font-medium text-gray-900 whitespace-nowrap">
+                      {{ job.department || '-' }}
+                    </p>
                   </td>
                   <td class="px-4 py-3 align-middle">
                     <p class="font-medium text-gray-900 whitespace-nowrap">
@@ -172,7 +178,7 @@
                   </td>
                 </tr>
                 <tr v-if="!loading && filteredJobs.length === 0">
-                <td colspan="13" class="px-4 py-8 text-center text-sm text-gray-500">
+                <td colspan="15" class="px-4 py-8 text-center text-sm text-gray-500">
                     No matching data found.
                   </td>
                 </tr>
@@ -307,6 +313,7 @@ const filteredJobs = computed(() => {
 
     const haystack = [
       j.main_position,
+      j.department,
       j.site,
       j.position_status,
       j.employment_status,

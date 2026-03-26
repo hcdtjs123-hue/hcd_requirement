@@ -3,17 +3,17 @@
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div>
         <p class="text-sm uppercase tracking-[0.3em] text-blue-600">Administrator</p>
-        <h1 class="mt-3 text-3xl font-semibold tracking-tight">User Management</h1>
+        <h1 class="mt-3 text-3xl font-semibold tracking-tight">User History</h1>
         <p class="mt-2 text-sm text-gray-600">
-          Register new employee accounts and manage active user identity details, credentials, and role.
+          Review user accounts that are no longer active, including expired candidate accounts.
         </p>
       </div>
       <button
         type="button"
-        class="rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
-        @click="goToCreate"
+        class="rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+        @click="refreshUsers"
       >
-        Add User
+        {{ loading ? 'Loading...' : 'Refresh' }}
       </button>
     </div>
 
@@ -24,19 +24,10 @@
       {{ error }}
     </p>
 
-    <section class="max-w-4xl">
-      <!-- User List -->
+    <section class="max-w-5xl">
       <div class="rounded-xl border border-gray-200 bg-gray-50 p-5">
         <div class="mb-4 flex items-center justify-between">
-          <h2 class="text-xl font-semibold">Active User List</h2>
-          <button
-            type="button"
-            class="text-sm text-gray-600 transition hover:text-gray-900"
-            :disabled="loading"
-            @click="refreshUsers"
-          >
-            {{ loading ? 'Loading...' : 'Refresh' }}
-          </button>
+          <h2 class="text-xl font-semibold">Inactive User List</h2>
         </div>
 
         <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -65,6 +56,7 @@
                   <th class="px-4 py-3 font-medium min-w-[220px]">Email</th>
                   <th class="px-4 py-3 font-medium min-w-[160px]">Username</th>
                   <th class="px-4 py-3 font-medium">Role</th>
+                  <th class="px-4 py-3 font-medium min-w-[160px]">Updated</th>
                   <th class="px-4 py-3 text-right font-medium">Actions</th>
                 </tr>
               </thead>
@@ -74,9 +66,7 @@
                     {{ (page - 1) * pageSize + idx + 1 }}
                   </td>
                   <td class="px-4 py-3 align-top">
-                    <p class="font-medium text-gray-900 whitespace-nowrap">
-                      {{ getDisplayName(u) }}
-                    </p>
+                    <p class="font-medium text-gray-900 whitespace-nowrap">{{ getDisplayName(u) }}</p>
                   </td>
                   <td class="px-4 py-3 align-top">
                     <p class="whitespace-nowrap">{{ u.email || '-' }}</p>
@@ -85,34 +75,15 @@
                     <p class="whitespace-nowrap">{{ u.username ? `@${u.username}` : '-' }}</p>
                   </td>
                   <td class="px-4 py-3 align-top">
-                    <div class="flex flex-col items-start gap-2">
-                      <span
-                        class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold"
-                        :class="roleBadge(u.role)"
-                      >
-                        {{ u.role || 'No Role' }}
-                      </span>
-                      <div class="flex items-center gap-1">
-                        <select
-                          v-model="roleChanges[u.id]"
-                          class="rounded border border-gray-200 px-1 py-0.5 text-xs outline-none"
-                        >
-                          <option value="">Change role...</option>
-                          <option v-for="role in roles" :key="role.id" :value="role.id">
-                            {{ role.name }}
-                          </option>
-                        </select>
-                        <button
-                          v-if="roleChanges[u.id]"
-                          type="button"
-                          class="rounded bg-blue-600 px-2 py-0.5 text-xs text-white transition hover:bg-blue-700 disabled:opacity-60"
-                          :disabled="saving"
-                          @click="handleRoleChange(u.id)"
-                        >
-                          OK
-                        </button>
-                      </div>
-                    </div>
+                    <span
+                      class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold"
+                      :class="roleBadge(u.role)"
+                    >
+                      {{ u.role || 'No Role' }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-3 align-top">
+                    <p class="whitespace-nowrap">{{ formatDate(u.updated_at) }}</p>
                   </td>
                   <td class="px-4 py-3 text-right align-top">
                     <RowActionsMenu
@@ -133,8 +104,8 @@
                   </td>
                 </tr>
                 <tr v-if="!loading && filteredUsers.length === 0">
-                  <td colspan="6" class="px-4 py-8 text-center text-sm text-gray-500">
-                    No matching data found.
+                  <td colspan="7" class="px-4 py-8 text-center text-sm text-gray-500">
+                    No inactive user history found.
                   </td>
                 </tr>
               </tbody>
@@ -165,12 +136,10 @@ import { useAuthViewModel } from '@/viewmodels/useAuthViewModel'
 import { useUserManagementViewModel } from '@/viewmodels/useUserManagementViewModel'
 
 const router = useRouter()
-const { users, roles, loading, saving, error, refreshUsers, deleteUser, updateUserRole } =
-  useUserManagementViewModel()
+const { users, loading, saving, error, refreshUsers, deleteUser } = useUserManagementViewModel()
 const { hasPermission } = useAuthViewModel()
 const appToast = useAppToast()
 
-const roleChanges = ref<Record<string, string>>({})
 const searchQuery = ref('')
 const roleFilter = ref('')
 const pageSize = 10
@@ -191,10 +160,20 @@ function getDisplayName(user: ManagedUser) {
   return fullName || '-'
 }
 
+function formatDate(value: string | null) {
+  if (!value) return '-'
+
+  return new Date(value).toLocaleDateString('en-US', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  })
+}
+
 const roleOptions = computed(() => {
   const set = new Set<string>()
   for (const u of users.value) {
-    if (u.is_active === false) continue
+    if (u.is_active !== false) continue
     set.add(u.role || 'No Role')
   }
   return Array.from(set).sort((a, b) => a.localeCompare(b))
@@ -203,7 +182,7 @@ const roleOptions = computed(() => {
 const filteredUsers = computed(() => {
   const q = normalize(searchQuery.value)
   return users.value.filter((u) => {
-    if (u.is_active === false) return false
+    if (u.is_active !== false) return false
 
     const roleLabel = u.role || 'No Role'
     if (roleFilter.value && roleLabel !== roleFilter.value) return false
@@ -244,10 +223,6 @@ watch(
   },
 )
 
-function goToCreate() {
-  router.push('/user-management/create')
-}
-
 function goToEdit(userId: string) {
   router.push(`/user-management/${userId}/edit`)
 }
@@ -269,19 +244,6 @@ async function handleDelete(userId: string, email: string) {
     appToast.deleted('User')
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to delete user.'
-    appToast.error(message)
-  }
-}
-
-async function handleRoleChange(userId: string) {
-  const newRoleId = roleChanges.value[userId]
-  if (!newRoleId) return
-  try {
-    await updateUserRole(userId, newRoleId)
-    appToast.updated('User role')
-    roleChanges.value[userId] = ''
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Failed to update role.'
     appToast.error(message)
   }
 }

@@ -138,7 +138,7 @@
             <h2 class="text-sm font-semibold text-gray-900">Candidate Pipeline</h2>
           </div>
           <RouterLink to="/recruitment/pipeline" class="text-xs text-blue-600 hover:underline"
-            >Open recruitment module →</RouterLink
+            >Open hiring module →</RouterLink
           >
         </div>
         <div class="space-y-2 p-5">
@@ -478,7 +478,7 @@ const quickLinks = computed(() => {
     },
     {
       to: '/recruitment',
-      label: 'Recruitment Dashboard',
+      label: 'Hiring Dashboard',
       desc: 'Monitor positions ready for processing',
       icon: Briefcase,
       bg: 'bg-emerald-100',
@@ -487,8 +487,8 @@ const quickLinks = computed(() => {
     },
     {
       to: '/recruitment/pipeline',
-      label: 'Recruitment Pipeline',
-      desc: 'Manage candidates in recruitment process',
+      label: 'Hiring Pipeline',
+      desc: 'Manage candidates in hiring process',
       icon: Users,
       bg: 'bg-purple-100',
       color: 'text-purple-700',

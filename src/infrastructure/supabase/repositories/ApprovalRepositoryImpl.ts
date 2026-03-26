@@ -8,6 +8,9 @@ import type {
 } from '@/domain/entities/ApprovalChain'
 import type { ApprovalRepository } from '@/domain/repositories/ApprovalRepository'
 
+const emailApiUrl = (import.meta.env.VITE_EMAIL_API_URL || '').replace(/\/$/, '')
+const emailApiKey = import.meta.env.VITE_EMAIL_API_KEY || ''
+
 const chainSelect = `
   *,
   steps:approval_steps(*)
@@ -64,15 +67,37 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
       .from('approval_chains')
       .select(chainWithJobRequestSelect)
       .eq('job_request_id', jobRequestId)
-      .maybeSingle()
+      .order('created_at', { ascending: false })
+      .limit(1)
 
     if (error) throw new Error(error.message)
 
-    return data ? this.normalizeChain(data) : null
+    const latestChain = data?.[0]
+    return latestChain ? this.normalizeChain(latestChain) : null
   }
 
   async submitForApproval(input: SubmitApprovalInput): Promise<ApprovalChain> {
-    // 1. Get all approver masters ordered by step_order with employee join
+    const existingChain = await this.getLatestActiveChainByJobRequest(input.job_request_id)
+    if (existingChain) {
+      throw new Error('This ERF already has an active approval chain.')
+    }
+
+    const { data: jobRequest, error: jobRequestError } = await supabase
+      .from('new_employee_application_form')
+      .select('id, approval_director_bu_id, approval_director_bu')
+      .eq('id', input.job_request_id)
+      .single()
+
+    if (jobRequestError) throw new Error(jobRequestError.message)
+    if (!jobRequest.approval_director_bu) {
+      throw new Error('BU Director Approval is required before submitting ERF approval.')
+    }
+
+    const buDirector = jobRequest.approval_director_bu_id
+      ? await this.resolveBuDirectorApproverById(jobRequest.approval_director_bu_id)
+      : await this.resolveBuDirectorApprover(jobRequest.approval_director_bu)
+
+    // 1. Get HR approver masters ordered by step_order with employee join
     const { data: approverMasters, error: approverError } = await supabase
       .from('approver_master')
       .select('*, employee:employees(first_name, middle_name, last_name, email)')
@@ -83,6 +108,17 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
       throw new Error(
         'No approvers registered. Please add approvers in Master Data first.',
       )
+    }
+
+    const gmHrdApprover = approverMasters.find((approver: any) => approver.step_order === 1)
+    const directorHrdApprover = approverMasters.find((approver: any) => approver.step_order === 2)
+
+    if (!gmHrdApprover?.employee?.email) {
+      throw new Error('GM HRD approver is not configured correctly.')
+    }
+
+    if (!directorHrdApprover?.employee?.email) {
+      throw new Error('Director HRD approver is not configured correctly.')
     }
 
     // 2. Get current user
@@ -101,21 +137,30 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
 
     if (chainError) throw new Error(chainError.message)
 
-    // 4. Create steps from approver masters
-    const steps = approverMasters.map((approver: any, index) => {
-      const emp = approver.employee
-      const fullName = emp 
-        ? [emp.first_name, emp.middle_name, emp.last_name].filter(Boolean).join(' ')
-        : 'Unknown'
-      
-      return {
+    // 4. Create steps with fixed order: BU Director -> GM HRD -> Director HRD
+    const steps = [
+      {
         chain_id: chain.id,
-        step_order: index + 1,
-        approver_email: emp?.email || '',
-        approver_name: fullName,
+        step_order: 1,
+        approver_email: buDirector.email,
+        approver_name: buDirector.name,
         status: 'pending',
-      }
-    })
+      },
+      {
+        chain_id: chain.id,
+        step_order: 2,
+        approver_email: gmHrdApprover.employee.email || '',
+        approver_name: this.buildEmployeeFullName(gmHrdApprover.employee),
+        status: 'pending',
+      },
+      {
+        chain_id: chain.id,
+        step_order: 3,
+        approver_email: directorHrdApprover.employee.email || '',
+        approver_name: this.buildEmployeeFullName(directorHrdApprover.employee),
+        status: 'pending',
+      },
+    ]
 
     const { error: stepsError } = await supabase.from('approval_steps').insert(steps)
 
@@ -196,16 +241,19 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
     }
 
     // 3. Approve this step
+    const approvedAt = new Date().toISOString()
     const { error: updateError } = await supabase
       .from('approval_steps')
       .update({
         status: 'approved',
-        approved_at: new Date().toISOString(),
+        approved_at: approvedAt,
         notes: notes || null,
       })
       .eq('id', step.id)
 
     if (updateError) throw new Error(updateError.message)
+
+    await this.syncJobRequestApprovalField(step.chain_id, step.step_order, step.approver_name, approvedAt)
 
     // 4. Check if all steps in chain are now approved
     const { data: remainingPending, error: remainError } = await supabase
@@ -310,14 +358,9 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
   // ========================
 
   async getAllApproverMasters(): Promise<ApproverMaster[]> {
-    const accessScope = await this.getApproverMasterAccessScope()
-    let query = supabase
+    const query = supabase
       .from('approver_master')
       .select('*, employee:employees(first_name, middle_name, last_name, email, phone, main_position)')
-
-    if (accessScope.isManager && accessScope.userId) {
-      query = query.eq('created_by', accessScope.userId)
-    }
 
     const { data, error } = await query.order('step_order', { ascending: true })
 
@@ -345,8 +388,7 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
   }
 
   async updateApproverMaster(id: string, input: ApproverMasterInput): Promise<ApproverMaster> {
-    const accessScope = await this.getApproverMasterAccessScope()
-    let query = supabase
+    const query = supabase
       .from('approver_master')
       .update({
         employee_id: input.employee_id,
@@ -354,34 +396,25 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
       })
       .eq('id', id)
 
-    if (accessScope.isManager && accessScope.userId) {
-      query = query.eq('created_by', accessScope.userId)
-    }
-
     const { data, error } = await query
       .select('*, employee:employees(first_name, middle_name, last_name, email, phone, main_position)')
       .maybeSingle()
 
     if (error) throw new Error(error.message)
     if (!data) {
-      throw new Error('Approver data not found or inaccessible.')
+      throw new Error('Approver data not found.')
     }
 
     return data as ApproverMaster
   }
 
   async deleteApproverMaster(id: string): Promise<void> {
-    const accessScope = await this.getApproverMasterAccessScope()
-    let query = supabase.from('approver_master').delete().eq('id', id)
-
-    if (accessScope.isManager && accessScope.userId) {
-      query = query.eq('created_by', accessScope.userId)
-    }
+    const query = supabase.from('approver_master').delete().eq('id', id)
 
     const { data, error } = await query.select('id')
 
     if (error) throw new Error(error.message)
-    if (accessScope.isManager && (!data || data.length === 0)) {
+    if (!data || data.length === 0) {
       throw new Error('Approver data not found or could not be deleted.')
     }
   }
@@ -414,6 +447,118 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
       ...chain,
       steps,
     }
+  }
+
+  private buildEmployeeFullName(
+    employee:
+      | {
+          first_name?: string | null
+          middle_name?: string | null
+          last_name?: string | null
+        }
+      | null
+      | undefined,
+  ) {
+    return [employee?.first_name, employee?.middle_name, employee?.last_name]
+      .filter(Boolean)
+      .join(' ')
+      .trim()
+  }
+
+  private async getLatestActiveChainByJobRequest(jobRequestId: string) {
+    const { data, error } = await supabase
+      .from('approval_chains')
+      .select(chainWithJobRequestSelect)
+      .eq('job_request_id', jobRequestId)
+      .in('status', ['draft', 'pending'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+
+    if (error) throw new Error(error.message)
+
+    return data?.[0] ? this.normalizeChain(data[0]) : null
+  }
+
+  private async resolveBuDirectorApprover(displayLabel: string) {
+    const { data: employees, error } = await supabase
+      .from('employees')
+      .select('first_name, middle_name, last_name, email, main_position')
+
+    if (error) throw new Error(error.message)
+
+    const matchedEmployee = (employees ?? []).find((employee) => {
+      const fullName = this.buildEmployeeFullName(employee)
+      const position = employee.main_position ?? 'Unknown position'
+      return fullName === displayLabel || `${fullName} — ${position}` === displayLabel
+    })
+
+    if (!matchedEmployee?.email) {
+      throw new Error('BU Director approver email could not be resolved from the selected ERF approver.')
+    }
+
+    return {
+      email: matchedEmployee.email,
+      name: this.buildEmployeeFullName(matchedEmployee) || displayLabel,
+    }
+  }
+
+  private async resolveBuDirectorApproverById(employeeId: string) {
+    const { data: employee, error } = await supabase
+      .from('employees')
+      .select('id, first_name, middle_name, last_name, email')
+      .eq('id', employeeId)
+      .maybeSingle()
+
+    if (error) throw new Error(error.message)
+
+    if (!employee?.email) {
+      throw new Error('BU Director approver email could not be resolved from the selected employee.')
+    }
+
+    return {
+      email: employee.email,
+      name: this.buildEmployeeFullName(employee) || 'BU Director',
+    }
+  }
+
+  private async syncJobRequestApprovalField(
+    chainId: string,
+    stepOrder: number,
+    approverName: string | null,
+    approvedAt: string,
+  ) {
+    const { data: chain, error: chainError } = await supabase
+      .from('approval_chains')
+      .select('job_request_id')
+      .eq('id', chainId)
+      .single()
+
+    if (chainError) throw new Error(chainError.message)
+
+    const approvalPayloadByStep: Record<number, Record<string, string | null>> = {
+      1: {
+        approval_director_bu: approverName,
+        approval_director_bu_date: approvedAt,
+      },
+      2: {
+        approval_gm_hrd: approverName,
+        approval_gm_hrd_date: approvedAt,
+      },
+      3: {
+        approval_director_hrd: approverName,
+        approval_director_hrd_date: approvedAt,
+      },
+    }
+
+    const payload = approvalPayloadByStep[stepOrder]
+    if (!payload) return
+
+    const { error: updateJobError } = await supabase
+      .from('new_employee_application_form')
+      .update(payload)
+      .eq('id', chain.job_request_id)
+
+    if (updateJobError) throw new Error(updateJobError.message)
   }
 
   private async getApproverMasterAccessScope() {
@@ -479,6 +624,18 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
   }
 
   private async sendApprovalEmail(email: string, name: string, token: string) {
+    if (!email?.trim()) {
+      throw new Error('Approval email is missing for the current approver.')
+    }
+
+    if (!emailApiUrl) {
+      throw new Error('VITE_EMAIL_API_URL is not set.')
+    }
+
+    if (!emailApiKey) {
+      throw new Error('VITE_EMAIL_API_KEY is not set.')
+    }
+
     const approvalLink = `${window.location.origin}/approve/${token}`
     const html = `
       <div style="font-family: sans-serif; padding: 20px;">
@@ -491,16 +648,28 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
       </div>
     `
 
-    try {
-      await supabase.functions.invoke('resend-email', {
-        body: {
-          to: email,
-          subject: 'ERF Approval Notification (HCD)',
-          html,
-        },
-      })
-    } catch (err) {
-      console.error('Failed to send email to', email, err)
+    const response = await fetch(`${emailApiUrl}/send-email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': emailApiKey,
+      },
+      body: JSON.stringify({
+        to: email,
+        subject: 'ERF Approval Notification (HCD)',
+        html,
+      }),
+    })
+
+    const payload = (await response.json().catch(() => ({}))) as {
+      ok?: boolean
+      error?: string
+    }
+
+    if (!response.ok || !payload.ok) {
+      throw new Error(
+        `Failed to send approval email to ${email}: ${payload.error || `HTTP ${response.status}`}`,
+      )
     }
   }
 }

@@ -5,7 +5,10 @@ export interface User {
   email: string
   role?: UserRole
   permissions?: string[] // e.g., ['job_request:read', 'user:create']
+  is_active?: boolean | null
   username?: string
+  created_at?: string
+  updated_at?: string
   first_name?: string
   middle_name?: string
   last_name?: string

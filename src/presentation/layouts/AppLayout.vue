@@ -250,7 +250,7 @@ const { chains } = useApprovalViewModel()
 const appToast = useAppToast()
 
 const isMobileSidebarOpen = ref(false)
-const openSections = ref<string[]>(['Overview', 'ERF Management', 'Recruitment'])
+const openSections = ref<string[]>(['Overview', 'ERF Management', 'Hiring'])
 
 interface NavItem {
   to: string
@@ -292,18 +292,18 @@ const navigationSections = computed((): NavSection[] => [
     ],
   },
   {
-    label: 'Recruitment',
+    label: 'Hiring',
     icon: Briefcase,
     items: [
       {
         to: '/recruitment',
-        label: 'Recruitment Dashboard',
+        label: 'Hiring Dashboard',
         icon: Briefcase,
         permissions: ['recruitment:read', 'candidate:read'],
       },
       {
         to: '/recruitment/pipeline',
-        label: 'Recruitment Pipeline',
+        label: 'Hiring Pipeline',
         icon: Users,
         permissions: ['recruitment:read', 'candidate:read'],
       },
@@ -346,6 +346,12 @@ const navigationSections = computed((): NavSection[] => [
         to: '/user-management',
         label: 'User Management',
         icon: Settings,
+        permissions: ['user:read'],
+      },
+      {
+        to: '/user-management/history',
+        label: 'User History',
+        icon: ClipboardList,
         permissions: ['user:read'],
       },
       {
@@ -392,12 +398,13 @@ const pageTitle = computed(() => {
     { prefix: '/job-requests', title: 'ERF' },
     { prefix: '/approver-master', title: 'Approver Master' },
     { prefix: '/approval-tracking', title: 'Approval Tracking' },
-    { prefix: '/recruitment/pipeline', title: 'Recruitment Pipeline' },
-    { prefix: '/candidate-management', title: 'Recruitment Pipeline' },
-    { prefix: '/recruitment', title: 'Recruitment Dashboard' },
+    { prefix: '/recruitment/pipeline', title: 'Hiring Pipeline' },
+    { prefix: '/candidate-management', title: 'Hiring Pipeline' },
+    { prefix: '/recruitment', title: 'Hiring Dashboard' },
     { prefix: '/candidates', title: 'Candidate Form' },
     { prefix: '/applications', title: 'Candidate Form' },
     { prefix: '/profile', title: 'Profile' },
+    { prefix: '/user-management/history', title: 'User History' },
     { prefix: '/user-management', title: 'User Management' },
     { prefix: '/role-management', title: 'Role Management' },
     { prefix: '/custom-group-management', title: 'Custom Group Management' },
