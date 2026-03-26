@@ -68,15 +68,14 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
   }
 
   async submitForApproval(input: SubmitApprovalInput): Promise<ApprovalChain> {
-    // 1. Get all active approver masters ordered by step_order
-    const { data: approvers, error: approverError } = await supabase
+    // 1. Get all approver masters ordered by step_order with employee join
+    const { data: approverMasters, error: approverError } = await supabase
       .from('approver_master')
-      .select('*')
-      .eq('is_active', true)
+      .select('*, employee:employees(first_name, middle_name, last_name, email)')
       .order('step_order', { ascending: true })
 
     if (approverError) throw new Error(approverError.message)
-    if (!approvers || approvers.length === 0) {
+    if (!approverMasters || approverMasters.length === 0) {
       throw new Error(
         'Belum ada approver yang terdaftar. Tambahkan approver di Master Data terlebih dahulu.',
       )
@@ -99,13 +98,20 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
     if (chainError) throw new Error(chainError.message)
 
     // 4. Create steps from approver masters
-    const steps = approvers.map((approver, index) => ({
-      chain_id: chain.id,
-      step_order: index + 1,
-      approver_email: approver.email,
-      approver_name: approver.name,
-      status: 'pending',
-    }))
+    const steps = approverMasters.map((approver: any, index) => {
+      const emp = approver.employee
+      const fullName = emp 
+        ? [emp.first_name, emp.middle_name, emp.last_name].filter(Boolean).join(' ')
+        : 'Unknown'
+      
+      return {
+        chain_id: chain.id,
+        step_order: index + 1,
+        approver_email: emp?.email || '',
+        approver_name: fullName,
+        status: 'pending',
+      }
+    })
 
     const { error: stepsError } = await supabase.from('approval_steps').insert(steps)
 

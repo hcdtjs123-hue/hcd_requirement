@@ -131,6 +131,16 @@
         </label>
 
         <label class="space-y-2">
+          <span class="text-sm font-medium text-gray-700">Department</span>
+          <input
+            v-model="form.department"
+            class="field"
+            type="text"
+            placeholder="Department"
+          />
+        </label>
+
+        <label class="space-y-2">
           <span class="text-sm font-medium text-gray-700">Date of Birth</span>
           <input v-model="form.date_of_birth" class="field" type="date" />
         </label>
@@ -257,6 +267,7 @@ type UserFormState = {
   last_name: string
   main_position: string
   hire_location: string
+  department: string
   date_of_birth: string
   place_of_birth: string
   nationality: string
@@ -295,6 +306,7 @@ function createEmptyForm(): UserFormState {
     last_name: '',
     main_position: '',
     hire_location: '',
+    department: '',
     date_of_birth: '',
     place_of_birth: '',
     nationality: '',
@@ -320,6 +332,7 @@ function populateFormFromTarget() {
   form.last_name = targetUser.value.last_name ?? ''
   form.main_position = targetUser.value.main_position ?? ''
   form.hire_location = targetUser.value.hire_location ?? ''
+  form.department = targetUser.value.department ?? ''
   form.date_of_birth = targetUser.value.date_of_birth ?? ''
   form.place_of_birth = targetUser.value.place_of_birth ?? ''
   form.nationality = targetUser.value.nationality ?? ''
@@ -357,6 +370,7 @@ onMounted(() => {
 async function handleSubmit() {
   try {
     const selectedRole = roles.value.find((r) => r.id === form.role_id)
+    const department = form.department.trim() || undefined
 
     if (isEditMode.value) {
       if (!targetUser.value) {
@@ -371,17 +385,18 @@ async function handleSubmit() {
         last_name: form.last_name,
         main_position: form.main_position,
         hire_location: form.hire_location,
+        department,
         date_of_birth: form.date_of_birth,
         place_of_birth: form.place_of_birth,
         nationality: form.nationality,
         marital_status: form.marital_status,
         religion: form.religion,
         gender: form.gender,
-      ethnic: form.ethnic,
-      blood_type: form.blood_type,
-      no_id: form.no_id,
-      role_id: form.role_id,
-    }
+        ethnic: form.ethnic,
+        blood_type: form.blood_type,
+        no_id: form.no_id,
+        role_id: form.role_id,
+      }
 
       if (form.password.trim()) {
         if (form.password.trim().length < 6) {
@@ -405,6 +420,7 @@ async function handleSubmit() {
       last_name: form.last_name,
       main_position: form.main_position,
       hire_location: form.hire_location,
+      department,
       date_of_birth: form.date_of_birth,
       place_of_birth: form.place_of_birth,
       nationality: form.nationality,

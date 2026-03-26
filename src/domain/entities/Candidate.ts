@@ -60,10 +60,13 @@ export interface PersonalStatement {
   expected_salary: number | null
 }
 
+export type HrScreeningStatus = 'pending' | 'hr_approved' | 'hr_rejected'
+
 export interface CandidateRecord {
   id: string
   job_request_id: string | null
   candidate_id: string | null
+  hr_screening_status?: HrScreeningStatus | null
   date_application: string | null
   notice_period: string | null
   first_name: string | null

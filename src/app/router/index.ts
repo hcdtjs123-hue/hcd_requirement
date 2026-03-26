@@ -187,6 +187,12 @@ const router = createRouter({
       component: () => import('@/presentation/pages/approvals/PublicApprovalPage.vue'),
       meta: { public: true },
     },
+    {
+      path: '/candidate-decision',
+      name: 'public-candidate-decision',
+      component: () => import('@/presentation/pages/recruitment/PublicCandidateDecisionPage.vue'),
+      meta: { public: true },
+    },
   ],
 })
 

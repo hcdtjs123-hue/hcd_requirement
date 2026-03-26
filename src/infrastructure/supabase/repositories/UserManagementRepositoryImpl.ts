@@ -16,6 +16,7 @@ export class UserManagementRepositoryImpl implements UserManagementRepository {
       .select(
         `id,
          username,
+         email,
          first_name,
          middle_name,
          last_name,

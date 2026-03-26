@@ -39,10 +39,11 @@ __screenshots__/
 *.timestamp-*-*.mjs
 
 # Environment variables
-.env
-.env.*
-!.env.example
-!.env.sample
+# Ignore all env files (including nested ones) except example files.
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.sample
 # Tooling
 .gemini
 mcp

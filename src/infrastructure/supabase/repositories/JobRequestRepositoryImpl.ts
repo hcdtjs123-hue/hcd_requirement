@@ -1,6 +1,7 @@
 import { supabase } from '@/infrastructure/supabase/client'
 import type { JobRequest, JobRequestInput } from '@/domain/entities/JobRequest'
 import type { JobRequestRepository } from '@/domain/repositories/JobRequestRepository'
+import { approvalRepo } from '@/infrastructure/container'
 
 export class JobRequestRepositoryImpl implements JobRequestRepository {
   async getAll(): Promise<JobRequest[]> {
@@ -87,6 +88,17 @@ export class JobRequestRepositoryImpl implements JobRequestRepository {
 
     if (error) {
       throw new Error(error.message)
+    }
+
+    // Automatically trigger approval chain
+    try {
+      if (created) {
+        await approvalRepo.submitForApproval({ job_request_id: created.id })
+      }
+    } catch (err) {
+      console.error('Failed to start approval chain:', err)
+      // We don't throw here to avoid failing the Job Request creation itself,
+      // but in production we might want more robust error handling.
     }
 
     return created
