@@ -5,7 +5,7 @@
         <p class="text-sm uppercase tracking-[0.3em] text-blue-600">Recruitment Team</p>
         <h1 class="mt-3 text-3xl font-semibold tracking-tight">Recruitment Dashboard</h1>
         <p class="mt-2 text-sm text-gray-600">
-          Job requests that are fully approved and ready to be processed.
+          Employee Request Forms (ERF) that are fully approved and ready to be processed.
         </p>
       </div>
       <button
@@ -312,7 +312,7 @@ function handleFileSelect(event: Event, trackingId: string) {
 async function handleApprove(trackingId: string) {
   try {
     await approveTracking(trackingId)
-    appToast.success('Job request successfully approved by staff.')
+    appToast.success('ERF successfully approved by staff.')
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to approve.'
     appToast.error(message)

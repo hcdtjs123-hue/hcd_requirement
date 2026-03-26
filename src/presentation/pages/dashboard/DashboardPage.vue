@@ -51,7 +51,7 @@
 
     <!-- Main Content Grid -->
     <div class="grid gap-6 lg:grid-cols-3" v-if="showOperationalOverview">
-      <!-- Job Requests Terbaru -->
+    <!-- Latest ERF Submissions -->
       <div
         v-if="showJobRequestsPanel"
         class="rounded-3xl border border-gray-200 bg-white shadow-sm"
@@ -60,7 +60,7 @@
         <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4">
           <div class="flex items-center gap-2">
             <FileText class="h-4 w-4 text-blue-600" />
-            <h2 class="text-sm font-semibold text-gray-900">Latest Job Requests</h2>
+          <h2 class="text-sm font-semibold text-gray-900">Latest Employee Request Forms (ERF)</h2>
           </div>
           <RouterLink to="/job-requests" class="text-xs text-blue-600 hover:underline"
             >View all →</RouterLink
@@ -87,7 +87,7 @@
             >
           </div>
           <div v-if="recentJobs.length === 0" class="px-6 py-10 text-center text-sm text-gray-400">
-            No job requests yet.
+            No ERF submissions yet.
           </div>
         </div>
       </div>
@@ -127,7 +127,7 @@
 
     <!-- Bottom Grid -->
     <div class="grid gap-6 lg:grid-cols-2">
-      <!-- Kandidat Pipeline -->
+      <!-- Candidate Pipeline -->
       <div
         v-if="showRecruitmentPanel"
         class="rounded-3xl border border-gray-200 bg-white shadow-sm"
@@ -167,7 +167,7 @@
         </div>
       </div>
 
-      <!-- Akses Cepat -->
+      <!-- Quick Access -->
       <div
         class="rounded-3xl border border-gray-200 bg-white shadow-sm"
         :class="showRecruitmentPanel ? '' : 'lg:col-span-2'"
@@ -271,7 +271,7 @@ const dashboardIntro = computed(() => {
     return {
       title: 'Manage operations and system access',
       description:
-        'The administrator dashboard highlights cross-process modules, from job request, approval, recruitment, up to user and role management.',
+        'The administrator dashboard highlights cross-process modules, from employee request form (erf), approval, recruitment, up to user and role management.',
     }
   }
 
@@ -303,7 +303,7 @@ const kpiCards = computed(() => {
 
   if (showJobRequestsPanel.value) {
     cards.push({
-      label: 'Total Job Requests',
+      label: 'Total ERF',
       value: jobs.value.length,
       sub: 'All position requests',
       icon: FileText,
@@ -460,7 +460,7 @@ const quickLinks = computed(() => {
   const all = [
     {
       to: '/job-requests/create',
-      label: 'Create Job Request',
+      label: 'Create ERF',
       desc: 'New position request form',
       icon: FileText,
       bg: 'bg-blue-100',
@@ -496,7 +496,7 @@ const quickLinks = computed(() => {
     },
     {
       to: '/candidates',
-      label: 'Candidate Database',
+      label: 'Candidate Form',
       desc: 'Manage candidate profiles and forms',
       icon: ClipboardList,
       bg: 'bg-indigo-100',

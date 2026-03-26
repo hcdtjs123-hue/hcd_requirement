@@ -94,9 +94,9 @@
           </div>
         </div>
 
-        <!-- Job Request Data -->
+        <!-- ERF Data -->
         <div class="rounded-3xl border border-gray-200 bg-white p-8">
-          <h2 class="mb-6 text-xl font-semibold text-gray-900">Request Details</h2>
+          <h2 class="mb-6 text-xl font-semibold text-gray-900">ERF Details</h2>
           <div class="grid gap-4 md:grid-cols-2">
             <div
               v-for="field in jobRequestFields"

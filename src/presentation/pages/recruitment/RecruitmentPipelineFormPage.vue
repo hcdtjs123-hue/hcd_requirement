@@ -46,7 +46,7 @@
           <label class="space-y-2">
             <span class="text-sm font-medium text-gray-700">Tracking ID *</span>
             <select v-model="invForm.tracking_id" class="field" required>
-              <option value="">Select a Job Request</option>
+              <option value="">Select an ERF</option>
               <option v-for="t in trackings" :key="t.id" :value="t.id">
                 {{ t.job_request?.main_position || t.id }}
               </option>

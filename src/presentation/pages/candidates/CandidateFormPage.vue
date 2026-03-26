@@ -27,9 +27,9 @@
       <form v-if="!candidateLoading" class="space-y-8" @submit.prevent="handleSubmit">
         <section class="grid gap-4 md:grid-cols-2">
           <label class="space-y-2 md:col-span-2">
-            <span class="text-sm font-medium text-gray-700">Job Request</span>
+            <span class="text-sm font-medium text-gray-700">Employee Request Form (ERF)</span>
             <select v-model="form.job_request_id" class="field" required>
-              <option value="">Select job request</option>
+              <option value="">Select ERF</option>
               <option v-for="job in jobs" :key="job.id" :value="job.id">
                 {{ job.main_position || '-' }}
               </option>

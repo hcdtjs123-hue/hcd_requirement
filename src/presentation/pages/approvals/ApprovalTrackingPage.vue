@@ -5,7 +5,7 @@
         <p class="text-sm uppercase tracking-[0.3em] text-blue-600">Monitoring</p>
         <h1 class="mt-3 text-3xl font-semibold tracking-tight">Approval Tracking</h1>
         <p class="mt-2 text-sm text-gray-600">
-          Track the job request approval status along with the detailed history of each step.
+          Track the ERF approval status along with the detailed history of each step.
         </p>
       </div>
       <button

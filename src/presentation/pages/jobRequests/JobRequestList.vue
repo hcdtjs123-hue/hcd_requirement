@@ -3,14 +3,14 @@
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div>
         <p class="text-sm uppercase tracking-[0.3em] text-blue-600">Master Form</p>
-        <h1 class="mt-3 text-3xl font-semibold tracking-tight">Job Request</h1>
+        <h1 class="mt-3 text-3xl font-semibold tracking-tight">Employee Request Form (ERF)</h1>
       </div>
       <button
         type="button"
         class="rounded-2xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
         @click="goToCreate"
       >
-        Create Job Request
+        Create ERF
       </button>
     </div>
 
@@ -190,11 +190,11 @@
     </section>
   </div>
 
-  <!-- Close Job Request Modal -->
+  <!-- Close ERF Modal -->
   <div v-if="showCloseModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
     <div class="w-full max-w-md rounded-3xl bg-white p-6 shadow-xl">
-      <h3 class="mb-4 text-xl font-semibold text-gray-900 text-center">Close Job Request</h3>
-      <p class="mb-6 text-sm text-gray-600 text-center">Please provide a reason for closing this job request.</p>
+      <h3 class="mb-4 text-xl font-semibold text-gray-900 text-center">Close ERF</h3>
+      <p class="mb-6 text-sm text-gray-600 text-center">Please provide a reason for closing this employee request form.</p>
       
       <form @submit.prevent="handleClose" class="space-y-4">
         <label class="block space-y-2">
@@ -211,7 +211,7 @@
           <textarea
             v-model="closeForm.reason"
             required
-            placeholder="Why is this job request being closed?"
+            placeholder="Why is this ERF being closed?"
             class="w-full min-h-[120px] rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-blue-600 resize-none"
           ></textarea>
         </label>
@@ -229,7 +229,7 @@
             :disabled="saving"
             class="flex-1 rounded-2xl bg-red-600 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-60"
           >
-            {{ saving ? 'Closing...' : 'Close Job Request' }}
+            {{ saving ? 'Closing...' : 'Close ERF' }}
           </button>
         </div>
       </form>
@@ -353,12 +353,12 @@ function goToEdit(id: string) {
 }
 
 async function handleDelete(id: string, mainPosition: string) {
-  if (!confirm(`Delete job request ${mainPosition}?`)) return
+  if (!confirm(`Delete ERF ${mainPosition}?`)) return
   try {
     await remove(id)
-    appToast.success('Job request deleted successfully.')
+    appToast.success('ERF deleted successfully.')
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Failed to delete job request.'
+    const message = err instanceof Error ? err.message : 'Failed to delete ERF.'
     appToast.error(message)
   }
 }
@@ -388,10 +388,10 @@ async function handleClose() {
       closeForm.value.category as 'employee hired' | 'canceled',
       closeForm.value.reason
     )
-    appToast.success('Job request closed successfully.')
+    appToast.success('ERF closed successfully.')
     showCloseModal.value = false
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Failed to close job request.'
+    const message = err instanceof Error ? err.message : 'Failed to close ERF.'
     appToast.error(message)
   }
 }

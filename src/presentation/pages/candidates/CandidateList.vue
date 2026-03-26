@@ -3,9 +3,9 @@
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div>
         <p class="text-sm uppercase tracking-[0.3em] text-blue-600">Candidate Module</p>
-        <h1 class="mt-3 text-3xl font-semibold tracking-tight">Candidate Database</h1>
+        <h1 class="mt-3 text-3xl font-semibold tracking-tight">Candidate Form</h1>
         <p class="mt-2 text-sm text-gray-600">
-          Manage candidate profiles, candidate forms, and their relationship to job requests.
+          Manage candidate profiles, candidate forms, and their relationship to Employee Request Forms (ERF).
         </p>
       </div>
       <button
@@ -52,7 +52,7 @@
               v-model="jobRequestFilter"
               class="h-11 rounded-2xl border border-gray-200 bg-white px-3 text-sm outline-none focus:border-blue-600"
             >
-              <option value="">All Job Requests</option>
+              <option value="">All ERF</option>
               <option v-for="opt in jobRequestOptions" :key="opt" :value="opt">{{ opt }}</option>
             </select>
           </div>
@@ -67,7 +67,7 @@
                   <th class="px-4 py-3 font-medium min-w-[220px]">Name</th>
                   <th class="px-4 py-3 font-medium min-w-[220px]">Email</th>
                   <th class="px-4 py-3 font-medium min-w-[160px]">Phone</th>
-                  <th class="px-4 py-3 font-medium min-w-[200px]">Job Request</th>
+                  <th class="px-4 py-3 font-medium min-w-[200px]">ERF</th>
                   <th class="px-4 py-3 font-medium text-right min-w-[160px]">Actions</th>
                 </tr>
               </thead>
@@ -99,7 +99,7 @@
                     <span
                       class="inline-flex rounded-full bg-blue-100 px-2.5 py-0.5 text-[10px] font-medium tracking-wider text-blue-700"
                     >
-                      {{ candidate.job_request?.main_position || 'No Job Request' }}
+                      {{ candidate.job_request?.main_position || 'No ERF' }}
                     </span>
                   </td>
                   <td class="px-4 py-3 text-right align-middle">

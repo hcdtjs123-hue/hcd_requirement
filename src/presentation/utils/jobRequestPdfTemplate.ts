@@ -56,7 +56,7 @@ function buildTemplate(job: JobRequest) {
   <html lang="en">
     <head>
       <meta charset="UTF-8" />
-      <title>Job Request Form</title>
+      <title>Employee Request Form (ERF)</title>
       <style>
         @page { size: A4; margin: 14mm 12mm; }
         * { box-sizing: border-box; }
@@ -160,7 +160,7 @@ function buildTemplate(job: JobRequest) {
     <body>
       <div class="sheet">
         <div class="header">
-          <h1>JOB REQUEST FORM</h1>
+          <h1>EMPLOYEE REQUEST FORM (ERF)</h1>
         </div>
 
         ${buildRow('Request Date', formatDate(job.created_at))}

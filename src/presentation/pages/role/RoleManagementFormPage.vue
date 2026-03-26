@@ -80,10 +80,10 @@
         </div>
 
         <div class="grid gap-6 sm:grid-cols-2">
-          <!-- Modul Job Request -->
-          <div class="space-y-3 rounded-2xl bg-gray-50 p-4 border border-gray-100">
-            <h3 class="font-medium text-gray-900 border-b border-gray-200 pb-2">
-              Job Request Module
+          <!-- Modul ERF -->
+          <div class="space-y-4">
+            <h3 class="text-sm font-semibold text-gray-900 border-l-4 border-blue-500 pl-3">
+              ERF Module
             </h3>
             <div class="space-y-2">
               <label

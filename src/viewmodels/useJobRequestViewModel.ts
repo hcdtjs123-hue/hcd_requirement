@@ -20,7 +20,7 @@ export function useJobRequestViewModel() {
     try {
       jobs.value = await new GetJobRequests(jobRequestRepo).execute()
     } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Failed to load job requests.'
+      error.value = err instanceof Error ? err.message : 'Failed to load ERFs.'
     } finally {
       loading.value = false
     }
@@ -33,7 +33,7 @@ export function useJobRequestViewModel() {
       await createJobRequest(jobRequestRepo, payload)
       await refresh()
     } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Failed to create the job request.'
+      error.value = err instanceof Error ? err.message : 'Failed to create the ERF.'
       throw err
     } finally {
       saving.value = false
@@ -47,7 +47,7 @@ export function useJobRequestViewModel() {
       await updateJobRequest(jobRequestRepo, id, payload)
       await refresh()
     } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Failed to update the job request.'
+      error.value = err instanceof Error ? err.message : 'Failed to update the ERF.'
       throw err
     } finally {
       saving.value = false
@@ -61,7 +61,7 @@ export function useJobRequestViewModel() {
       await deleteJobRequest(jobRequestRepo, id)
       await refresh()
     } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Failed to delete the job request.'
+      error.value = err instanceof Error ? err.message : 'Failed to delete the ERF.'
       throw err
     } finally {
       saving.value = false
@@ -75,7 +75,7 @@ export function useJobRequestViewModel() {
       await closeJobRequest(jobRequestRepo, id, category, reason)
       await refresh()
     } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Failed to close the job request.'
+      error.value = err instanceof Error ? err.message : 'Failed to close the ERF.'
       throw err
     } finally {
       saving.value = false

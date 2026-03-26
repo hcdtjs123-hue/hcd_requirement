@@ -7,9 +7,9 @@
         ←
       </button>
       <div>
-        <p class="text-sm uppercase tracking-[0.3em] text-blue-600">Job Request</p>
-        <h1 class="mt-1 text-2xl font-semibold tracking-tight">
-          {{ isEdit ? 'Edit Job Request' : 'New Job Request Form' }}
+        <p class="text-sm uppercase tracking-[0.3em] text-blue-600">Employee Request Form (ERF)</p>
+        <h1 class="mt-3 text-3xl font-semibold tracking-tight">
+          {{ isEdit ? 'Edit ERF' : 'New ERF Form' }}
         </h1>
       </div>
     </div>
@@ -123,7 +123,7 @@
           <button type="submit"
             class="rounded-2xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
             :disabled="saving">
-            {{ saving ? 'Saving...' : isEdit ? 'Update Job Request' : 'Save Job Request' }}
+            {{ saving ? 'Saving...' : isEdit ? 'Update ERF' : 'Save ERF' }}
           </button>
           <button type="button"
             class="rounded-2xl border border-gray-200 px-6 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
@@ -285,7 +285,7 @@ function loadData() {
       searchDirectManager.value = job.direct_manager ?? ''
       searchApprovalDirectorBu.value = job.approval_director_bu ?? ''
     } else if (!loading.value) {
-      appToast.error('Job request data not found.')
+      appToast.error('ERF data not found.')
       router.back()
     }
   }
@@ -308,14 +308,14 @@ async function handleSubmit() {
   try {
     if (isEdit.value && id.value) {
       await update(id.value, { ...form })
-      appToast.updated('Job Request')
+      appToast.updated('ERF')
     } else {
       await create({ ...form })
-      appToast.created('Job Request')
+      appToast.created('ERF')
     }
     router.push('/job-requests')
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Failed to save job request.'
+    const message = err instanceof Error ? err.message : 'Failed to save ERF.'
     appToast.error(message)
   }
 }

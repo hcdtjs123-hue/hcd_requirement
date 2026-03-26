@@ -133,7 +133,7 @@
       <div>
         <h3 class="font-bold text-blue-900">Configuration Guide</h3>
         <p class="mt-2 text-sm text-blue-800 leading-relaxed">
-          These two roles are critical for the recruitment workflow. The <strong>GM HRD</strong> handles the first stage of HR approval, followed by the <strong>Director HRD</strong>. Both names will be automatically populated into new Job Requests based on these configurations.
+          These two roles are critical for the recruitment workflow. The <strong>GM HRD</strong> handles the first stage of HR approval, followed by the <strong>Director HRD</strong>. Both names will be automatically populated into new ERF submissions based on these configurations.
         </p>
       </div>
     </div>

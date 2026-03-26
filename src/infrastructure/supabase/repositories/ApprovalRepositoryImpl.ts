@@ -484,7 +484,7 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
       <div style="font-family: sans-serif; padding: 20px;">
         <h2>Approval Request (HCD)</h2>
         <p>Hello ${name},</p>
-        <p>There is a new Job Request submission that requires your approval.</p>
+        <p>There is a new Employee Request Form (ERF) submission that requires your approval.</p>
         <p>Please click the link below to view the details and provide your decision:</p>
         <a href="${approvalLink}" style="display:inline-block; padding:10px 20px; background-color:#2563eb; color:white; text-decoration:none; border-radius:5px;">Open Approval Form</a>
         <p style="margin-top:20px; font-size: 12px; color: #666;">If the button doesn't work, copy the following link: <br/>${approvalLink}</p>
@@ -495,7 +495,7 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
       await supabase.functions.invoke('resend-email', {
         body: {
           to: email,
-          subject: 'Job Request Approval Notification (HCD)',
+          subject: 'ERF Approval Notification (HCD)',
           html,
         },
       })
