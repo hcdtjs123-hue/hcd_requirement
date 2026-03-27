@@ -346,6 +346,7 @@ const filteredChains = computed(() => {
       c.job_request?.main_position,
       c.job_request?.site,
       c.job_request?.department,
+      c.job_request?.job_level,
       c.status,
       ...c.steps.map((step) => `${approvalRoleLabel(step.step_order)} ${stepApproverName(step)}`),
     ]
@@ -593,6 +594,7 @@ function buildJobRequestFields(chain: ApprovalChain) {
 
   return [
     { label: 'Department', value: jobRequest?.department || '-' },
+    { label: 'Job Level', value: jobRequest?.job_level || '-' },
     { label: 'Main Position', value: jobRequest?.main_position || '-' },
     { label: 'Site', value: jobRequest?.site || '-' },
     { label: 'Employment Status', value: jobRequest?.employment_status || '-' },

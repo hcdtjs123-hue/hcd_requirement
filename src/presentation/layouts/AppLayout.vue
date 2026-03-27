@@ -329,7 +329,7 @@ const navigationSections = computed((): NavSection[] => [
       },
       {
         to: '/master-data-management',
-        label: 'PT & Department',
+        label: 'PT, Dept, Level',
         icon: Building2,
         permissions: ['user:read'],
         adminOnly: true,
@@ -405,7 +405,7 @@ const pageTitle = computed(() => {
     { prefix: '/user-management', title: 'User Management' },
     { prefix: '/role-management', title: 'Role Management' },
     { prefix: '/custom-group-management', title: 'Custom Group Management' },
-    { prefix: '/master-data-management', title: 'PT & Department Master' },
+    { prefix: '/master-data-management', title: 'Master Data ERF' },
   ]
 
   const match = titleMatchers.find(

@@ -30,6 +30,7 @@ export interface ApprovalChain {
     id: string
     main_position: string | null
     department: string | null
+    job_level: string | null
     site: string | null
     employment_status: string | null
     direct_manager: string | null

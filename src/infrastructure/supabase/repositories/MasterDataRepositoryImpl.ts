@@ -4,6 +4,7 @@ import type { MasterDataInput, MasterDataItem, MasterDataType } from '@/domain/e
 const tableNameByType: Record<MasterDataType, string> = {
   pt: 'master_pt',
   department: 'master_department',
+  job_level: 'master_job_level',
 }
 
 export class MasterDataRepositoryImpl {

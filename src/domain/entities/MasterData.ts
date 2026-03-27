@@ -1,4 +1,4 @@
-export type MasterDataType = 'pt' | 'department'
+export type MasterDataType = 'pt' | 'department' | 'job_level'
 
 export interface MasterDataItem {
   id: string

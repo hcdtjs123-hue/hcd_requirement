@@ -15,6 +15,8 @@ export interface JobRequest {
   pt_pembebanan: string | null
   department_id?: string | null
   department: string | null
+  job_level_id?: string | null
+  job_level: string | null
   employment_status: EmploymentStatus | null
   direct_manager: string | null
   approval_director_bu_id: string | null
@@ -57,6 +59,8 @@ export interface JobRequestInput {
   pt_pembebanan: string
   department_id?: string | null
   department: string
+  job_level_id?: string | null
+  job_level: string
   employment_status: EmploymentStatus | ""
   direct_manager: string
   approval_director_bu_id: string | null

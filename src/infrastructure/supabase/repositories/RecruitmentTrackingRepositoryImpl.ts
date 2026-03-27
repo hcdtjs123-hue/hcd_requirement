@@ -6,10 +6,23 @@ const trackingSelect = `
   *,
   job_request:employee_request_form(
     id,
+    pt_pembebanan,
+    department,
+    job_level,
     main_position,
     site,
+    working_location,
     employment_status,
+    position_status,
     required_date,
+    status,
+    closed_date,
+    custom_grup_1:master_custom_grup_1(name),
+    custom_grup_2:master_custom_grup_2(name),
+    custom_grup_3:master_custom_grup_3(name),
+    custom_grup_4:master_custom_grup_4(name),
+    custom_grup_5:master_custom_grup_5(name),
+    custom_grup_6:master_custom_grup_6(name),
     approval_director_bu,
     approval_director_bu_date,
     approval_gm_hrd,
@@ -44,8 +57,30 @@ export class RecruitmentTrackingRepositoryImpl implements RecruitmentTrackingRep
   }
 
   private normalizeTracking(data: Record<string, unknown>): RecruitmentTracking {
+    const jobRequest = data.job_request as
+      | (Record<string, unknown> & {
+          custom_grup_1?: { name?: string | null } | null
+          custom_grup_2?: { name?: string | null } | null
+          custom_grup_3?: { name?: string | null } | null
+          custom_grup_4?: { name?: string | null } | null
+          custom_grup_5?: { name?: string | null } | null
+          custom_grup_6?: { name?: string | null } | null
+        })
+      | null
+
     return {
       ...(data as unknown as RecruitmentTracking),
+      job_request: jobRequest
+        ? ({
+            ...jobRequest,
+            custom_grup_1: jobRequest.custom_grup_1?.name ?? null,
+            custom_grup_2: jobRequest.custom_grup_2?.name ?? null,
+            custom_grup_3: jobRequest.custom_grup_3?.name ?? null,
+            custom_grup_4: jobRequest.custom_grup_4?.name ?? null,
+            custom_grup_5: jobRequest.custom_grup_5?.name ?? null,
+            custom_grup_6: jobRequest.custom_grup_6?.name ?? null,
+          } as RecruitmentTracking['job_request'])
+        : null,
     }
   }
 }

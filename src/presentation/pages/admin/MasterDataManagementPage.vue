@@ -2,9 +2,9 @@
   <div class="mx-auto flex max-w-6xl flex-col gap-8 text-gray-900">
     <div>
       <p class="text-sm uppercase tracking-[0.3em] text-blue-600">Administrator</p>
-      <h1 class="mt-3 text-3xl font-semibold tracking-tight">PT & Department Master</h1>
+      <h1 class="mt-3 text-3xl font-semibold tracking-tight">Master Data ERF</h1>
       <p class="mt-2 text-sm text-gray-600">
-        Manage reusable master data for Cost Center PT and Department fields in ERF.
+        Manage reusable master data for Cost Center PT, Department, and Job Level in ERF.
       </p>
     </div>
 
@@ -127,6 +127,7 @@ import { useAppToast } from '@/presentation/components/feedback/useAppToast'
 const tabs: Array<{ label: string; value: MasterDataType }> = [
   { label: 'PT', value: 'pt' },
   { label: 'Department', value: 'department' },
+  { label: 'Job Level', value: 'job_level' },
 ]
 
 const activeTab = ref<MasterDataType>('pt')

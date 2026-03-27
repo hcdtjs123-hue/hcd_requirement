@@ -224,6 +224,8 @@ const jobRequestFields = computed(() => {
   const jr = chain.value?.job_request
   if (!jr) return []
   return [
+    { label: 'Department', value: jr.department },
+    { label: 'Job Level', value: jr.job_level },
     { label: 'Main Position', value: jr.main_position },
     { label: 'Site', value: jr.site },
     { label: 'Employment Status', value: jr.employment_status },

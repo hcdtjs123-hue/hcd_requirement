@@ -13,6 +13,7 @@ export class JobRequestRepositoryImpl implements JobRequestRepository {
       *,
       pt:master_pt(id, name),
       department_ref:master_department(id, name),
+      job_level_ref:master_job_level(id, name),
       custom_grup_1:master_custom_grup_1(name),
       custom_grup_2:master_custom_grup_2(name),
       custom_grup_3:master_custom_grup_3(name),
@@ -40,6 +41,7 @@ export class JobRequestRepositoryImpl implements JobRequestRepository {
       *,
       pt:master_pt(id, name),
       department_ref:master_department(id, name),
+      job_level_ref:master_job_level(id, name),
       custom_grup_1:master_custom_grup_1(name),
       custom_grup_2:master_custom_grup_2(name),
       custom_grup_3:master_custom_grup_3(name),
@@ -71,6 +73,8 @@ export class JobRequestRepositoryImpl implements JobRequestRepository {
       pt_pembebanan: item.pt?.name ?? item.pt_pembebanan ?? null,
       department_id: item.department_id ?? item.department_ref?.id ?? null,
       department: item.department_ref?.name ?? item.department ?? null,
+      job_level_id: item.job_level_id ?? item.job_level_ref?.id ?? null,
+      job_level: item.job_level_ref?.name ?? item.job_level ?? null,
       custom_grup_1: item.custom_grup_1?.name ?? null,
       custom_grup_2: item.custom_grup_2?.name ?? null,
       custom_grup_3: item.custom_grup_3?.name ?? null,
@@ -278,34 +282,42 @@ export class JobRequestRepositoryImpl implements JobRequestRepository {
   private async resolveMasterDataIds(data: JobRequestInput) {
     const ptName = String(data.pt_pembebanan ?? '').trim()
     const departmentName = String(data.department ?? '').trim()
+    const jobLevelName = String(data.job_level ?? '').trim()
 
-    const [ptResult, departmentResult] = await Promise.all([
+    const [ptResult, departmentResult, jobLevelResult] = await Promise.all([
       ptName
         ? supabase.from('master_pt').select('id').eq('name', ptName).maybeSingle()
         : Promise.resolve({ data: null, error: null }),
       departmentName
         ? supabase.from('master_department').select('id').eq('name', departmentName).maybeSingle()
         : Promise.resolve({ data: null, error: null }),
+      jobLevelName
+        ? supabase.from('master_job_level').select('id').eq('name', jobLevelName).maybeSingle()
+        : Promise.resolve({ data: null, error: null }),
     ])
 
     if (ptResult.error) throw new Error(ptResult.error.message)
     if (departmentResult.error) throw new Error(departmentResult.error.message)
+    if (jobLevelResult.error) throw new Error(jobLevelResult.error.message)
 
     return {
       pt_id: data.pt_id || ptResult.data?.id || null,
       department_id: data.department_id || departmentResult.data?.id || null,
+      job_level_id: data.job_level_id || jobLevelResult.data?.id || null,
     }
   }
 
   private mapInput(
     data: JobRequestInput,
-    masterDataIds: { pt_id: string | null; department_id: string | null },
+    masterDataIds: { pt_id: string | null; department_id: string | null; job_level_id: string | null },
   ) {
     return {
       pt_id: masterDataIds.pt_id,
       pt_pembebanan: data.pt_pembebanan || null,
       department_id: masterDataIds.department_id,
       department: data.department || null,
+      job_level_id: masterDataIds.job_level_id,
+      job_level: data.job_level || null,
       employment_status: data.employment_status || null,
       direct_manager: data.direct_manager || null,
       approval_director_bu_id: data.approval_director_bu_id || null,

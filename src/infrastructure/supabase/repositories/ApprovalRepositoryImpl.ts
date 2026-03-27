@@ -23,6 +23,7 @@ const chainWithJobRequestSelect = `
     id,
     main_position,
     department,
+    job_level,
     site,
     employment_status,
     required_date,

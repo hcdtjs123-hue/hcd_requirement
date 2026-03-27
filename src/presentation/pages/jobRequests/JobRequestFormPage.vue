@@ -49,11 +49,20 @@
               </option>
             </select>
           </label>
-          <label class="space-y-2 md:col-span-2">
+          <label class="space-y-2">
             <span class="text-sm font-medium text-gray-700">Department</span>
             <select v-model="form.department" class="field">
               <option value="">Select department...</option>
               <option v-for="option in departmentOptions" :key="option.id" :value="option.name">
+                {{ option.name }}
+              </option>
+            </select>
+          </label>
+          <label class="space-y-2">
+            <span class="text-sm font-medium text-gray-700">Job Level</span>
+            <select v-model="form.job_level" class="field">
+              <option value="">Select job level...</option>
+              <option v-for="option in jobLevelOptions" :key="option.id" :value="option.name">
                 {{ option.name }}
               </option>
             </select>
@@ -252,6 +261,8 @@ function createEmptyForm(): JobRequestInput {
   return {
     pt_pembebanan: '',
     department: '',
+    job_level_id: null,
+    job_level: '',
     main_position: '',
     employment_status: '',
     position_status: '',
@@ -323,6 +334,9 @@ const ptOptions = computed(() => withCurrentOption(optionsByType.value.pt, form.
 const departmentOptions = computed(() =>
   withCurrentOption(optionsByType.value.department, form.department),
 )
+const jobLevelOptions = computed(() =>
+  withCurrentOption(optionsByType.value.job_level, form.job_level),
+)
 
 async function loadDirectManagers() {
   const { data, error } = await supabase
@@ -377,6 +391,7 @@ function loadData() {
       Object.assign(form, {
         pt_pembebanan: job.pt_pembebanan ?? '',
         department: job.department ?? '',
+        job_level: job.job_level ?? '',
         main_position: job.main_position,
         employment_status: job.employment_status ?? '',
         position_status: job.position_status ?? '',
@@ -411,7 +426,7 @@ onMounted(() => {
   loadDirectManagers()
   loadAllOptions()
   loadMasterDataOptions().catch(() => {
-    appToast.error('Failed to load PT and Department master data.')
+    appToast.error('Failed to load PT, Department, and Job Level master data.')
   })
   document.addEventListener('click', handleClickOutside)
 })

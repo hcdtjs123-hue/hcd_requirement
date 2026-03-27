@@ -240,6 +240,7 @@ function buildTemplate(job: JobRequest) {
             ${buildRow('Request Date', formatDate(job.created_at))}
             ${buildRow('Required Position', lineValue(job.main_position))}
             ${buildRow('Department', lineValue(job.department))}
+            ${buildRow('Job Level', lineValue(job.job_level))}
             ${buildRow('Site', lineValue(job.site))}
             ${buildRow('Working Location', lineValue(job.working_location))}
             ${buildRow('Required Date', formatDate(job.required_date))}

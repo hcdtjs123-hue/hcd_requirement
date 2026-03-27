@@ -11,6 +11,7 @@ export function useMasterDataViewModel() {
   const optionsByType = ref<MasterDataOptionState>({
     pt: [],
     department: [],
+    job_level: [],
   })
 
   async function refreshOptions(type: MasterDataType) {
@@ -30,12 +31,14 @@ export function useMasterDataViewModel() {
     loading.value = true
     error.value = null
     try {
-      const [pt, department] = await Promise.all([
+      const [pt, department, jobLevel] = await Promise.all([
         masterDataRepo.getAll('pt'),
         masterDataRepo.getAll('department'),
+        masterDataRepo.getAll('job_level'),
       ])
       optionsByType.value.pt = pt
       optionsByType.value.department = department
+      optionsByType.value.job_level = jobLevel
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to load master data options.'
       throw err
