@@ -12,11 +12,12 @@ function escapeHtml(value: unknown) {
 function formatDate(value: string | null | undefined) {
   if (!value) return '-'
 
-  return new Date(value).toLocaleDateString('en-US', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric',
-  })
+  const date = new Date(value)
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+
+  return `${year}-${month}-${day}`
 }
 
 function lineValue(value: string | number | null | undefined) {
@@ -41,6 +42,23 @@ function buildRow(label: string, value: string, multiline = false) {
       <div class="field-label">${escapeHtml(label)}</div>
       <div class="field-separator">:</div>
       <div class="field-value${multiline ? ' multiline' : ''}">${value}</div>
+    </div>
+  `
+}
+
+function buildApprovalItem(
+  label: string,
+  name: string | number | null | undefined,
+  date: string | null | undefined,
+) {
+  return `
+    <div class="approval-row">
+      <div class="field-label">${escapeHtml(label)}</div>
+      <div class="field-separator">:</div>
+      <div class="approval-field-value">${nameOnly(name)}</div>
+      <div class="field-label approval-date-title">Date</div>
+      <div class="field-separator">:</div>
+      <div class="approval-date-value">${escapeHtml(formatDate(date))}</div>
     </div>
   `
 }
@@ -116,6 +134,13 @@ function buildTemplate(job: JobRequest) {
           align-items: start;
           margin-top: 8px;
         }
+        .approval-row {
+          display: grid;
+          grid-template-columns: 165px 12px minmax(180px, 260px) 42px 12px 1fr;
+          gap: 6px;
+          align-items: start;
+          margin-top: 8px;
+        }
         .field-label {
           font-weight: 700;
           color: #334155;
@@ -131,6 +156,17 @@ function buildTemplate(job: JobRequest) {
           color: #111827;
           word-break: break-word;
         }
+        .approval-field-value,
+        .approval-date-value {
+          min-height: 20px;
+          padding: 0 2px 3px;
+          border-bottom: 1px solid #cbd5e1;
+          color: #111827;
+          word-break: break-word;
+        }
+        .approval-date-title {
+          text-align: right;
+        }
         .field-value.multiline {
           min-height: 60px;
         }
@@ -143,38 +179,6 @@ function buildTemplate(job: JobRequest) {
         .closing-box {
           padding: 12px 14px;
           border: 1px solid #cbd5e1;
-        }
-        .signature-table {
-          width: 100%;
-          border-collapse: collapse;
-          table-layout: fixed;
-          margin-top: 10px;
-        }
-        .signature-table td {
-          border: 1px solid #111827;
-          text-align: center;
-          vertical-align: middle;
-          padding: 8px;
-        }
-        .signature-group {
-          font-size: 10px;
-          font-weight: 700;
-          letter-spacing: 0.08em;
-        }
-        .signature-space {
-          height: 96px;
-          position: relative;
-        }
-        .signature-name {
-          position: absolute;
-          left: 8px;
-          right: 8px;
-          bottom: 10px;
-          font-size: 11px;
-          font-weight: 700;
-        }
-        .signature-role {
-          font-size: 11px;
         }
         .approval-note {
           margin-top: 10px;
@@ -242,33 +246,11 @@ function buildTemplate(job: JobRequest) {
           }
 
           <div class="section">
-            <p class="section-title">Signatures</p>
-            <table class="signature-table">
-              <tr>
-                <td class="signature-group">Submitted by:</td>
-                <td class="signature-group" colspan="3">Approved by:</td>
-              </tr>
-              <tr>
-                <td class="signature-space">
-                  <div class="signature-name">${nameOnly(job.created_by_name || job.direct_manager)}</div>
-                </td>
-                <td class="signature-space">
-                  <div class="signature-name">${nameOnly(job.approval_director_bu)}</div>
-                </td>
-                <td class="signature-space">
-                  <div class="signature-name">${nameOnly(job.approval_gm_hrd)}</div>
-                </td>
-                <td class="signature-space">
-                  <div class="signature-name">${nameOnly(job.approval_director_hrd)}</div>
-                </td>
-              </tr>
-              <tr>
-                <td class="signature-role">Applicant</td>
-                <td class="signature-role">BU Director</td>
-                <td class="signature-role">GM HRD</td>
-                <td class="signature-role">Director HRD</td>
-              </tr>
-            </table>
+            <p class="section-title">Sistem Approval</p>
+            ${buildApprovalItem('Requester', job.created_by_name || job.direct_manager, job.created_at)}
+            ${buildApprovalItem('BU Director', job.approval_director_bu, job.approval_director_bu_date)}
+            ${buildApprovalItem('GM HRD', job.approval_gm_hrd, job.approval_gm_hrd_date)}
+            ${buildApprovalItem('HR Director', job.approval_director_hrd, job.approval_director_hrd_date)}
             ${
               isFullyApproved
                 ? `

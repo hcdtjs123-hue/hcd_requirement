@@ -665,7 +665,7 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
     const html = `
       <div style="font-family: sans-serif; padding: 20px;">
         <h2>Approval Request (HCD)</h2>
-        <p>Hello ${name},</p>
+        <p>Dear ${name},</p>
         <p>There is a new Employee Request Form (ERF) submission that requires your approval.</p>
         <p>Please click the link below to view the details and provide your decision:</p>
         <a href="${approvalLink}" style="display:inline-block; padding:10px 20px; background-color:#2563eb; color:white; text-decoration:none; border-radius:5px;">Open Approval Form</a>
