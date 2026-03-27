@@ -10,7 +10,7 @@ import type { CandidateDataRepository } from '@/domain/repositories/CandidateDat
 
 const candidateSelect = `
   *,
-  job_request:new_employee_application_form(
+  job_request:employee_request_form(
     id,
     main_position,
     site,
@@ -30,7 +30,7 @@ const candidateSelect = `
 export class CandidateDataRepositoryImpl implements CandidateDataRepository {
   async getAll(): Promise<CandidateRecord[]> {
     const accessScope = await this.getAccessScope()
-    let query = supabase.from('main_application_form').select(candidateSelect)
+    let query = supabase.from('candidate_form').select(candidateSelect)
 
     if (accessScope.isCandidate && accessScope.userId) {
       query = query.eq('candidate_id', accessScope.userId)
@@ -53,7 +53,7 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
 
   async getById(id: string): Promise<CandidateRecord | null> {
     const accessScope = await this.getAccessScope()
-    let query = supabase.from('main_application_form').select(candidateSelect).eq('id', id)
+    let query = supabase.from('candidate_form').select(candidateSelect).eq('id', id)
 
     if (accessScope.isCandidate && accessScope.userId) {
       query = query.eq('candidate_id', accessScope.userId)
@@ -82,7 +82,7 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
     }
 
     const { data: created, error } = await supabase
-      .from('main_application_form')
+      .from('candidate_form')
       .insert({
         ...this.mapCandidateInput(data),
         candidate_id: accessScope.isCandidate
@@ -114,7 +114,7 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
     }
 
     let query = supabase
-      .from('main_application_form')
+      .from('candidate_form')
       .update({
         ...this.mapCandidateInput(data),
         candidate_id: accessScope.isCandidate ? accessScope.userId : (data.candidate_id ?? null),
@@ -154,7 +154,7 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
 
   async delete(id: string): Promise<void> {
     const accessScope = await this.getAccessScope()
-    let query = supabase.from('main_application_form').delete().eq('id', id)
+    let query = supabase.from('candidate_form').delete().eq('id', id)
 
     if (accessScope.isCandidate && accessScope.userId) {
       query = query.eq('candidate_id', accessScope.userId)
@@ -212,7 +212,7 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
 
     if (isManager) {
       const { data: ownedJobRequests, error: ownedJobRequestsError } = await supabase
-        .from('new_employee_application_form')
+        .from('employee_request_form')
         .select('id')
         .eq('created_by', user.id)
 

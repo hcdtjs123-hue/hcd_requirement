@@ -10,51 +10,28 @@ import type { UserRole } from '@/domain/entities/User'
 
 export class UserManagementRepositoryImpl implements UserManagementRepository {
   async getAllUsers(): Promise<ManagedUser[]> {
-    // Get all employees with their roles
-    const { data: employees, error: employeeError } = await supabase
-      .from('employees')
+    const accessScope = await this.getAccessScope()
+
+    const { data: profiles, error: profileError } = await supabase
+      .from('profiles')
       .select(
         `id,
          username,
          email,
-         first_name,
-         middle_name,
-         last_name,
-         main_position,
-         hire_location,
-         date_of_birth,
-         place_of_birth,
-         nationality,
-         marital_status,
-         religion,
-         gender,
-        ethnic,
-        blood_type,
-        no_id,
-        employee_code,
-         department,
-         employment_type,
-         employment_start_date,
-         emergency_contact_name,
-          emergency_contact_phone,
-          custom_grup_1_id,
-          custom_grup_2_id,
-          custom_grup_3_id,
-          custom_grup_4_id,
-          custom_grup_5_id,
-          custom_grup_6_id,
-          is_active,
-          created_at,
-          updated_at`,
+         full_name,
+         phone,
+         avatar_url,
+         deleted_at,
+          created_at`,
       )
       .order('created_at', { ascending: false })
 
-    if (employeeError) throw new Error(employeeError.message)
+    if (profileError) throw new Error(profileError.message)
 
-    if (!employees || employees.length === 0) return []
+    if (!profiles || profiles.length === 0) return []
 
     // Get user_roles for all users
-    const userIds = employees.map((p) => p.id)
+    const userIds = profiles.map((p) => p.id)
     const { data: userRoles, error: rolesError } = await supabase
       .from('user_roles')
       .select('user_id, role_id, roles(name)')
@@ -67,8 +44,10 @@ export class UserManagementRepositoryImpl implements UserManagementRepository {
     if (authError) throw new Error(authError.message)
 
     const emailMap = new Map<string, string>()
+    const creatorMap = new Map<string, string | null>()
     for (const u of authData.users) {
       if (u.email) emailMap.set(u.id, u.email)
+      creatorMap.set(u.id, this.extractCreatorId(u))
     }
 
     // Map roles by user_id
@@ -85,103 +64,111 @@ export class UserManagementRepositoryImpl implements UserManagementRepository {
       }
     }
 
-    return employees.map((employee) => {
+    const filteredEmployees =
+      accessScope.isStaff && accessScope.userId
+        ? profiles.filter((employee) => {
+            const roleInfo = roleMap.get(employee.id)
+            return (
+              this.normalizeRoleName(roleInfo?.role_name) === 'candidate' &&
+              creatorMap.get(employee.id) === accessScope.userId
+            )
+          })
+        : profiles
+
+    return filteredEmployees.map((employee) => {
       const roleInfo = roleMap.get(employee.id)
       return {
         id: employee.id,
         email: emailMap.get(employee.id) ?? '',
         username: employee.username ?? null,
-        first_name: employee.first_name ?? null,
-        middle_name: employee.middle_name ?? null,
-        last_name: employee.last_name ?? null,
-        main_position: employee.main_position ?? null,
-        hire_location: employee.hire_location ?? null,
-        date_of_birth: employee.date_of_birth ?? null,
-        place_of_birth: employee.place_of_birth ?? null,
-        nationality: employee.nationality ?? null,
-        marital_status: employee.marital_status ?? null,
-        religion: employee.religion ?? null,
-        gender: employee.gender ?? null,
-        ethnic: employee.ethnic ?? null,
-        blood_type: employee.blood_type ?? null,
-        no_id: employee.no_id ?? null,
-        employee_code: employee.employee_code ?? null,
-        department: employee.department ?? null,
-        employment_type: employee.employment_type ?? null,
-        employment_start_date: employee.employment_start_date ?? null,
-        emergency_contact_name: employee.emergency_contact_name ?? null,
-        emergency_contact_phone: employee.emergency_contact_phone ?? null,
-        custom_grup_1_id: employee.custom_grup_1_id ?? null,
-        custom_grup_2_id: employee.custom_grup_2_id ?? null,
-        custom_grup_3_id: employee.custom_grup_3_id ?? null,
-        custom_grup_4_id: employee.custom_grup_4_id ?? null,
-        custom_grup_5_id: employee.custom_grup_5_id ?? null,
-        custom_grup_6_id: employee.custom_grup_6_id ?? null,
-        is_active: employee.is_active ?? null,
+        full_name: employee.full_name ?? null,
+        phone: employee.phone ?? null,
+        first_name: employee.full_name ?? null,
+        middle_name: null,
+        last_name: null,
+        main_position: null,
+        hire_location: null,
+        date_of_birth: null,
+        place_of_birth: null,
+        nationality: null,
+        marital_status: null,
+        religion: null,
+        gender: null,
+        ethnic: null,
+        blood_type: null,
+        no_id: null,
+        employee_code: null,
+        department: null,
+        employment_type: null,
+        employment_start_date: null,
+        emergency_contact_name: null,
+        emergency_contact_phone: employee.phone ?? null,
+        custom_grup_1_id: null,
+        custom_grup_2_id: null,
+        custom_grup_3_id: null,
+        custom_grup_4_id: null,
+        custom_grup_5_id: null,
+        custom_grup_6_id: null,
+        is_active: !employee.deleted_at,
         role: (roleInfo?.role_name as UserRole) ?? null,
         role_id: roleInfo?.role_id ?? null,
         created_at: employee.created_at ?? null,
-        updated_at: employee.updated_at ?? null,
+        updated_at: null,
       }
     })
   }
 
   async getRoles(): Promise<RoleOption[]> {
+    const accessScope = await this.getAccessScope()
     const { data, error } = await supabase
       .from('roles')
       .select('id, name, description')
       .order('name', { ascending: true })
 
     if (error) throw new Error(error.message)
-    return data ?? []
+
+    const roles = data ?? []
+    if (!accessScope.isStaff) {
+      return roles
+    }
+
+    return roles.filter((role) => this.normalizeRoleName(role.name) === 'candidate')
   }
 
   async createUser(input: CreateUserInput): Promise<ManagedUser> {
+    const accessScope = await this.getAccessScope()
+    const roleName = await this.getRoleNameById(input.role_id)
+
+    if (accessScope.isStaff && roleName !== 'candidate') {
+      throw new Error('Staff can only create users with the candidate role.')
+    }
+
     // 1. Create auth user via admin API
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email: input.email,
       password: input.password,
       email_confirm: true,
+      user_metadata: accessScope.userId
+        ? {
+            created_by: accessScope.userId,
+          }
+        : undefined,
     })
 
     if (authError) throw new Error(authError.message)
     if (!authData.user) throw new Error('Failed to create user account.')
 
     const userId = authData.user.id
+    const fullName = input.full_name.trim()
 
     // 2. Update employee (trigger already inserts, so we update)
     const { error: employeeError } = await supabase
-      .from('employees')
+      .from('profiles')
       .update({
         username: input.username,
         email: input.email,
-        first_name: input.first_name,
-        middle_name: input.middle_name,
-        last_name: input.last_name,
-        main_position: input.main_position,
-        hire_location: input.hire_location,
-        date_of_birth: input.date_of_birth || null,
-        place_of_birth: input.place_of_birth,
-        nationality: input.nationality,
-        marital_status: input.marital_status,
-        religion: input.religion,
-        gender: input.gender,
-        ethnic: input.ethnic,
-        blood_type: input.blood_type,
-        no_id: input.no_id,
-        employee_code: input.employee_code ?? null,
-        department: input.department ?? null,
-        employment_type: input.employment_type ?? null,
-        employment_start_date: input.employment_start_date || null,
-        emergency_contact_name: input.emergency_contact_name ?? null,
-        emergency_contact_phone: input.emergency_contact_phone ?? null,
-        custom_grup_1_id: input.custom_grup_1_id ?? null,
-        custom_grup_2_id: input.custom_grup_2_id ?? null,
-        custom_grup_3_id: input.custom_grup_3_id ?? null,
-        custom_grup_4_id: input.custom_grup_4_id ?? null,
-        custom_grup_5_id: input.custom_grup_5_id ?? null,
-        custom_grup_6_id: input.custom_grup_6_id ?? null,
-        is_active: input.is_active ?? true,
+        full_name: fullName,
+        phone: input.phone?.trim() || null,
       })
       .eq('id', userId)
 
@@ -196,51 +183,56 @@ export class UserManagementRepositoryImpl implements UserManagementRepository {
     if (roleError) throw new Error(roleError.message)
 
     // 4. Get the role name
-    const { data: roleData } = await supabase
-      .from('roles')
-      .select('name')
-      .eq('id', input.role_id)
-      .single()
-
     return {
       id: userId,
       email: input.email,
       username: input.username,
-      first_name: input.first_name,
-      middle_name: input.middle_name,
-      last_name: input.last_name,
-      main_position: input.main_position,
-      hire_location: input.hire_location,
-      date_of_birth: input.date_of_birth,
-      place_of_birth: input.place_of_birth,
-      nationality: input.nationality,
-      marital_status: input.marital_status,
-      religion: input.religion,
-      gender: input.gender,
-      ethnic: input.ethnic,
-      blood_type: input.blood_type,
-      no_id: input.no_id,
-      employee_code: input.employee_code ?? null,
-      department: input.department ?? null,
-      employment_type: input.employment_type ?? null,
-      employment_start_date: input.employment_start_date ?? null,
-      emergency_contact_name: input.emergency_contact_name ?? null,
-      emergency_contact_phone: input.emergency_contact_phone ?? null,
-      custom_grup_1_id: input.custom_grup_1_id ?? null,
-      custom_grup_2_id: input.custom_grup_2_id ?? null,
-      custom_grup_3_id: input.custom_grup_3_id ?? null,
-      custom_grup_4_id: input.custom_grup_4_id ?? null,
-      custom_grup_5_id: input.custom_grup_5_id ?? null,
-      custom_grup_6_id: input.custom_grup_6_id ?? null,
-      is_active: input.is_active ?? true,
-      role: (roleData?.name as UserRole) ?? null,
+      full_name: fullName,
+      phone: input.phone?.trim() || null,
+      first_name: fullName,
+      middle_name: null,
+      last_name: null,
+      main_position: null,
+      hire_location: null,
+      date_of_birth: null,
+      place_of_birth: null,
+      nationality: null,
+      marital_status: null,
+      religion: null,
+      gender: null,
+      ethnic: null,
+      blood_type: null,
+      no_id: null,
+      employee_code: null,
+      department: null,
+      employment_type: null,
+      employment_start_date: null,
+      emergency_contact_name: null,
+      emergency_contact_phone: null,
+      custom_grup_1_id: null,
+      custom_grup_2_id: null,
+      custom_grup_3_id: null,
+      custom_grup_4_id: null,
+      custom_grup_5_id: null,
+      custom_grup_6_id: null,
+      is_active: true,
+      role: (roleName as UserRole) ?? null,
       role_id: input.role_id,
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+      updated_at: null,
     }
   }
 
   async updateUser(userId: string, input: UpdateUserInput): Promise<ManagedUser> {
+    const accessScope = await this.getAccessScope()
+    const roleName = await this.getRoleNameById(input.role_id)
+
+    await this.assertCanManageUser(userId, accessScope)
+
+    if (accessScope.isStaff && roleName !== 'candidate') {
+      throw new Error('Staff can only save users with the candidate role.')
+    }
+
     const authPayload: { email: string; password?: string } = {
       email: input.email,
     }
@@ -251,39 +243,15 @@ export class UserManagementRepositoryImpl implements UserManagementRepository {
 
     const { error: authError } = await supabase.auth.admin.updateUserById(userId, authPayload)
     if (authError) throw new Error(authError.message)
+    const fullName = input.full_name.trim()
 
     const { error: employeeError } = await supabase
-      .from('employees')
+      .from('profiles')
       .update({
         username: input.username,
         email: input.email,
-        first_name: input.first_name,
-        middle_name: input.middle_name,
-        last_name: input.last_name,
-        main_position: input.main_position,
-        hire_location: input.hire_location,
-        date_of_birth: input.date_of_birth || null,
-        place_of_birth: input.place_of_birth,
-        nationality: input.nationality,
-        marital_status: input.marital_status,
-        religion: input.religion,
-        gender: input.gender,
-        ethnic: input.ethnic,
-        blood_type: input.blood_type,
-        no_id: input.no_id,
-        employee_code: input.employee_code ?? null,
-        department: input.department ?? null,
-        employment_type: input.employment_type ?? null,
-        employment_start_date: input.employment_start_date || null,
-        emergency_contact_name: input.emergency_contact_name ?? null,
-        emergency_contact_phone: input.emergency_contact_phone ?? null,
-        custom_grup_1_id: input.custom_grup_1_id ?? null,
-        custom_grup_2_id: input.custom_grup_2_id ?? null,
-        custom_grup_3_id: input.custom_grup_3_id ?? null,
-        custom_grup_4_id: input.custom_grup_4_id ?? null,
-        custom_grup_5_id: input.custom_grup_5_id ?? null,
-        custom_grup_6_id: input.custom_grup_6_id ?? null,
-        is_active: input.is_active ?? true,
+        full_name: fullName,
+        phone: input.phone?.trim() || null,
       })
       .eq('id', userId)
 
@@ -299,59 +267,65 @@ export class UserManagementRepositoryImpl implements UserManagementRepository {
 
     if (insertError) throw new Error(insertError.message)
 
-    const { data: roleData, error: roleError } = await supabase
-      .from('roles')
-      .select('name')
-      .eq('id', input.role_id)
-      .single()
-
-    if (roleError) throw new Error(roleError.message)
-
     return {
       id: userId,
       email: input.email,
       username: input.username,
-      first_name: input.first_name,
-      middle_name: input.middle_name,
-      last_name: input.last_name,
-      main_position: input.main_position,
-      hire_location: input.hire_location,
-      date_of_birth: input.date_of_birth,
-      place_of_birth: input.place_of_birth,
-      nationality: input.nationality,
-      marital_status: input.marital_status,
-      religion: input.religion,
-      gender: input.gender,
-      ethnic: input.ethnic,
-      blood_type: input.blood_type,
-      no_id: input.no_id,
-      employee_code: input.employee_code ?? null,
-      department: input.department ?? null,
-      employment_type: input.employment_type ?? null,
-      employment_start_date: input.employment_start_date ?? null,
-      emergency_contact_name: input.emergency_contact_name ?? null,
-      emergency_contact_phone: input.emergency_contact_phone ?? null,
-      custom_grup_1_id: input.custom_grup_1_id ?? null,
-      custom_grup_2_id: input.custom_grup_2_id ?? null,
-      custom_grup_3_id: input.custom_grup_3_id ?? null,
-      custom_grup_4_id: input.custom_grup_4_id ?? null,
-      custom_grup_5_id: input.custom_grup_5_id ?? null,
-      custom_grup_6_id: input.custom_grup_6_id ?? null,
-      is_active: input.is_active ?? true,
-      role: (roleData?.name as UserRole) ?? null,
+      full_name: fullName,
+      phone: input.phone?.trim() || null,
+      first_name: fullName,
+      middle_name: null,
+      last_name: null,
+      main_position: null,
+      hire_location: null,
+      date_of_birth: null,
+      place_of_birth: null,
+      nationality: null,
+      marital_status: null,
+      religion: null,
+      gender: null,
+      ethnic: null,
+      blood_type: null,
+      no_id: null,
+      employee_code: null,
+      department: null,
+      employment_type: null,
+      employment_start_date: null,
+      emergency_contact_name: null,
+      emergency_contact_phone: null,
+      custom_grup_1_id: null,
+      custom_grup_2_id: null,
+      custom_grup_3_id: null,
+      custom_grup_4_id: null,
+      custom_grup_5_id: null,
+      custom_grup_6_id: null,
+      is_active: true,
+      role: (roleName as UserRole) ?? null,
       role_id: input.role_id,
       created_at: null,
-      updated_at: new Date().toISOString(),
+      updated_at: null,
     }
   }
 
   async deleteUser(userId: string): Promise<void> {
+    const accessScope = await this.getAccessScope()
+    await this.assertCanManageUser(userId, accessScope)
+
     // Delete from auth (cascades to employees and user_roles)
     const { error } = await supabase.auth.admin.deleteUser(userId)
     if (error) throw new Error(error.message)
   }
 
   async updateUserRole(userId: string, roleId: string): Promise<void> {
+    const accessScope = await this.getAccessScope()
+    const roleName = await this.getRoleNameById(roleId)
+
+    await this.assertCanManageUser(userId, accessScope)
+
+    if (accessScope.isStaff && roleName !== 'candidate') {
+      throw new Error('Staff can only assign the candidate role.')
+    }
+
     // Remove old role
     const { error: deleteError } = await supabase.from('user_roles').delete().eq('user_id', userId)
 
@@ -363,5 +337,113 @@ export class UserManagementRepositoryImpl implements UserManagementRepository {
       .insert({ user_id: userId, role_id: roleId })
 
     if (insertError) throw new Error(insertError.message)
+  }
+
+  private async getAccessScope() {
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser()
+
+    if (userError) {
+      throw new Error(userError.message)
+    }
+
+    if (!user) {
+      return {
+        isStaff: false,
+        roleName: null as string | null,
+        userId: null as string | null,
+      }
+    }
+
+    const { data: roleData, error: roleError } = await supabase
+      .from('user_roles')
+      .select('roles(name)')
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    if (roleError) {
+      throw new Error(roleError.message)
+    }
+
+    const roleName = (roleData as { roles?: { name?: string } | null } | null)?.roles?.name ?? null
+
+    return {
+      isStaff: this.isStaffRole(roleName),
+      roleName,
+      userId: user.id,
+    }
+  }
+
+  private async getRoleNameById(roleId: string) {
+    const { data: roleData, error: roleError } = await supabase
+      .from('roles')
+      .select('name')
+      .eq('id', roleId)
+      .single()
+
+    if (roleError) {
+      throw new Error(roleError.message)
+    }
+
+    return this.normalizeRoleName(roleData?.name)
+  }
+
+  private async assertCanManageUser(
+    userId: string,
+    accessScope: { isStaff: boolean; userId: string | null },
+  ) {
+    if (!accessScope.isStaff || !accessScope.userId) {
+      return
+    }
+
+    const { data: roleData, error: roleError } = await supabase
+      .from('user_roles')
+      .select('roles(name)')
+      .eq('user_id', userId)
+      .maybeSingle()
+
+    if (roleError) {
+      throw new Error(roleError.message)
+    }
+
+    const targetRoleName = this.normalizeRoleName(
+      (roleData as { roles?: { name?: string } | null } | null)?.roles?.name,
+    )
+
+    if (targetRoleName !== 'candidate') {
+      throw new Error('Staff can only manage users with the candidate role.')
+    }
+
+    const { data: authData, error: authError } = await supabase.auth.admin.listUsers()
+    if (authError) throw new Error(authError.message)
+
+    const targetUser = authData.users.find((item) => item.id === userId)
+    if (!targetUser) {
+      throw new Error('User account was not found.')
+    }
+
+    if (this.extractCreatorId(targetUser) !== accessScope.userId) {
+      throw new Error('You can only manage candidate accounts that you created.')
+    }
+  }
+
+  private extractCreatorId(user: { app_metadata?: unknown; user_metadata?: unknown }) {
+    const userMetadata = (user.user_metadata ?? {}) as Record<string, unknown>
+    const appMetadata = (user.app_metadata ?? {}) as Record<string, unknown>
+
+    const creatorId = userMetadata.created_by ?? appMetadata.created_by
+    return typeof creatorId === 'string' && creatorId.trim() ? creatorId : null
+  }
+
+  private normalizeRoleName(roleName: unknown) {
+    return String(roleName ?? '')
+      .toLowerCase()
+      .trim()
+  }
+
+  private isStaffRole(roleName: unknown) {
+    return this.normalizeRoleName(roleName).startsWith('staff')
   }
 }

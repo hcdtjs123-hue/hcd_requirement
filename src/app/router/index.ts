@@ -152,12 +152,6 @@ const router = createRouter({
           meta: { requiredPermissions: ['user:read'] },
         },
         {
-          path: 'user-management/history',
-          name: 'user-history',
-          component: () => import('@/presentation/pages/admin/UserHistoryPage.vue'),
-          meta: { requiredPermissions: ['user:read'] },
-        },
-        {
           path: 'user-management/create',
           name: 'user-management-create',
           component: () => import('@/presentation/pages/admin/UserManagementFormPage.vue'),
@@ -173,7 +167,10 @@ const router = createRouter({
           path: 'custom-group-management',
           name: 'custom-group-management',
           component: () => import('@/presentation/pages/admin/CustomGroupManagementPage.vue'),
-          meta: { requiredPermissions: ['user:read'] },
+          meta: {
+            requiredPermissions: ['user:read'],
+            allowedRoles: ['admin', 'administrator', 'super admin', 'super_admin'],
+          },
         },
         {
           path: 'role-management',

@@ -56,8 +56,8 @@
           
           <div class="grid grid-cols-2 gap-4">
              <div class="space-y-1">
-              <p class="text-xs font-bold uppercase text-gray-400">Position</p>
-              <p class="text-sm font-medium text-gray-700">{{ gmApprover.employee.main_position || '-' }}</p>
+              <p class="text-xs font-bold uppercase text-gray-400">Username</p>
+              <p class="text-sm font-medium text-gray-700">{{ gmApprover.employee.username ? `@${gmApprover.employee.username}` : '-' }}</p>
             </div>
              <div class="space-y-1">
               <p class="text-xs font-bold uppercase text-gray-400">Phone</p>
@@ -107,8 +107,8 @@
           
           <div class="grid grid-cols-2 gap-4">
              <div class="space-y-1">
-              <p class="text-xs font-bold uppercase text-gray-400">Position</p>
-              <p class="text-sm font-medium text-gray-700">{{ directorApprover.employee.main_position || '-' }}</p>
+              <p class="text-xs font-bold uppercase text-gray-400">Username</p>
+              <p class="text-sm font-medium text-gray-700">{{ directorApprover.employee.username ? `@${directorApprover.employee.username}` : '-' }}</p>
             </div>
              <div class="space-y-1">
               <p class="text-xs font-bold uppercase text-gray-400">Phone</p>
@@ -161,9 +161,7 @@ const directorApprover = computed(() =>
 )
 
 function getFullName(emp: any) {
-  return [emp.first_name, emp.middle_name, emp.last_name]
-    .filter(Boolean)
-    .join(' ')
+  return emp?.full_name || emp?.username || '-'
 }
 
 function goToEdit() {

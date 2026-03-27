@@ -11,7 +11,7 @@ import type { RecruitmentTrackingRepository } from "@/domain/repositories/Recrui
 const trackingSelect = `
   *,
   files:job_posting_files(*),
-  job_request:new_employee_application_form(
+  job_request:employee_request_form(
     id,
     main_position,
     site,
@@ -174,7 +174,7 @@ export class RecruitmentTrackingRepositoryImpl implements RecruitmentTrackingRep
     }
 
     const { data: candidateAccount, error: accountError } = await supabase
-      .from("employees")
+      .from("profiles")
       .select("id, email")
       .ilike("email", candidateEmail)
       .maybeSingle()

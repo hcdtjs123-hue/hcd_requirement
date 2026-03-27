@@ -35,11 +35,10 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   async function fetchUserProfile(userId: string): Promise<Partial<User>> {
-    // Fetch employee profile
-    const { data: employee } = await supabase
-      .from("employees")
+    const { data: profile } = await supabase
+      .from("profiles")
       .select(
-        "username, first_name, middle_name, last_name, main_position, hire_location, date_of_birth, place_of_birth, nationality, marital_status, religion, gender, ethnic, blood_type, avatar_url, is_active, created_at, updated_at",
+        "username, full_name, phone, avatar_url, created_at, email",
       )
       .eq("id", userId)
       .maybeSingle()
@@ -76,24 +75,14 @@ export const useAuthStore = defineStore("auth", () => {
     }
 
     return {
-      username: employee?.username ?? undefined,
-      first_name: employee?.first_name ?? undefined,
-      middle_name: employee?.middle_name ?? undefined,
-      last_name: employee?.last_name ?? undefined,
-      main_position: employee?.main_position ?? undefined,
-      hire_location: employee?.hire_location ?? undefined,
-      date_of_birth: employee?.date_of_birth ?? undefined,
-      place_of_birth: employee?.place_of_birth ?? undefined,
-      nationality: employee?.nationality ?? undefined,
-      marital_status: employee?.marital_status ?? undefined,
-      religion: employee?.religion ?? undefined,
-      gender: employee?.gender ?? undefined,
-      ethnic: employee?.ethnic ?? undefined,
-      blood_type: employee?.blood_type ?? undefined,
-      avatar_url: employee?.avatar_url ?? undefined,
-      is_active: employee?.is_active ?? undefined,
-      created_at: employee?.created_at ?? undefined,
-      updated_at: employee?.updated_at ?? undefined,
+      username: profile?.username ?? undefined,
+      full_name: profile?.full_name ?? undefined,
+      first_name: profile?.full_name ?? undefined,
+      middle_name: undefined,
+      last_name: undefined,
+      avatar_url: profile?.avatar_url ?? undefined,
+      created_at: profile?.created_at ?? undefined,
+      is_active: true,
       role: roleName as UserRole | undefined,
       permissions,
     }
@@ -102,10 +91,6 @@ export const useAuthStore = defineStore("auth", () => {
   async function expireCandidateIfNeeded(userId: string, profile: Partial<User>) {
     const normalizedRole = String(profile.role ?? "").toLowerCase()
     if (normalizedRole !== "candidate") {
-      return profile
-    }
-
-    if (profile.is_active === false) {
       return profile
     }
 
@@ -123,22 +108,9 @@ export const useAuthStore = defineStore("auth", () => {
       return profile
     }
 
-    const { error: updateError } = await supabase
-      .from("employees")
-      .update({
-        is_active: false,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", userId)
-
-    if (updateError) {
-      throw new Error("Gagal menonaktifkan akun candidate yang sudah kedaluwarsa.")
-    }
-
     return {
       ...profile,
       is_active: false,
-      updated_at: new Date().toISOString(),
     }
   }
 

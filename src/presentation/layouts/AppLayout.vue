@@ -336,6 +336,7 @@ const navigationSections = computed((): NavSection[] => [
         label: 'Custom Groups',
         icon: Settings,
         permissions: ['user:read'],
+        adminOnly: true,
       },
     ],
   },
@@ -352,12 +353,6 @@ const navigationSections = computed((): NavSection[] => [
         to: '/user-management',
         label: 'User Management',
         icon: Settings,
-        permissions: ['user:read'],
-      },
-      {
-        to: '/user-management/history',
-        label: 'User History',
-        icon: ClipboardList,
         permissions: ['user:read'],
       },
       {
@@ -412,7 +407,6 @@ const pageTitle = computed(() => {
     { prefix: '/candidates', title: 'Candidate Form' },
     { prefix: '/applications', title: 'Candidate Form' },
     { prefix: '/profile', title: 'Profile' },
-    { prefix: '/user-management/history', title: 'User History' },
     { prefix: '/user-management', title: 'User Management' },
     { prefix: '/role-management', title: 'Role Management' },
     { prefix: '/custom-group-management', title: 'Custom Group Management' },

@@ -196,14 +196,14 @@ type ApproverFormState = ApproverMasterInput & { id?: string }
 
 async function loadEmployees() {
   const { data, error } = await supabase
-    .from('employees')
-    .select(`id, first_name, middle_name, last_name, main_position, email`)
+    .from('profiles')
+    .select(`id, full_name, username, email`)
 
   if (error) return
 
   employees.value = (data ?? []).map((emp) => {
-    const fullName = [emp.first_name, emp.middle_name, emp.last_name].filter(Boolean).join(' ').trim()
-    const position = emp.main_position ?? 'No position'
+    const fullName = String(emp.full_name ?? emp.username ?? '').trim()
+    const position = emp.username ? `@${emp.username}` : 'No username'
     return {
       id: emp.id,
       label: `${fullName || 'Unnamed'} — ${position}`,

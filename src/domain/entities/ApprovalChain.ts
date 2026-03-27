@@ -63,12 +63,10 @@ export interface ApproverMaster {
   created_by: string | null
   created_at: string | null
   employee?: {
-    first_name: string
-    middle_name: string | null
-    last_name: string | null
+    full_name?: string | null
+    username?: string | null
     email: string | null
     phone: string | null
-    main_position: string | null
   }
 }
 

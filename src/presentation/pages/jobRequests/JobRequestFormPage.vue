@@ -9,7 +9,7 @@
       <div>
         <p class="text-sm uppercase tracking-[0.3em] text-blue-600">Employee Request Form (ERF)</p>
         <h1 class="mt-3 text-3xl font-semibold tracking-tight">
-          {{ isEdit ? 'Edit ERF' : 'New ERF Form' }}
+          {{ isEdit ? 'Edit ERF' : 'New ERF' }}
         </h1>
       </div>
     </div>
@@ -225,17 +225,14 @@ const filteredApprovalDirectorBu = computed(() => filterManagers(searchApprovalD
 
 async function loadDirectManagers() {
   const { data, error } = await supabase
-    .from('employees')
-    .select(`id, first_name, middle_name, last_name, main_position`)
+    .from('profiles')
+    .select(`id, full_name, username`)
 
   if (error) return
 
   directManagers.value = (data ?? []).map((employee) => {
-    const fullName = [employee.first_name, employee.middle_name, employee.last_name]
-      .filter(Boolean)
-      .join(' ')
-      .trim()
-    const position = employee.main_position ?? 'Unknown position'
+    const fullName = String(employee.full_name ?? employee.username ?? '').trim()
+    const position = employee.username ? `@${employee.username}` : 'No username'
 
     return {
       id: employee.id,

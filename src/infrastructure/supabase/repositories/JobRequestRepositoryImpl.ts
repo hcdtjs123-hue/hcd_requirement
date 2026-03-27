@@ -3,10 +3,13 @@ import type { JobRequest, JobRequestInput } from '@/domain/entities/JobRequest'
 import type { JobRequestRepository } from '@/domain/repositories/JobRequestRepository'
 import { approvalRepo } from '@/infrastructure/container'
 
+const approverEmployeeSelect =
+  'employee:profiles!approver_master_employee_id_fkey(full_name, email, username)'
+
 export class JobRequestRepositoryImpl implements JobRequestRepository {
   async getAll(): Promise<JobRequest[]> {
     const accessScope = await this.getAccessScope()
-    let query = supabase.from('new_employee_application_form').select(`
+    let query = supabase.from('employee_request_form').select(`
       *,
       custom_grup_1:master_custom_grup_1(name),
       custom_grup_2:master_custom_grup_2(name),
@@ -31,7 +34,7 @@ export class JobRequestRepositoryImpl implements JobRequestRepository {
 
   async getById(id: string): Promise<JobRequest | null> {
     const accessScope = await this.getAccessScope()
-    let query = supabase.from('new_employee_application_form').select(`
+    let query = supabase.from('employee_request_form').select(`
       *,
       custom_grup_1:master_custom_grup_1(name),
       custom_grup_2:master_custom_grup_2(name),
@@ -77,8 +80,8 @@ export class JobRequestRepositoryImpl implements JobRequestRepository {
     }
 
     const { data: creators, error } = await supabase
-      .from('employees')
-      .select('id, first_name, middle_name, last_name')
+      .from('profiles')
+      .select('id, full_name, username')
       .in('id', creatorIds)
 
     if (error) {
@@ -87,10 +90,7 @@ export class JobRequestRepositoryImpl implements JobRequestRepository {
 
     const creatorNameMap = new Map<string, string>()
     for (const creator of creators ?? []) {
-      const fullName = [creator.first_name, creator.middle_name, creator.last_name]
-        .filter(Boolean)
-        .join(' ')
-        .trim()
+      const fullName = String(creator.full_name ?? creator.username ?? '').trim()
 
       if (fullName) {
         creatorNameMap.set(creator.id, fullName)
@@ -109,7 +109,7 @@ export class JobRequestRepositoryImpl implements JobRequestRepository {
     // Auto-populate: find active GM HRD approver from approver_master
     const { data: gmHrdApprover } = await supabase
       .from('approver_master')
-      .select('employee:employees(first_name, middle_name, last_name, email)')
+      .select(approverEmployeeSelect)
       .eq('step_order', 1)
       .limit(1)
       .maybeSingle()
@@ -117,24 +117,17 @@ export class JobRequestRepositoryImpl implements JobRequestRepository {
     // Auto-populate: find active Direktur HRD approver from approver_master
     const { data: directorHrdApprover } = await supabase
       .from('approver_master')
-      .select('employee:employees(first_name, middle_name, last_name, email)')
+      .select(approverEmployeeSelect)
       .eq('step_order', 2)
       .limit(1)
       .maybeSingle()
 
     const gmEmployee = (gmHrdApprover?.employee as any)
-    const approvalGmHrd = gmEmployee
-      ? [gmEmployee.first_name, gmEmployee.middle_name, gmEmployee.last_name]
-          .filter(Boolean)
-          .join(' ')
-      : null
+    const approvalGmHrd = String(gmEmployee?.full_name ?? gmEmployee?.username ?? '').trim() || null
 
     const directorEmployee = (directorHrdApprover?.employee as any)
-    const approvalDirectorHrd = directorEmployee
-      ? [directorEmployee.first_name, directorEmployee.middle_name, directorEmployee.last_name]
-          .filter(Boolean)
-          .join(' ')
-      : null
+    const approvalDirectorHrd =
+      String(directorEmployee?.full_name ?? directorEmployee?.username ?? '').trim() || null
 
     const payload = {
       ...this.mapInput(data),
@@ -144,7 +137,7 @@ export class JobRequestRepositoryImpl implements JobRequestRepository {
     }
 
     const { data: created, error } = await supabase
-      .from('new_employee_application_form')
+      .from('employee_request_form')
       .insert(payload)
       .select('*')
       .single()
@@ -177,7 +170,7 @@ export class JobRequestRepositoryImpl implements JobRequestRepository {
     const accessScope = await this.getAccessScope()
 
     let query = supabase
-      .from('new_employee_application_form')
+      .from('employee_request_form')
       .update({
         ...this.mapInput(data),
         updated_at: new Date().toISOString(),
@@ -203,7 +196,7 @@ export class JobRequestRepositoryImpl implements JobRequestRepository {
 
   async delete(id: string): Promise<void> {
     const accessScope = await this.getAccessScope()
-    let query = supabase.from('new_employee_application_form').delete().eq('id', id)
+    let query = supabase.from('employee_request_form').delete().eq('id', id)
 
     if (accessScope.isManager && accessScope.userId) {
       query = query.eq('created_by', accessScope.userId)
@@ -222,7 +215,7 @@ export class JobRequestRepositoryImpl implements JobRequestRepository {
 
   async close(id: string, category: 'employee hired' | 'canceled', reason: string): Promise<void> {
     const { error } = await supabase
-      .from('new_employee_application_form')
+      .from('employee_request_form')
       .update({
         status: 'closed',
         closed_date: new Date().toISOString(),

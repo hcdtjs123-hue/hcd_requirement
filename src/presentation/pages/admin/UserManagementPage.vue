@@ -2,10 +2,16 @@
   <div class="mx-auto flex max-w-6xl flex-col gap-8 text-gray-900">
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <p class="text-sm uppercase tracking-[0.3em] text-blue-600">Administrator</p>
+        <p class="text-sm uppercase tracking-[0.3em] text-blue-600">
+          {{ isStaffUser ? 'Recruitment Staff' : 'Administrator' }}
+        </p>
         <h1 class="mt-3 text-3xl font-semibold tracking-tight">User Management</h1>
         <p class="mt-2 text-sm text-gray-600">
-          Register new employee accounts and manage active user identity details, credentials, and role.
+          {{
+            isStaffUser
+              ? 'View and manage only the candidate accounts that you created.'
+              : 'Register new accounts and manage user identity details, credentials, and role.'
+          }}
         </p>
       </div>
       <button
@@ -13,7 +19,7 @@
         class="rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
         @click="goToCreate"
       >
-        Add User
+        {{ isStaffUser ? 'Add Candidate' : 'Add User' }}
       </button>
     </div>
 
@@ -28,7 +34,7 @@
       <!-- User List -->
       <div class="rounded-xl border border-gray-200 bg-gray-50 p-5">
         <div class="mb-4 flex items-center justify-between">
-          <h2 class="text-xl font-semibold">Active User List</h2>
+          <h2 class="text-xl font-semibold">User List</h2>
           <button
             type="button"
             class="text-sm text-gray-600 transition hover:text-gray-900"
@@ -43,7 +49,7 @@
           <input
             v-model="searchQuery"
             type="search"
-            placeholder="Search name, email, username, position..."
+            placeholder="Search name, email, username, phone, or role..."
             class="h-11 w-full rounded-xl border border-gray-200 bg-white px-4 text-sm outline-none focus:border-blue-600"
           />
           <select
@@ -92,7 +98,7 @@
                       >
                         {{ u.role || 'No Role' }}
                       </span>
-                      <div class="flex items-center gap-1">
+                      <div v-if="!isStaffUser" class="flex items-center gap-1">
                         <select
                           v-model="roleChanges[u.id]"
                           class="rounded border border-gray-200 px-1 py-0.5 text-xs outline-none"
@@ -167,7 +173,7 @@ import { useUserManagementViewModel } from '@/viewmodels/useUserManagementViewMo
 const router = useRouter()
 const { users, roles, loading, saving, error, refreshUsers, deleteUser, updateUserRole } =
   useUserManagementViewModel()
-const { hasPermission } = useAuthViewModel()
+const { hasPermission, userRole } = useAuthViewModel()
 const appToast = useAppToast()
 
 const roleChanges = ref<Record<string, string>>({})
@@ -175,6 +181,7 @@ const searchQuery = ref('')
 const roleFilter = ref('')
 const pageSize = 10
 const page = ref(1)
+const isStaffUser = computed(() => normalize(userRole.value).startsWith('staff'))
 
 function normalize(value: unknown) {
   return String(value ?? '')
@@ -183,6 +190,10 @@ function normalize(value: unknown) {
 }
 
 function getDisplayName(user: ManagedUser) {
+  if (user.full_name?.trim()) {
+    return user.full_name.trim()
+  }
+
   const fullName = [user.first_name, user.middle_name, user.last_name]
     .map((part) => String(part ?? '').trim())
     .filter(Boolean)
@@ -213,9 +224,7 @@ const filteredUsers = computed(() => {
       getDisplayName(u),
       u.email,
       u.username ? `@${u.username}` : '',
-      u.main_position ?? '',
-      u.hire_location ?? '',
-      u.no_id ?? '',
+      u.phone ?? '',
       roleLabel,
     ]
       .map(normalize)

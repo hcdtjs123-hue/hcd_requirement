@@ -10,10 +10,18 @@
       </button>
       <div>
         <p class="text-sm uppercase tracking-[0.3em] text-blue-600">
-          {{ isEditMode ? 'Administrator' : 'Registration' }}
+          {{ isStaffUser ? 'Recruitment Staff' : isEditMode ? 'Administrator' : 'Registration' }}
         </p>
         <h1 class="mt-1 text-2xl font-semibold tracking-tight">
-          {{ isEditMode ? 'Edit Employee Account' : 'Create Employee Account' }}
+          {{
+            isEditMode
+              ? isStaffUser
+                ? 'Edit Candidate Account'
+                : 'Edit User Account'
+              : isStaffUser
+                ? 'Create Candidate Account'
+                : 'Create User Account'
+          }}
         </h1>
       </div>
     </div>
@@ -76,8 +84,25 @@
         </label>
 
         <label class="space-y-2">
+          <span class="text-sm font-medium text-gray-700">Full Name *</span>
+          <input
+            v-model="form.full_name"
+            class="field"
+            type="text"
+            required
+            placeholder="Full name"
+          />
+        </label>
+
+        <label class="space-y-2">
           <span class="text-sm font-medium text-gray-700">Role *</span>
-          <select v-model="form.role_id" class="field" required>
+          <div
+            v-if="isStaffUser"
+            class="field flex min-h-12 items-center bg-gray-100 text-sm text-gray-700"
+          >
+            {{ candidateRole?.name || 'Candidate' }}
+          </div>
+          <select v-else v-model="form.role_id" class="field" required>
             <option value="">Select a role</option>
             <option v-for="role in roles" :key="role.id" :value="role.id">
               {{ role.name }} — {{ role.description || 'No description' }}
@@ -86,135 +111,14 @@
         </label>
 
         <label class="space-y-2">
-          <span class="text-sm font-medium text-gray-700">First Name</span>
-          <input v-model="form.first_name" class="field" type="text" placeholder="First name" />
-        </label>
-
-        <label class="space-y-2">
-          <span class="text-sm font-medium text-gray-700">Middle Name</span>
+          <span class="text-sm font-medium text-gray-700">Phone</span>
           <input
-            v-model="form.middle_name"
+            v-model="form.phone"
             class="field"
-            type="text"
-            placeholder="Middle name"
+            type="tel"
+            placeholder="+62..."
           />
-        </label>
-
-        <label class="space-y-2">
-          <span class="text-sm font-medium text-gray-700">Last Name</span>
-          <input v-model="form.last_name" class="field" type="text" placeholder="Last name" />
-        </label>
-
-        <label class="space-y-2">
-          <span class="text-sm font-medium text-gray-700">No ID</span>
-          <input v-model="form.no_id" class="field" type="text" placeholder="National ID number" />
-        </label>
-
-        <label class="space-y-2">
-          <span class="text-sm font-medium text-gray-700">Main Position</span>
-          <input
-            v-model="form.main_position"
-            class="field"
-            type="text"
-            placeholder="Main position"
-          />
-        </label>
-
-        <label class="space-y-2">
-          <span class="text-sm font-medium text-gray-700">Hire Location</span>
-          <input
-            v-model="form.hire_location"
-            class="field"
-            type="text"
-            placeholder="Hire location"
-          />
-        </label>
-
-        <label class="space-y-2">
-          <span class="text-sm font-medium text-gray-700">Department</span>
-          <input
-            v-model="form.department"
-            class="field"
-            type="text"
-            placeholder="Department"
-          />
-        </label>
-
-        <label class="space-y-2">
-          <span class="text-sm font-medium text-gray-700">Date of Birth</span>
-          <input v-model="form.date_of_birth" class="field" type="date" />
-        </label>
-
-        <label class="space-y-2">
-          <span class="text-sm font-medium text-gray-700">Place of Birth</span>
-          <input
-            v-model="form.place_of_birth"
-            class="field"
-            type="text"
-            placeholder="Place of birth"
-          />
-        </label>
-
-        <label class="space-y-2">
-          <span class="text-sm font-medium text-gray-700">Nationality</span>
-          <input
-            v-model="form.nationality"
-            class="field"
-            type="text"
-            placeholder="Nationality"
-          />
-        </label>
-
-        <label class="space-y-2">
-          <span class="text-sm font-medium text-gray-700">Marital Status</span>
-          <select v-model="form.marital_status" class="field">
-            <option value="">Select marital status</option>
-            <option value="Single">Single</option>
-            <option value="Married">Married</option>
-            <option value="Divorced">Divorced</option>
-            <option value="Widowed">Widowed</option>
-          </select>
-        </label>
-
-        <label class="space-y-2">
-          <span class="text-sm font-medium text-gray-700">Religion</span>
-          <input v-model="form.religion" class="field" type="text" placeholder="Religion" />
-        </label>
-
-        <label class="space-y-2">
-          <span class="text-sm font-medium text-gray-700">Gender</span>
-          <select v-model="form.gender" class="field">
-            <option value="">Select gender</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-            <option value="Other">Other</option>
-          </select>
-        </label>
-
-        <label class="space-y-2">
-          <span class="text-sm font-medium text-gray-700">Ethnic</span>
-          <input v-model="form.ethnic" class="field" type="text" placeholder="Ethnic group" />
-        </label>
-
-        <label class="space-y-2">
-          <span class="text-sm font-medium text-gray-700">Blood Type</span>
-          <select v-model="form.blood_type" class="field">
-            <option value="">Select blood type</option>
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="AB">AB</option>
-            <option value="O">O</option>
-          </select>
-        </label>
-
-        <label v-for="index in 6" :key="index" class="space-y-2 text-gray-700">
-          <span class="text-sm font-medium">Custom Group {{ index }}</span>
-          <select v-model="form[`custom_grup_${index}_id` as keyof typeof form]" class="field">
-            <option :value="null">Select...</option>
-            <option v-for="opt in groupedOptions[index]" :key="opt.id" :value="opt.id">
-              {{ opt.name }}
-            </option>
-          </select>
+          <p class="text-xs text-gray-500">Optional. Saved to `profiles.phone`.</p>
         </label>
 
         <div class="mt-6 flex gap-3 md:col-span-2">
@@ -227,10 +131,14 @@
               saving
                 ? isEditMode
                   ? 'Saving...'
-                  : 'Registering...'
+                  : isStaffUser
+                    ? 'Creating Candidate...'
+                    : 'Registering...'
                 : isEditMode
                   ? 'Save Changes'
-                  : 'Register User'
+                  : isStaffUser
+                    ? 'Create Candidate'
+                    : 'Register User'
             }}
           </button>
           <button
@@ -261,47 +169,28 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import type { CreateUserInput, UpdateUserInput } from '@/domain/entities/ManagedUser'
 import { useAppToast } from '@/presentation/components/feedback/useAppToast'
+import { useAuthViewModel } from '@/viewmodels/useAuthViewModel'
 import { useUserManagementViewModel } from '@/viewmodels/useUserManagementViewModel'
-import { useCustomGroupViewModel } from '@/viewmodels/useCustomGroupViewModel'
 
 type UserFormState = {
   email: string
   username: string
   password: string
-  first_name: string
-  middle_name: string
-  last_name: string
-  main_position: string
-  hire_location: string
-  department: string
-  date_of_birth: string
-  place_of_birth: string
-  nationality: string
-  marital_status: string
-  religion: string
-  gender: string
-  ethnic: string
-  blood_type: string
-  no_id: string
+  full_name: string
+  phone: string
   role_id: string
-  custom_grup_1_id: string | null
-  custom_grup_2_id: string | null
-  custom_grup_3_id: string | null
-  custom_grup_4_id: string | null
-  custom_grup_5_id: string | null
-  custom_grup_6_id: string | null
 }
 
 const router = useRouter()
 const route = useRoute()
 const { roles, users, loading, error, saving, createUser, updateUser, refreshUsers, refreshRoles } =
   useUserManagementViewModel()
-const { groupedOptions, loadAllOptions } = useCustomGroupViewModel()
+const { userRole } = useAuthViewModel()
 const appToast = useAppToast()
 
 const lastCreated = ref<{
@@ -313,70 +202,45 @@ const lastCreated = ref<{
 const editUserId = computed(() => String(route.params.id ?? ''))
 const isEditMode = computed(() => Boolean(editUserId.value))
 const targetUser = computed(() => users.value.find((user) => user.id === editUserId.value) ?? null)
+const isStaffUser = computed(() => normalizeRole(userRole.value).startsWith('staff'))
+const candidateRole = computed(
+  () => roles.value.find((role) => normalizeRole(role.name) === 'candidate') ?? null,
+)
 
 function createEmptyForm(): UserFormState {
   return {
     email: '',
     username: '',
     password: '',
-    first_name: '',
-    middle_name: '',
-    last_name: '',
-    main_position: '',
-    hire_location: '',
-    department: '',
-    date_of_birth: '',
-    place_of_birth: '',
-    nationality: '',
-    marital_status: '',
-    religion: '',
-    gender: '',
-    ethnic: '',
-    blood_type: '',
-    no_id: '',
+    full_name: '',
+    phone: '',
     role_id: '',
-    custom_grup_1_id: null,
-    custom_grup_2_id: null,
-    custom_grup_3_id: null,
-    custom_grup_4_id: null,
-    custom_grup_5_id: null,
-    custom_grup_6_id: null,
   }
 }
 
 const form = reactive(createEmptyForm())
+
+function normalizeRole(value: unknown) {
+  return String(value ?? '')
+    .toLowerCase()
+    .trim()
+}
 
 function populateFormFromTarget() {
   if (!targetUser.value) return
   form.email = targetUser.value.email ?? ''
   form.username = targetUser.value.username ?? ''
   form.password = ''
-  form.first_name = targetUser.value.first_name ?? ''
-  form.middle_name = targetUser.value.middle_name ?? ''
-  form.last_name = targetUser.value.last_name ?? ''
-  form.main_position = targetUser.value.main_position ?? ''
-  form.hire_location = targetUser.value.hire_location ?? ''
-  form.department = targetUser.value.department ?? ''
-  form.date_of_birth = targetUser.value.date_of_birth ?? ''
-  form.place_of_birth = targetUser.value.place_of_birth ?? ''
-  form.nationality = targetUser.value.nationality ?? ''
-  form.marital_status = targetUser.value.marital_status ?? ''
-  form.religion = targetUser.value.religion ?? ''
-  form.gender = targetUser.value.gender ?? ''
-  form.ethnic = targetUser.value.ethnic ?? ''
-  form.blood_type = targetUser.value.blood_type ?? ''
-  form.no_id = targetUser.value.no_id ?? ''
+  form.full_name = targetUser.value.full_name ?? targetUser.value.first_name ?? ''
+  form.phone = targetUser.value.phone ?? targetUser.value.emergency_contact_phone ?? ''
   form.role_id = targetUser.value.role_id ?? ''
-  form.custom_grup_1_id = targetUser.value.custom_grup_1_id ?? null
-  form.custom_grup_2_id = targetUser.value.custom_grup_2_id ?? null
-  form.custom_grup_3_id = targetUser.value.custom_grup_3_id ?? null
-  form.custom_grup_4_id = targetUser.value.custom_grup_4_id ?? null
-  form.custom_grup_5_id = targetUser.value.custom_grup_5_id ?? null
-  form.custom_grup_6_id = targetUser.value.custom_grup_6_id ?? null
 }
 
 function resetForm() {
   Object.assign(form, createEmptyForm())
+  if (isStaffUser.value && candidateRole.value) {
+    form.role_id = candidateRole.value.id
+  }
 }
 
 async function loadDependencies() {
@@ -388,8 +252,6 @@ async function loadDependencies() {
     await refreshUsers()
   }
 
-  await loadAllOptions()
-
   if (isEditMode.value) {
     populateFormFromTarget()
   }
@@ -399,10 +261,30 @@ onMounted(() => {
   loadDependencies()
 })
 
+watch(
+  [isStaffUser, candidateRole],
+  () => {
+    if (isStaffUser.value && candidateRole.value) {
+      form.role_id = candidateRole.value.id
+    }
+  },
+  { immediate: true },
+)
+
 async function handleSubmit() {
   try {
-    const selectedRole = roles.value.find((r) => r.id === form.role_id)
-    const department = form.department.trim() || undefined
+    const fullName = form.full_name.trim()
+    if (!fullName) {
+      throw new Error('Full name is required.')
+    }
+
+    if (isStaffUser.value && candidateRole.value) {
+      form.role_id = candidateRole.value.id
+    }
+
+    const selectedRole =
+      roles.value.find((r) => r.id === form.role_id) ??
+      (isStaffUser.value ? candidateRole.value : null)
 
     if (isEditMode.value) {
       if (!targetUser.value) {
@@ -412,28 +294,9 @@ async function handleSubmit() {
       const payload: UpdateUserInput = {
         email: form.email,
         username: form.username,
-        first_name: form.first_name,
-        middle_name: form.middle_name,
-        last_name: form.last_name,
-        main_position: form.main_position,
-        hire_location: form.hire_location,
-        department,
-        date_of_birth: form.date_of_birth,
-        place_of_birth: form.place_of_birth,
-        nationality: form.nationality,
-        marital_status: form.marital_status,
-        religion: form.religion,
-        gender: form.gender,
-        ethnic: form.ethnic,
-        blood_type: form.blood_type,
-        no_id: form.no_id,
+        full_name: fullName,
+        phone: form.phone.trim() || undefined,
         role_id: form.role_id,
-        custom_grup_1_id: form.custom_grup_1_id,
-        custom_grup_2_id: form.custom_grup_2_id,
-        custom_grup_3_id: form.custom_grup_3_id,
-        custom_grup_4_id: form.custom_grup_4_id,
-        custom_grup_5_id: form.custom_grup_5_id,
-        custom_grup_6_id: form.custom_grup_6_id,
       }
 
       if (form.password.trim()) {
@@ -453,28 +316,9 @@ async function handleSubmit() {
       email: form.email,
       username: form.username,
       password: form.password,
-      first_name: form.first_name,
-      middle_name: form.middle_name,
-      last_name: form.last_name,
-      main_position: form.main_position,
-      hire_location: form.hire_location,
-      department,
-      date_of_birth: form.date_of_birth,
-      place_of_birth: form.place_of_birth,
-      nationality: form.nationality,
-      marital_status: form.marital_status,
-      religion: form.religion,
-      gender: form.gender,
-      ethnic: form.ethnic,
-      blood_type: form.blood_type,
-      no_id: form.no_id,
+      full_name: fullName,
+      phone: form.phone.trim() || undefined,
       role_id: form.role_id,
-      custom_grup_1_id: form.custom_grup_1_id,
-      custom_grup_2_id: form.custom_grup_2_id,
-      custom_grup_3_id: form.custom_grup_3_id,
-      custom_grup_4_id: form.custom_grup_4_id,
-      custom_grup_5_id: form.custom_grup_5_id,
-      custom_grup_6_id: form.custom_grup_6_id,
     }
 
     await createUser(payload)

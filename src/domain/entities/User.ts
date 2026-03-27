@@ -7,6 +7,7 @@ export interface User {
   permissions?: string[] // e.g., ['job_request:read', 'user:create']
   is_active?: boolean | null
   username?: string
+  full_name?: string
   created_at?: string
   updated_at?: string
   first_name?: string

@@ -55,7 +55,7 @@ function buildTemplate(job: JobRequest) {
   <html lang="en">
     <head>
       <meta charset="UTF-8" />
-      <title>WORKFORCE REQUIREMENT REQUEST FORM</title>
+      <title>Employee Request Form (ERF)</title>
       <style>
         @page { size: A4; margin: 12mm; }
         * { box-sizing: border-box; }
@@ -79,9 +79,7 @@ function buildTemplate(job: JobRequest) {
         }
         .header-top {
           display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 12px;
+          justify-content: center;
         }
         .header h1 {
           margin: 0;
@@ -92,20 +90,6 @@ function buildTemplate(job: JobRequest) {
           margin: 4px 0 0;
           font-size: 11px;
           color: #475569;
-        }
-        .status-badge {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          min-width: 88px;
-          padding: 4px 10px;
-          border: 1px solid #111827;
-          border-radius: 999px;
-          font-size: 10px;
-          font-weight: 700;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
-          white-space: nowrap;
         }
         .content {
           padding: 18px 22px 22px;
@@ -213,12 +197,10 @@ function buildTemplate(job: JobRequest) {
       <div class="sheet">
         <div class="header">
           <div class="header-top">
-            <div class="status-badge">${escapeHtml(job.status || 'open')}</div>
             <div>
-              <h1>WORKFORCE REQUIREMENT REQUEST FORM</h1>
+              <h1>Employee Request Form (ERF)</h1>
               <p>Recruitment request document</p>
             </div>
-            <div class="status-badge">HCD</div>
           </div>
         </div>
 

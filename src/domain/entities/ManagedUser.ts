@@ -4,6 +4,8 @@ export interface ManagedUser {
   id: string
   email: string
   username: string | null
+  full_name?: string | null
+  phone?: string | null
   first_name: string | null
   middle_name: string | null
   last_name: string | null
@@ -41,32 +43,8 @@ export interface CreateUserInput {
   email: string
   username: string
   password: string
-  first_name: string
-  middle_name: string
-  last_name: string
-  main_position: string
-  hire_location: string
-  date_of_birth: string
-  place_of_birth: string
-  nationality: string
-  marital_status: string
-  religion: string
-  gender: string
-  ethnic: string
-  blood_type: string
-  no_id: string
-  employee_code?: string
-  department?: string
-  employment_type?: string
-  employment_start_date?: string
-  emergency_contact_name?: string
-  emergency_contact_phone?: string
-  custom_grup_1_id: string | null
-  custom_grup_2_id: string | null
-  custom_grup_3_id: string | null
-  custom_grup_4_id: string | null
-  custom_grup_5_id: string | null
-  custom_grup_6_id: string | null
+  full_name: string
+  phone?: string
   is_active?: boolean
   role_id: string
 }
@@ -75,32 +53,8 @@ export interface UpdateUserInput {
   email: string
   username: string
   password?: string
-  first_name: string
-  middle_name: string
-  last_name: string
-  main_position: string
-  hire_location: string
-  date_of_birth: string
-  place_of_birth: string
-  nationality: string
-  marital_status: string
-  religion: string
-  gender: string
-  ethnic: string
-  blood_type: string
-  no_id: string
-  employee_code?: string
-  department?: string
-  employment_type?: string
-  employment_start_date?: string
-  emergency_contact_name?: string
-  emergency_contact_phone?: string
-  custom_grup_1_id: string | null
-  custom_grup_2_id: string | null
-  custom_grup_3_id: string | null
-  custom_grup_4_id: string | null
-  custom_grup_5_id: string | null
-  custom_grup_6_id: string | null
+  full_name: string
+  phone?: string
   is_active?: boolean
   role_id: string
 }

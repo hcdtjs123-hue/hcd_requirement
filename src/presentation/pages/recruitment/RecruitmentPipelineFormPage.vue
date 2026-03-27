@@ -32,18 +32,6 @@
       <section v-if="!isEdit" class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
         <form class="grid gap-4 md:grid-cols-2" @submit.prevent="handleCreateInvitation">
           <label class="space-y-2">
-            <span class="text-sm font-medium text-gray-700">Full Name *</span>
-            <input v-model="invForm.candidate_name" class="field" type="text" required />
-          </label>
-          <label class="space-y-2">
-            <span class="text-sm font-medium text-gray-700">Email *</span>
-            <input v-model="invForm.candidate_email" class="field" type="email" required />
-          </label>
-          <label class="space-y-2">
-            <span class="text-sm font-medium text-gray-700">Applied Position</span>
-            <input v-model="invForm.position_applied" class="field" type="text" />
-          </label>
-          <label class="space-y-2">
             <span class="text-sm font-medium text-gray-700">Tracking ID *</span>
             <select v-model="invForm.tracking_id" class="field" required>
               <option value="">Select an ERF</option>
@@ -52,11 +40,62 @@
               </option>
             </select>
           </label>
+          <label class="space-y-2">
+            <span class="text-sm font-medium text-gray-700">Candidate User *</span>
+            <div class="relative" ref="candidateFieldRef">
+              <input
+                v-model="candidateSearch"
+                type="text"
+                class="field"
+                placeholder="Search candidate..."
+                autocomplete="off"
+                @focus="isCandidateDropdownOpen = true"
+                @input="handleCandidateSearchInput"
+              />
+              <ul
+                v-show="isCandidateDropdownOpen && filteredCandidateOptions.length > 0"
+                class="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-xl border border-gray-200 bg-white shadow-xl"
+              >
+                <li
+                  v-for="candidate in filteredCandidateOptions"
+                  :key="candidate.id"
+                  class="cursor-pointer border-b border-gray-50 px-4 py-3 text-sm transition last:border-0 hover:bg-blue-50"
+                  @click="selectCandidate(candidate)"
+                >
+                  {{ candidate.label }}
+                </li>
+              </ul>
+            </div>
+            <p v-if="!userLoading && candidateOptions.length === 0" class="text-xs text-gray-500">
+              No candidate accounts are available.
+            </p>
+          </label>
+          <div
+            v-if="selectedCandidate"
+            class="grid gap-4 rounded-xl border border-gray-100 bg-gray-50 p-4 md:col-span-2 md:grid-cols-3"
+          >
+            <div class="space-y-1">
+              <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Name</p>
+              <p class="text-sm font-medium text-gray-900">
+                {{ candidateDisplayName(selectedCandidate) }}
+              </p>
+            </div>
+            <div class="space-y-1">
+              <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Email</p>
+              <p class="text-sm font-medium text-gray-900">{{ selectedCandidate.email || '-' }}</p>
+            </div>
+            <div class="space-y-1">
+              <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Position</p>
+              <p class="text-sm font-medium text-gray-900">
+                {{ selectedCandidate.main_position || 'No position' }}
+              </p>
+            </div>
+          </div>
           <div class="flex gap-3 pt-4 border-t border-gray-100 md:col-span-2">
             <button
               type="submit"
               class="rounded-xl bg-blue-600 px-8 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
-              :disabled="saving"
+              :disabled="saving || !invForm.user_id"
             >
               {{ saving ? 'Saving...' : 'Add Candidate' }}
             </button>
@@ -260,15 +299,17 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, computed, watch, onMounted } from 'vue'
+import { reactive, ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import type {
   CandidateInvitationInput,
   CandidateInvitationStatus,
 } from '@/domain/entities/RecruitmentTracking'
+import type { ManagedUser } from '@/domain/entities/ManagedUser'
 import { useAppToast } from '@/presentation/components/feedback/useAppToast'
 import { useRecruitmentTrackingViewModel } from '@/viewmodels/useRecruitmentTrackingViewModel'
+import { useUserManagementViewModel } from '@/viewmodels/useUserManagementViewModel'
 
 const route = useRoute()
 const router = useRouter()
@@ -285,6 +326,7 @@ const {
   scheduleInterview,
   confirmAttendance,
 } = useRecruitmentTrackingViewModel()
+const { users: managedUsers, loading: userLoading, refreshUsers } = useUserManagementViewModel()
 const appToast = useAppToast()
 
 const id = computed(() => route.params.id as string | undefined)
@@ -295,6 +337,9 @@ const selectedInvitationId = computed(() => id.value ?? '')
 const selectedInvitation = computed(
   () => invitations.value.find((inv) => inv.id === selectedInvitationId.value) ?? null,
 )
+const candidateFieldRef = ref<HTMLElement | null>(null)
+const candidateSearch = ref('')
+const isCandidateDropdownOpen = ref(false)
 
 // Invitation form
 const invForm = reactive<CandidateInvitationInput>({
@@ -302,6 +347,7 @@ const invForm = reactive<CandidateInvitationInput>({
   candidate_name: '',
   candidate_email: '',
   position_applied: '',
+  user_id: null,
 })
 
 // Interview form
@@ -315,7 +361,107 @@ const interviewForm = reactive({
 onMounted(() => {
   if (trackings.value.length === 0) refreshTrackings()
   if (invitations.value.length === 0) refreshInvitations()
+  if (managedUsers.value.length === 0) refreshUsers()
+  document.addEventListener('click', handleOutsideClick)
 })
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleOutsideClick)
+})
+
+type CandidateOption = {
+  id: string
+  label: string
+  rawName: string
+  rawPosition: string
+  email: string
+  user: ManagedUser
+}
+
+const candidateUsers = computed(() =>
+  managedUsers.value.filter(
+    (user) => normalizeRole(user.role) === 'candidate' && user.is_active !== false,
+  ),
+)
+
+const candidateOptions = computed<CandidateOption[]>(() =>
+  candidateUsers.value.map((user) => {
+    const rawName = candidateDisplayName(user)
+    const rawPosition = user.main_position?.trim() || 'No position'
+    return {
+      id: user.id,
+      label: `${rawName} — ${rawPosition}`,
+      rawName,
+      rawPosition,
+      email: user.email?.trim() || '',
+      user,
+    }
+  }),
+)
+
+const filteredCandidateOptions = computed(() => {
+  const q = normalize(candidateSearch.value)
+  const items = !q
+    ? candidateOptions.value
+    : candidateOptions.value.filter((candidate) =>
+        [candidate.rawName, candidate.email, candidate.rawPosition, candidate.label]
+          .map(normalize)
+          .join(' ')
+          .includes(q),
+      )
+
+  return items.slice(0, 8)
+})
+
+const selectedCandidate = computed(
+  () => candidateUsers.value.find((user) => user.id === invForm.user_id) ?? null,
+)
+
+function normalize(value: unknown) {
+  return String(value ?? '')
+    .toLowerCase()
+    .trim()
+}
+
+function normalizeRole(value: unknown) {
+  return normalize(value)
+}
+
+function candidateDisplayName(user: ManagedUser) {
+  if (user.full_name?.trim()) {
+    return user.full_name.trim()
+  }
+
+  const fullName = [user.first_name, user.middle_name, user.last_name]
+    .map((part) => String(part ?? '').trim())
+    .filter(Boolean)
+    .join(' ')
+
+  return fullName || user.username || user.email || 'Unnamed candidate'
+}
+
+function handleCandidateSearchInput() {
+  isCandidateDropdownOpen.value = true
+  invForm.user_id = null
+  invForm.candidate_name = ''
+  invForm.candidate_email = ''
+}
+
+function selectCandidate(candidate: CandidateOption) {
+  invForm.user_id = candidate.id
+  invForm.candidate_name = candidate.rawName
+  invForm.candidate_email = candidate.email
+  candidateSearch.value = candidate.label
+  isCandidateDropdownOpen.value = false
+}
+
+function handleOutsideClick(event: MouseEvent) {
+  if (!candidateFieldRef.value) return
+  const target = event.target
+  if (target instanceof Node && !candidateFieldRef.value.contains(target)) {
+    isCandidateDropdownOpen.value = false
+  }
+}
 
 function formatDate(dateStr: string | null) {
   if (!dateStr) return '-'
@@ -343,7 +489,20 @@ function invStatusLabel(status: CandidateInvitationStatus) {
 
 async function handleCreateInvitation() {
   try {
-    await createInvitation({ ...invForm })
+    if (!selectedCandidate.value) {
+      throw new Error('Please select a candidate user first.')
+    }
+
+    const selectedTracking = trackings.value.find((tracking) => tracking.id === invForm.tracking_id)
+    const positionApplied = selectedTracking?.job_request?.main_position?.trim() || ''
+
+    await createInvitation({
+      ...invForm,
+      candidate_name: candidateDisplayName(selectedCandidate.value),
+      candidate_email: selectedCandidate.value.email || '',
+      position_applied: positionApplied,
+      user_id: selectedCandidate.value.id,
+    })
     appToast.created('Candidate')
     router.push('/recruitment/pipeline')
   } catch (err) {

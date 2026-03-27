@@ -24,7 +24,7 @@
     <section class="max-w-full">
       <div class="rounded-xl border border-gray-200 bg-gray-50 p-5">
         <div class="mb-4 flex items-center justify-between">
-          <h2 class="text-xl font-semibold">Request List</h2>
+          <h2 class="text-xl font-semibold">ERF List</h2>
           <button
             type="button"
             class="text-sm text-gray-600 transition hover:text-gray-900"
