@@ -113,36 +113,8 @@ const router = createRouter({
           meta: { requiredPermissions: ['recruitment:read', 'candidate:read'] },
         },
         {
-          path: 'recruitment/pipeline',
-          name: 'recruitment-pipeline',
-          component: () => import('@/presentation/pages/recruitment/RecruitmentPipelinePage.vue'),
-          meta: { requiredPermissions: ['recruitment:read', 'candidate:read'] },
-        },
-        {
-          path: 'recruitment/pipeline/create',
-          name: 'recruitment-pipeline-create',
-          component: () =>
-            import('@/presentation/pages/recruitment/RecruitmentPipelineFormPage.vue'),
-          meta: { requiredPermissions: ['recruitment:create', 'candidate:create'] },
-        },
-        {
-          path: 'recruitment/pipeline/:id/edit',
-          name: 'recruitment-pipeline-edit',
-          component: () =>
-            import('@/presentation/pages/recruitment/RecruitmentPipelineFormPage.vue'),
-          meta: { requiredPermissions: ['recruitment:update', 'candidate:update'] },
-        },
-        {
           path: 'candidate-management',
-          redirect: '/recruitment/pipeline',
-        },
-        {
-          path: 'candidate-management/create',
-          redirect: '/recruitment/pipeline/create',
-        },
-        {
-          path: 'candidate-management/:id/edit',
-          redirect: (to) => `/recruitment/pipeline/${to.params.id}/edit`,
+          redirect: '/candidates',
         },
         // Admin Routes
         {

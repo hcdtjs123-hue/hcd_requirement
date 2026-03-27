@@ -228,7 +228,6 @@ import {
   UserCheck,
   CheckSquare,
   Briefcase,
-  Users,
   ClipboardList,
   UserCircle,
   Settings,
@@ -240,14 +239,10 @@ import {
 
 import { useAppToast } from '@/presentation/components/feedback/useAppToast'
 import { useAuthViewModel } from '@/viewmodels/useAuthViewModel'
-import { useJobRequestViewModel } from '@/viewmodels/useJobRequestViewModel'
-import { useApprovalViewModel } from '@/viewmodels/useApprovalViewModel'
 
 const route = useRoute()
 const router = useRouter()
 const { isLoading, logout, user, userRole, hasAnyPermission } = useAuthViewModel()
-const { jobs } = useJobRequestViewModel()
-const { chains } = useApprovalViewModel()
 const appToast = useAppToast()
 
 const isMobileSidebarOpen = ref(false)
@@ -305,12 +300,6 @@ const navigationSections = computed((): NavSection[] => [
         to: '/recruitment',
         label: 'Hiring Dashboard',
         icon: Briefcase,
-        permissions: ['recruitment:read', 'candidate:read'],
-      },
-      {
-        to: '/recruitment/pipeline',
-        label: 'Hiring Pipeline',
-        icon: Users,
         permissions: ['recruitment:read', 'candidate:read'],
       },
       {
@@ -409,10 +398,9 @@ const pageTitle = computed(() => {
     { prefix: '/job-requests', title: 'ERF' },
     { prefix: '/approver-master', title: 'Approver Master' },
     { prefix: '/approval-tracking', title: 'Approval Tracking' },
-    { prefix: '/recruitment/pipeline', title: 'Hiring Pipeline' },
-    { prefix: '/candidate-management', title: 'Hiring Pipeline' },
     { prefix: '/recruitment', title: 'Hiring Dashboard' },
     { prefix: '/candidates', title: 'Candidate Form' },
+    { prefix: '/candidate-management', title: 'Candidate Form' },
     { prefix: '/applications', title: 'Candidate Form' },
     { prefix: '/profile', title: 'Profile' },
     { prefix: '/user-management', title: 'User Management' },

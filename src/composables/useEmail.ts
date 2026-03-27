@@ -13,7 +13,6 @@ export interface CandidateApprovalEmailPayload {
   applicationId: string
   to: string
   candidateName: string
-  invitationId?: string | null
   position?: string | null
   expiresInHours?: number
 }
@@ -81,7 +80,6 @@ export function useEmail() {
           applicationId: payload.applicationId,
           to: payload.to,
           candidateName: payload.candidateName,
-          invitationId: payload.invitationId ?? null,
           position: payload.position ?? null,
           expiresInHours: payload.expiresInHours,
         }),

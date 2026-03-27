@@ -291,7 +291,6 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
         await supabase.from('recruitment_tracking').insert({
           job_request_id: chain.job_request_id,
           chain_id: step.chain_id,
-          status: 'pending_review',
         })
       }
     } else {

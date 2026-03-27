@@ -74,7 +74,7 @@ function validateIssueBody(body) {
   if (!body || typeof body !== "object") {
     return ["Invalid JSON body"]
   }
-  const { applicationId, to, candidateName, invitationId, position, expiresInHours } = body
+  const { applicationId, to, candidateName, position, expiresInHours } = body
   if (!isNonEmptyString(applicationId)) {
     errors.push("applicationId is required")
   } else if (
@@ -89,15 +89,6 @@ function validateIssueBody(body) {
   }
   if (!isNonEmptyString(candidateName)) {
     errors.push("candidateName is required")
-  }
-  if (invitationId !== undefined && invitationId !== null && invitationId !== "") {
-    if (
-      !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
-        String(invitationId),
-      )
-    ) {
-      errors.push("invitationId must be a UUID when provided")
-    }
   }
   if (position !== undefined && position !== null && typeof position !== "string") {
     errors.push("position must be a string when provided")
@@ -207,7 +198,6 @@ app.post("/candidate-approval/issue", requireApiSecret, async (req, res) => {
       applicationId,
       to,
       candidateName,
-      invitationId,
       position,
       expiresInHours = 72,
     } = req.body
@@ -217,16 +207,10 @@ app.post("/candidate-approval/issue", requireApiSecret, async (req, res) => {
     const approveToken = randomToken()
     const rejectToken = randomToken()
 
-    const invitationUuid =
-      invitationId && String(invitationId).trim()
-        ? String(invitationId).trim()
-        : null
-
     const { data: inserted, error: insertError } = await supabase
       .from("candidate_hr_approval_tokens")
       .insert({
         application_id: applicationId.trim(),
-        invitation_id: invitationUuid,
         approve_token: approveToken,
         reject_token: rejectToken,
         expires_at: expiresAt.toISOString(),
@@ -291,7 +275,7 @@ async function processDecision(token, decision, res) {
     const col = decision === "approve" ? "approve_token" : "reject_token"
     const { data: row, error: fetchError } = await supabase
       .from("candidate_hr_approval_tokens")
-      .select("id, application_id, invitation_id, expires_at, outcome")
+      .select("id, application_id, expires_at, outcome")
       .eq(col, token.trim())
       .maybeSingle()
 
@@ -318,7 +302,7 @@ async function processDecision(token, decision, res) {
     const decidedAt = new Date().toISOString()
 
     const { error: appError } = await supabase
-      .from("main_application_form")
+      .from("candidate_form")
       .update({
         hr_screening_status: screening,
         updated_at: decidedAt,
@@ -346,13 +330,6 @@ async function processDecision(token, decision, res) {
       return res.redirect(
         `${PUBLIC_APP_URL}/candidate-decision?outcome=error&message=${encodeURIComponent("Gagal menyimpan keputusan")}`,
       )
-    }
-
-    if (decision === "reject" && row.invitation_id) {
-      await supabase
-        .from("candidate_invitations")
-        .update({ status: "rejected", updated_at: decidedAt })
-        .eq("id", row.invitation_id)
     }
 
     const outcomeParam = decision === "approve" ? "approved" : "rejected"

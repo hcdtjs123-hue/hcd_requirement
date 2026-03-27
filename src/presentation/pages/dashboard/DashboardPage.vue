@@ -125,53 +125,8 @@
       </div>
     </div>
 
-    <!-- Bottom Grid -->
-    <div class="grid gap-6 lg:grid-cols-2">
-      <!-- Candidate Pipeline -->
-      <div
-        v-if="showRecruitmentPanel"
-        class="rounded-xl border border-gray-200 bg-white shadow-sm"
-      >
-        <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4">
-          <div class="flex items-center gap-2">
-            <Users class="h-4 w-4 text-purple-600" />
-            <h2 class="text-sm font-semibold text-gray-900">Candidate Pipeline</h2>
-          </div>
-          <RouterLink to="/recruitment/pipeline" class="text-xs text-blue-600 hover:underline"
-            >Open hiring module →</RouterLink
-          >
-        </div>
-        <div class="space-y-2 p-5">
-          <div
-            v-for="stage in candidatePipeline"
-            :key="stage.label"
-            class="flex items-center gap-3"
-          >
-            <p class="w-36 shrink-0 text-xs text-gray-500">{{ stage.label }}</p>
-            <div class="flex-1 overflow-hidden rounded-full bg-gray-100 h-2">
-              <div
-                class="h-full rounded-full transition-all duration-500"
-                :class="stage.barColor"
-                :style="{
-                  width: totalCandidates > 0 ? `${(stage.count / totalCandidates) * 100}%` : '0%',
-                }"
-              />
-            </div>
-            <p class="w-6 shrink-0 text-right text-xs font-semibold text-gray-700">
-              {{ stage.count }}
-            </p>
-          </div>
-          <p v-if="totalCandidates === 0" class="py-4 text-center text-sm text-gray-400">
-            No candidate data yet.
-          </p>
-        </div>
-      </div>
-
-      <!-- Quick Access -->
-      <div
-        class="rounded-xl border border-gray-200 bg-white shadow-sm"
-        :class="showRecruitmentPanel ? '' : 'lg:col-span-2'"
-      >
+    <div class="grid gap-6 lg:grid-cols-1">
+      <div class="rounded-xl border border-gray-200 bg-white shadow-sm">
         <div class="flex items-center gap-2 border-b border-gray-100 px-6 py-4">
           <LayoutDashboard class="h-4 w-4 text-gray-600" />
           <h2 class="text-sm font-semibold text-gray-900">Quick Access</h2>
@@ -203,7 +158,6 @@ import { RouterLink } from 'vue-router'
 import {
   FileText,
   CheckSquare,
-  Users,
   LayoutDashboard,
   Clock,
   CheckCircle2,
@@ -220,11 +174,13 @@ import { useAuthViewModel } from '@/viewmodels/useAuthViewModel'
 import { useJobRequestViewModel } from '@/viewmodels/useJobRequestViewModel'
 import { useApprovalViewModel } from '@/viewmodels/useApprovalViewModel'
 import { useRecruitmentTrackingViewModel } from '@/viewmodels/useRecruitmentTrackingViewModel'
+import { useCandidateDataViewModel } from '@/viewmodels/useCandidateDataViewModel'
 
 const { user, userRole, hasAnyPermission } = useAuthViewModel()
 const { jobs } = useJobRequestViewModel()
 const { chains } = useApprovalViewModel()
-const { invitations } = useRecruitmentTrackingViewModel()
+const { trackings } = useRecruitmentTrackingViewModel()
+const { candidates } = useCandidateDataViewModel()
 
 const currentDate = computed(() =>
   new Date().toLocaleDateString('en-US', {
@@ -255,7 +211,7 @@ const dashboardIntro = computed(() => {
     return {
       title: 'Summary of your candidate data',
       description:
-        'This dashboard focuses on monitoring your candidate profile, recruitment status, and quick access to forms that need updating.',
+        'This dashboard focuses on monitoring your candidate profile and quick access to forms that need updating.',
     }
   }
 
@@ -277,9 +233,9 @@ const dashboardIntro = computed(() => {
 
   if (canReadRecruitment.value) {
     return {
-      title: 'Focus on recruitment pipeline execution',
+      title: 'Focus on approved recruitment requests',
       description:
-        'This dashboard highlights candidates currently being processed, positions ready for recruitment, and shortcuts to the most frequently used recruitment modules.',
+        'This dashboard highlights approved ERF records that are ready for recruitment processing and shortcuts to the most frequently used modules.',
     }
   }
 
@@ -292,7 +248,6 @@ const dashboardIntro = computed(() => {
 
 const showJobRequestsPanel = computed(() => canReadJobRequests.value)
 const showApprovalPanel = computed(() => canReadApprovals.value && !isCandidateRole.value)
-const showRecruitmentPanel = computed(() => canReadRecruitment.value && !isManagerRole.value)
 const showOperationalOverview = computed(
   () => showJobRequestsPanel.value || showApprovalPanel.value,
 )
@@ -336,10 +291,10 @@ const kpiCards = computed(() => {
 
   if (canReadRecruitment.value) {
     cards.push({
-      label: isCandidateRole.value ? 'Recruitment Status' : 'Total Candidates',
-      value: invitations.value.length,
-      sub: isCandidateRole.value ? 'Your recruitment process data' : 'In recruitment pipeline',
-      icon: Users,
+      label: 'Hiring Queue',
+      value: trackings.value.length,
+      sub: 'Approved ERF ready for recruitment handling',
+      icon: Briefcase,
       bg: 'bg-purple-50',
       color: 'text-purple-600',
       bar: 'bg-purple-500',
@@ -348,11 +303,11 @@ const kpiCards = computed(() => {
 
   if (canReadCandidates.value) {
     cards.push({
-      label: isCandidateRole.value ? 'Candidate Profile' : 'Candidate Data',
-      value: invitations.value.filter((invitation) => invitation.status === 'confirmed').length,
+      label: isCandidateRole.value ? 'Your Candidate Form' : 'Candidate Data',
+      value: candidates.value.length,
       sub: isCandidateRole.value
-        ? 'Confirmed forms and stages'
-        : 'Confirmed candidates in pipeline',
+        ? 'Candidate records available in your account'
+        : 'Candidate records available in the system',
       icon: ClipboardList,
       bg: 'bg-indigo-50',
       color: 'text-indigo-600',
@@ -419,42 +374,6 @@ const approvalStats = computed(() => [
   },
 ])
 
-// ─── Candidate Pipeline ───────────────────
-const totalCandidates = computed(() => invitations.value.length)
-
-const candidatePipeline = computed(() => [
-  {
-    label: 'Invited',
-    count: invitations.value.filter((i) => i.status === 'invited').length,
-    barColor: 'bg-gray-400',
-  },
-  {
-    label: 'Creds Sent',
-    count: invitations.value.filter((i) => i.status === 'credentials_sent').length,
-    barColor: 'bg-blue-400',
-  },
-  {
-    label: 'Fill Form',
-    count: invitations.value.filter((i) => i.status === 'form_in_progress').length,
-    barColor: 'bg-amber-400',
-  },
-  {
-    label: 'Form Completed',
-    count: invitations.value.filter((i) => i.status === 'form_completed').length,
-    barColor: 'bg-indigo-500',
-  },
-  {
-    label: 'Interview',
-    count: invitations.value.filter((i) => i.status === 'interview_scheduled').length,
-    barColor: 'bg-purple-500',
-  },
-  {
-    label: 'Confirmed',
-    count: invitations.value.filter((i) => i.status === 'confirmed').length,
-    barColor: 'bg-emerald-500',
-  },
-])
-
 // ─── Quick Links ──────────────────────────
 const quickLinks = computed(() => {
   const all = [
@@ -484,15 +403,6 @@ const quickLinks = computed(() => {
       icon: Briefcase,
       bg: 'bg-emerald-100',
       color: 'text-emerald-700',
-      permissions: ['recruitment:read', 'candidate:read'],
-    },
-    {
-      to: '/recruitment/pipeline',
-      label: 'Hiring Pipeline',
-      desc: 'Manage candidates in hiring process',
-      icon: Users,
-      bg: 'bg-purple-100',
-      color: 'text-purple-700',
       permissions: ['recruitment:read', 'candidate:read'],
     },
     {
@@ -530,7 +440,7 @@ const quickLinks = computed(() => {
   )
 
   if (isCandidateRole.value) {
-    return filtered.filter((link) => ['/candidates', '/recruitment/pipeline'].includes(link.to))
+    return filtered.filter((link) => ['/candidates'].includes(link.to))
   }
 
   if (isManagerRole.value) {
