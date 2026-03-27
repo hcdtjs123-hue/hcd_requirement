@@ -6,6 +6,7 @@
         <h1 class="mt-3 text-3xl font-semibold tracking-tight">Employee Request Form (ERF)</h1>
       </div>
       <button
+        v-if="canCreateJobRequest"
         type="button"
         class="rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
         @click="goToCreate"
@@ -37,10 +38,10 @@
 
         <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div class="flex flex-1 items-center gap-2">
-              <input
-                v-model="searchQuery"
-                type="search"
-                placeholder="Search position, site, approval..."
+            <input
+              v-model="searchQuery"
+              type="search"
+              placeholder="Search position, site, approval..."
               class="h-11 w-full rounded-xl border border-gray-200 bg-white px-4 text-sm outline-none focus:border-blue-600"
             />
           </div>
@@ -76,21 +77,21 @@
             <table class="w-full text-left text-sm text-gray-600">
               <thead class="bg-gray-50 text-xs uppercase text-gray-500">
                 <tr>
-              <th class="px-4 py-3 font-medium w-14">No</th>
-              <th class="px-4 py-3 font-medium min-w-[180px]">Department</th>
-              <th class="px-4 py-3 font-medium min-w-[180px]">Position</th>
-              <th class="px-4 py-3 font-medium min-w-[140px]">Site</th>
-              <th class="px-4 py-3 font-medium min-w-[160px]">Position Status</th>
-              <th class="px-4 py-3 font-medium min-w-[160px]">Employment</th>
-              <th class="px-4 py-3 font-medium min-w-[140px]">Required Date</th>
-              <th class="px-4 py-3 font-medium min-w-[160px]">Approval Dir. BU</th>
-              <th class="px-4 py-3 font-medium min-w-[160px]">Dir. BU Date</th>
-              <th class="px-4 py-3 font-medium min-w-[160px]">Approval GM HRD</th>
-              <th class="px-4 py-3 font-medium min-w-[160px]">GM HRD Date</th>
-              <th class="px-4 py-3 font-medium min-w-[160px]">Approval HRD Director</th>
-              <th class="px-4 py-3 font-medium min-w-[160px]">HRD Director Date</th>
-              <th class="px-4 py-3 font-medium min-w-[120px]">Status</th>
-              <th class="px-4 py-3 text-right min-w-[220px]">Actions</th>
+                  <th class="px-4 py-3 font-medium w-14">No</th>
+                  <th class="px-4 py-3 font-medium min-w-[180px]">Department</th>
+                  <th class="px-4 py-3 font-medium min-w-[180px]">Position</th>
+                  <th class="px-4 py-3 font-medium min-w-[140px]">Site</th>
+                  <th class="px-4 py-3 font-medium min-w-[160px]">Position Status</th>
+                  <th class="px-4 py-3 font-medium min-w-[160px]">Employment</th>
+                  <th class="px-4 py-3 font-medium min-w-[140px]">Required Date</th>
+                  <th class="px-4 py-3 font-medium min-w-[160px]">Approval Dir. BU</th>
+                  <th class="px-4 py-3 font-medium min-w-[160px]">Dir. BU Date</th>
+                  <th class="px-4 py-3 font-medium min-w-[160px]">Approval GM HRD</th>
+                  <th class="px-4 py-3 font-medium min-w-[160px]">GM HRD Date</th>
+                  <th class="px-4 py-3 font-medium min-w-[160px]">Approval HRD Director</th>
+                  <th class="px-4 py-3 font-medium min-w-[160px]">HRD Director Date</th>
+                  <th class="px-4 py-3 font-medium min-w-[120px]">Status</th>
+                  <th class="px-4 py-3 text-right min-w-[220px]">Actions</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200">
@@ -157,9 +158,15 @@
                   <td class="px-4 py-3 text-right align-middle">
                     <RowActionsMenu
                       :actions="[
-                        { label: 'Edit / Detail', onClick: () => goToEdit(job.id) },
+                        { label: 'Detail', onClick: () => goToDetail(job.id) },
+                        {
+                          label: 'Edit',
+                          disabled: saving || !canUpdateJobRequest,
+                          onClick: () => goToEdit(job.id),
+                        },
                         ...(job.status !== 'closed' ? [{
                           label: 'Close Job',
+                          disabled: saving || !canUpdateJobRequest,
                           onClick: () => openCloseModal(job.id),
                         }] : []),
                         {
@@ -170,7 +177,7 @@
                         {
                           label: 'Delete',
                           tone: 'danger',
-                          disabled: saving,
+                          disabled: saving || !canUpdateJobRequest,
                           onClick: () => handleDelete(job.id, job.main_position || ''),
                         },
                       ]"
@@ -178,7 +185,7 @@
                   </td>
                 </tr>
                 <tr v-if="!loading && filteredJobs.length === 0">
-                <td colspan="15" class="px-4 py-8 text-center text-sm text-gray-500">
+                  <td colspan="15" class="px-4 py-8 text-center text-sm text-gray-500">
                     No matching data found.
                   </td>
                 </tr>
@@ -249,13 +256,15 @@ import { useRouter } from 'vue-router'
 
 import RowActionsMenu from '@/presentation/components/menus/RowActionsMenu.vue'
 import TablePagination from '@/presentation/components/tables/TablePagination.vue'
-import { type JobRequest, type JobRequestInput } from '@/domain/entities/JobRequest'
+import type { JobRequest } from '@/domain/entities/JobRequest'
 import { useAppToast } from '@/presentation/components/feedback/useAppToast'
 import { exportJobRequestPdf } from '@/presentation/utils/jobRequestPdfTemplate'
+import { useAuthViewModel } from '@/viewmodels/useAuthViewModel'
 import { useJobRequestViewModel } from '@/viewmodels/useJobRequestViewModel'
 
 const router = useRouter()
 const { jobs, loading, error, saving, remove, refresh, close } = useJobRequestViewModel()
+const { hasPermission } = useAuthViewModel()
 const appToast = useAppToast()
 
 // Close Modal State
@@ -263,7 +272,7 @@ const showCloseModal = ref(false)
 const selectedJobId = ref('')
 const closeForm = ref({
   category: '' as 'employee hired' | 'canceled' | '',
-  reason: ''
+  reason: '',
 })
 
 const searchQuery = ref('')
@@ -272,6 +281,8 @@ const positionStatusFilter = ref('')
 const employmentFilter = ref('')
 const pageSize = 10
 const page = ref(1)
+const canCreateJobRequest = computed(() => hasPermission('job_request:create'))
+const canUpdateJobRequest = computed(() => hasPermission('job_request:update'))
 
 function normalize(value: unknown) {
   return String(value ?? '')
@@ -355,6 +366,10 @@ function goToCreate() {
   router.push('/job-requests/create')
 }
 
+function goToDetail(id: string) {
+  router.push(`/job-requests/${id}`)
+}
+
 function goToEdit(id: string) {
   router.push(`/job-requests/${id}/edit`)
 }
@@ -388,7 +403,7 @@ function openCloseModal(id: string) {
 
 async function handleClose() {
   if (!closeForm.value.category || !closeForm.value.reason) return
-  
+
   try {
     await close(
       selectedJobId.value,

@@ -1,143 +1,203 @@
 <template>
   <div class="mx-auto flex max-w-4xl flex-col gap-8 text-gray-900">
-    <div class="flex items-center gap-4">
-      <button type="button"
-        class="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-50"
-        @click="router.back()">
-        ←
-      </button>
-      <div>
-        <p class="text-sm uppercase tracking-[0.3em] text-blue-600">Employee Request Form (ERF)</p>
-        <h1 class="mt-3 text-3xl font-semibold tracking-tight">
-          {{ isEdit ? 'Edit ERF' : 'New ERF' }}
-        </h1>
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div class="flex items-center gap-4">
+        <button
+          type="button"
+          class="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-50"
+          @click="router.back()"
+        >
+          ←
+        </button>
+        <div>
+          <p class="text-sm uppercase tracking-[0.3em] text-blue-600">Employee Request Form (ERF)</p>
+          <h1 class="mt-3 text-3xl font-semibold tracking-tight">
+            {{ pageTitle }}
+          </h1>
+        </div>
       </div>
+      <button
+        v-if="canEditFromDetail"
+        type="button"
+        class="rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
+        @click="goToEdit"
+      >
+        Edit ERF
+      </button>
     </div>
 
     <p v-if="error" class="rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
       {{ error }}
     </p>
 
+    <div
+      v-if="isDetail"
+      class="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800"
+    >
+      Detail ERF ditampilkan dalam mode baca saja. Gunakan tombol edit jika ingin mengubah data.
+    </div>
+
     <section class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
       <form v-if="!loading" class="grid gap-5 md:grid-cols-2" @submit.prevent="handleSubmit">
-        <label class="space-y-2 md:col-span-2">
-          <span class="text-sm font-medium text-gray-700">Cost Center PT</span>
-          <select v-model="form.pt_pembebanan" class="field">
-            <option value="">Select PT...</option>
-            <option v-for="option in ptOptions" :key="option.id" :value="option.name">
-              {{ option.name }}
-            </option>
-          </select>
-        </label>
-        <label class="space-y-2 md:col-span-2">
-          <span class="text-sm font-medium text-gray-700">Department</span>
-          <select v-model="form.department" class="field">
-            <option value="">Select department...</option>
-            <option v-for="option in departmentOptions" :key="option.id" :value="option.name">
-              {{ option.name }}
-            </option>
-          </select>
-        </label>
-        <label class="space-y-2">
-          <span class="text-sm font-medium text-gray-700">Main Position *</span>
-          <input v-model="form.main_position" class="field" type="text" required
-            placeholder="e.g. Software Engineer" />
-        </label>
-        <label class="space-y-2">
-          <span class="text-sm font-medium text-gray-700">Employment Status</span>
-          <select v-model="form.employment_status" class="field">
-            <option value="">Select status...</option>
-            <option v-for="option in employmentStatusOptions" :key="option" :value="option">
-              {{ option }}
-            </option>
-          </select>
-        </label>
-        <label class="space-y-2">
-          <span class="text-sm font-medium text-gray-700">Position Status</span>
-          <select v-model="form.position_status" class="field">
-            <option value="">Select status...</option>
-            <option v-for="option in positionStatusOptions" :key="option" :value="option">
-              {{ option }}
-            </option>
-          </select>
-        </label>
-        <label class="space-y-2">
-          <span class="text-sm font-medium text-gray-700">Probation Period (Months)</span>
-          <input v-model.number="form.periode_probation" class="field" type="number" min="0"
-            @input="sanitizeNumberField(form, 'periode_probation')" />
-        </label>
-        <label class="space-y-2">
-          <span class="text-sm font-medium text-gray-700">Direct Manager</span>
-          <div class="relative" ref="managerFieldRef">
-            <input v-model="searchDirectManager" type="text" class="field" placeholder="Search for manager..."
-              @focus="openManagerDropdown" @input="openManagerDropdown" autocomplete="off" />
-            <ul v-show="isManagerDropdownOpen && filteredDirectManagers.length > 0"
-              class="absolute z-20 mt-1 max-h-52 w-full overflow-auto rounded-xl border border-gray-200 bg-white shadow-lg">
-              <li v-for="manager in filteredDirectManagers" :key="manager.id"
-                class="cursor-pointer px-4 py-2 hover:bg-blue-50" @click="selectManager(manager)">
-                {{ manager.label }}
-              </li>
-            </ul>
+        <fieldset class="contents" :disabled="isDetail || saving">
+          <label class="space-y-2 md:col-span-2">
+            <span class="text-sm font-medium text-gray-700">Cost Center PT</span>
+            <select v-model="form.pt_pembebanan" class="field">
+              <option value="">Select PT...</option>
+              <option v-for="option in ptOptions" :key="option.id" :value="option.name">
+                {{ option.name }}
+              </option>
+            </select>
+          </label>
+          <label class="space-y-2 md:col-span-2">
+            <span class="text-sm font-medium text-gray-700">Department</span>
+            <select v-model="form.department" class="field">
+              <option value="">Select department...</option>
+              <option v-for="option in departmentOptions" :key="option.id" :value="option.name">
+                {{ option.name }}
+              </option>
+            </select>
+          </label>
+          <label class="space-y-2">
+            <span class="text-sm font-medium text-gray-700">Main Position *</span>
+            <input
+              v-model="form.main_position"
+              class="field"
+              type="text"
+              required
+              placeholder="e.g. Software Engineer"
+            />
+          </label>
+          <label class="space-y-2">
+            <span class="text-sm font-medium text-gray-700">Employment Status</span>
+            <select v-model="form.employment_status" class="field">
+              <option value="">Select status...</option>
+              <option v-for="option in employmentStatusOptions" :key="option" :value="option">
+                {{ option }}
+              </option>
+            </select>
+          </label>
+          <label class="space-y-2">
+            <span class="text-sm font-medium text-gray-700">Position Status</span>
+            <select v-model="form.position_status" class="field">
+              <option value="">Select status...</option>
+              <option v-for="option in positionStatusOptions" :key="option" :value="option">
+                {{ option }}
+              </option>
+            </select>
+          </label>
+          <label class="space-y-2">
+            <span class="text-sm font-medium text-gray-700">Probation Period (Months)</span>
+            <input
+              v-model.number="form.periode_probation"
+              class="field"
+              type="number"
+              min="0"
+              @input="sanitizeNumberField(form, 'periode_probation')"
+            />
+          </label>
+          <label class="space-y-2">
+            <span class="text-sm font-medium text-gray-700">Direct Manager</span>
+            <div class="relative" ref="managerFieldRef">
+              <input
+                v-model="searchDirectManager"
+                type="text"
+                class="field"
+                placeholder="Search for manager..."
+                autocomplete="off"
+                @focus="openManagerDropdown"
+                @input="openManagerDropdown"
+              />
+              <ul
+                v-show="isManagerDropdownOpen && filteredDirectManagers.length > 0"
+                class="absolute z-20 mt-1 max-h-52 w-full overflow-auto rounded-xl border border-gray-200 bg-white shadow-lg"
+              >
+                <li
+                  v-for="manager in filteredDirectManagers"
+                  :key="manager.id"
+                  class="cursor-pointer px-4 py-2 hover:bg-blue-50"
+                  @click="selectManager(manager)"
+                >
+                  {{ manager.label }}
+                </li>
+              </ul>
+            </div>
+          </label>
+          <label class="space-y-2">
+            <span class="text-sm font-medium text-gray-700">BU Director Approval</span>
+            <div class="relative" ref="approvalDirectorBuFieldRef">
+              <input
+                v-model="searchApprovalDirectorBu"
+                type="text"
+                class="field"
+                placeholder="Search for BU director..."
+                autocomplete="off"
+                @focus="openApprovalDirectorBuDropdown"
+                @input="openApprovalDirectorBuDropdown"
+              />
+              <ul
+                v-show="isApprovalDirectorBuOpen && filteredApprovalDirectorBu.length > 0"
+                class="absolute z-20 mt-1 max-h-52 w-full overflow-auto rounded-xl border border-gray-200 bg-white shadow-lg"
+              >
+                <li
+                  v-for="manager in filteredApprovalDirectorBu"
+                  :key="`approval-${manager.id}`"
+                  class="cursor-pointer px-4 py-2 hover:bg-blue-50"
+                  @click="selectApprovalDirectorBu(manager)"
+                >
+                  {{ manager.label }}
+                </li>
+              </ul>
+            </div>
+          </label>
+          <label class="space-y-2">
+            <span class="text-sm font-medium text-gray-700">Site</span>
+            <input v-model="form.site" class="field" type="text" placeholder="Site location" />
+          </label>
+          <label class="space-y-2">
+            <span class="text-sm font-medium text-gray-700">Working Location</span>
+            <input
+              v-model="form.working_location"
+              class="field"
+              type="text"
+              placeholder="Working location"
+            />
+          </label>
+          <label class="space-y-2">
+            <span class="text-sm font-medium text-gray-700">Required Date</span>
+            <input v-model="form.required_date" class="field" type="date" />
+          </label>
+
+          <div class="flex gap-3 rounded-xl border border-blue-100 bg-blue-50 px-5 py-4 md:col-span-2">
+            <div class="mt-0.5 shrink-0 text-blue-500">ℹ</div>
+            <div>
+              <p class="text-sm font-semibold text-blue-800">Automatic Approval</p>
+              <p class="mt-1 text-sm leading-relaxed text-blue-700">
+                <strong>GM HRD</strong> and <strong>HRD Director</strong> are automatically filled from the active Approver Master according to their respective positions. Approval date is filled once approved.
+              </p>
+            </div>
           </div>
-        </label>
-        <label class="space-y-2">
-          <span class="text-sm font-medium text-gray-700">BU Director Approval</span>
-          <div class="relative" ref="approvalDirectorBuFieldRef">
-            <input v-model="searchApprovalDirectorBu" type="text" class="field"
-              placeholder="Search for BU director..." @focus="openApprovalDirectorBuDropdown"
-              @input="openApprovalDirectorBuDropdown" autocomplete="off" />
-            <ul v-show="isApprovalDirectorBuOpen && filteredApprovalDirectorBu.length > 0"
-              class="absolute z-20 mt-1 max-h-52 w-full overflow-auto rounded-xl border border-gray-200 bg-white shadow-lg">
-              <li v-for="manager in filteredApprovalDirectorBu" :key="`approval-${manager.id}`"
-                class="cursor-pointer px-4 py-2 hover:bg-blue-50" @click="selectApprovalDirectorBu(manager)">
-                {{ manager.label }}
-              </li>
-            </ul>
+
+          <div class="mt-4 md:col-span-2">
+            <hr class="border-gray-100" />
           </div>
-        </label>
-        <label class="space-y-2">
-          <span class="text-sm font-medium text-gray-700">Site</span>
-          <input v-model="form.site" class="field" type="text" placeholder="Site location" />
-        </label>
-        <label class="space-y-2">
-          <span class="text-sm font-medium text-gray-700">Working Location</span>
-          <input v-model="form.working_location" class="field" type="text" placeholder="Working location" />
-        </label>
-        <label class="space-y-2">
-          <span class="text-sm font-medium text-gray-700">Required Date</span>
-          <input v-model="form.required_date" class="field" type="date" />
-        </label>
 
-        <!-- Approval Auto Info Box -->
-        <div class="md:col-span-2 rounded-xl border border-blue-100 bg-blue-50 px-5 py-4 flex gap-3">
-          <div class="mt-0.5 text-blue-500 shrink-0">ℹ</div>
-          <div>
-            <p class="text-sm font-semibold text-blue-800">Automatic Approval</p>
-            <p class="mt-1 text-sm text-blue-700 leading-relaxed">
-              <strong>GM HRD</strong> and <strong>HRD Director</strong> are automatically filled from the active Approver Master according to their respective positions. Approval date is filled once approved.
-            </p>
-          </div>
-        </div>
+          <label v-for="index in 6" :key="index" class="space-y-2">
+            <span class="text-sm font-medium text-gray-700">Custom Group {{ index }}</span>
+            <select v-model="form[`custom_grup_${index}_id` as keyof typeof form]" class="field">
+              <option :value="null">Select...</option>
+              <option v-for="opt in groupedOptions[index]" :key="opt.id" :value="opt.id">
+                {{ opt.name }}
+              </option>
+            </select>
+          </label>
+        </fieldset>
 
-        <div class="md:col-span-2 mt-4">
-          <hr class="border-gray-100" />
-        </div>
-
-        <label v-for="index in 6" :key="index" class="space-y-2">
-          <span class="text-sm font-medium text-gray-700">Custom Group {{ index }}</span>
-          <select v-model="form[`custom_grup_${index}_id` as keyof typeof form]" class="field">
-            <option :value="null">Select...</option>
-            <option v-for="opt in groupedOptions[index]" :key="opt.id" :value="opt.id">
-              {{ opt.name }}
-            </option>
-          </select>
-        </label>
-
-        <div class="md:col-span-2 mt-6 flex gap-3">
+        <div v-if="!isDetail" class="md:col-span-2 mt-6 flex gap-3">
           <button type="submit"
             class="rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
             :disabled="saving">
-            {{ saving ? 'Saving...' : isEdit ? 'Update ERF' : 'Save ERF' }}
+            {{ saving ? 'Saving...' : submitLabel }}
           </button>
           <button type="button"
             class="rounded-xl border border-gray-200 px-6 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
@@ -162,6 +222,7 @@ import {
 } from '@/domain/entities/JobRequest'
 import type { MasterDataItem } from '@/domain/entities/MasterData'
 import { useAppToast } from '@/presentation/components/feedback/useAppToast'
+import { useAuthViewModel } from '@/viewmodels/useAuthViewModel'
 import { useJobRequestViewModel } from '@/viewmodels/useJobRequestViewModel'
 import { useCustomGroupViewModel } from '@/viewmodels/useCustomGroupViewModel'
 import { useMasterDataViewModel } from '@/viewmodels/useMasterDataViewModel'
@@ -172,10 +233,20 @@ const router = useRouter()
 const { jobs, loading, saving, error, create, update, refresh } = useJobRequestViewModel()
 const { groupedOptions, loadAllOptions } = useCustomGroupViewModel()
 const { optionsByType, loadAllOptions: loadMasterDataOptions } = useMasterDataViewModel()
+const { hasPermission } = useAuthViewModel()
 const appToast = useAppToast()
 
 const id = computed(() => route.params.id as string | undefined)
-const isEdit = computed(() => !!id.value)
+const isDetail = computed(() => route.name === 'job-requests-detail')
+const isEdit = computed(() => route.name === 'job-requests-edit')
+const isExistingRecord = computed(() => Boolean(id.value))
+const canEditFromDetail = computed(() => isDetail.value && hasPermission('job_request:update'))
+const pageTitle = computed(() => {
+  if (isDetail.value) return 'ERF Detail'
+  if (isEdit.value) return 'Edit ERF'
+  return 'New ERF'
+})
+const submitLabel = computed(() => (isEdit.value ? 'Update ERF' : 'Save ERF'))
 
 function createEmptyForm(): JobRequestInput {
   return {
@@ -300,7 +371,7 @@ function handleClickOutside(event: MouseEvent) {
 }
 
 function loadData() {
-  if (isEdit.value && id.value) {
+  if (isExistingRecord.value && id.value) {
     const job = jobs.value.find((j) => j.id === id.value)
     if (job) {
       Object.assign(form, {
@@ -336,7 +407,7 @@ function loadData() {
 watch(() => jobs.value, loadData, { immediate: true })
 
 onMounted(() => {
-  if (isEdit.value && jobs.value.length === 0) refresh()
+  if (isExistingRecord.value && jobs.value.length === 0) refresh()
   loadDirectManagers()
   loadAllOptions()
   loadMasterDataOptions().catch(() => {
@@ -349,7 +420,14 @@ onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside)
 })
 
+function goToEdit() {
+  if (!id.value) return
+  router.push(`/job-requests/${id.value}/edit`)
+}
+
 async function handleSubmit() {
+  if (isDetail.value) return
+
   try {
     if (isEdit.value && id.value) {
       await update(id.value, { ...form })

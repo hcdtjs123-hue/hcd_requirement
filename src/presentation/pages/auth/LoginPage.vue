@@ -98,7 +98,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ErrorMessage, Field, Form } from 'vee-validate'
 import { Eye, EyeOff, LoaderCircle, LockKeyhole, Mail, ShieldCheck } from 'lucide-vue-next'
 import { z } from 'zod'
@@ -106,6 +106,7 @@ import { z } from 'zod'
 import { useAppToast } from '@/presentation/components/feedback/useAppToast'
 import { useAuthViewModel } from '@/viewmodels/useAuthViewModel'
 
+const route = useRoute()
 const router = useRouter()
 const { error, isLoading, login } = useAuthViewModel()
 const appToast = useAppToast()
@@ -136,7 +137,8 @@ async function onSubmit(
   try {
     await login(parsed.data)
     appToast.success('Signed in successfully.')
-    await router.push({ name: 'dashboard' })
+    const redirect = String(route.query.redirect ?? '').trim()
+    await router.push(redirect || { name: 'dashboard' })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Sign in failed.'
     appToast.error(message)

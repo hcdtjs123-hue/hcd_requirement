@@ -247,9 +247,49 @@ const dashboardIntro = computed(() => {
 })
 
 const showJobRequestsPanel = computed(() => canReadJobRequests.value)
-const showApprovalPanel = computed(() => canReadApprovals.value && !isCandidateRole.value)
+const showApprovalPanel = computed(() => !isCandidateRole.value && chains.value.length > 0)
 const showOperationalOverview = computed(
   () => showJobRequestsPanel.value || showApprovalPanel.value,
+)
+
+function assignedApprovalStep(chain: (typeof chains.value)[number]) {
+  const currentEmail = String(user.value?.email ?? '')
+    .toLowerCase()
+    .trim()
+
+  return (
+    chain.steps.find(
+      (step) => String(step.approver_email ?? '').toLowerCase().trim() === currentEmail,
+    ) ?? null
+  )
+}
+
+const adminPendingApprovalsCount = computed(
+  () => chains.value.filter((chain) => chain.status === 'pending').length,
+)
+const adminApprovedHistoryCount = computed(
+  () => chains.value.filter((chain) => chain.status === 'approved').length,
+)
+const adminRejectedHistoryCount = computed(
+  () => chains.value.filter((chain) => chain.status === 'rejected').length,
+)
+const pendingApprovalsCount = computed(
+  () =>
+    isAdminRole.value
+      ? adminPendingApprovalsCount.value
+      : chains.value.filter((chain) => assignedApprovalStep(chain)?.status === 'pending').length,
+)
+const approvedHistoryCount = computed(
+  () =>
+    isAdminRole.value
+      ? adminApprovedHistoryCount.value
+      : chains.value.filter((chain) => assignedApprovalStep(chain)?.status === 'approved').length,
+)
+const rejectedHistoryCount = computed(
+  () =>
+    isAdminRole.value
+      ? adminRejectedHistoryCount.value
+      : chains.value.filter((chain) => assignedApprovalStep(chain)?.status === 'rejected').length,
 )
 
 // ─── KPI Cards ────────────────────────────
@@ -268,20 +308,24 @@ const kpiCards = computed(() => {
     })
   }
 
-  if (canReadApprovals.value) {
+  if (showApprovalPanel.value) {
     cards.push({
       label: 'Awaiting Approval',
-      value: chains.value.filter((c) => c.status === 'pending').length,
-      sub: isManagerRole.value ? 'Approvals you monitor' : 'Requires approver action',
+      value: pendingApprovalsCount.value,
+      sub: isAdminRole.value
+        ? 'All approval requests currently waiting in the system'
+        : 'Approval items assigned to your approver email',
       icon: Clock,
       bg: 'bg-amber-50',
       color: 'text-amber-600',
       bar: 'bg-amber-500',
     })
     cards.push({
-      label: 'Approved',
-      value: chains.value.filter((c) => c.status === 'approved').length,
-      sub: 'Approved submissions',
+      label: 'Approved by You',
+      value: approvedHistoryCount.value,
+      sub: isAdminRole.value
+        ? 'All requests that have completed approval'
+        : 'Approval history recorded by your approver email',
       icon: CheckCircle2,
       bg: 'bg-emerald-50',
       color: 'text-emerald-600',
@@ -345,38 +389,47 @@ function jobStatusBadge(status: string | null) {
 // ─── Approval Stats ───────────────────────
 const approvalStats = computed(() => [
   {
-    label: 'Draft',
-    count: chains.value.filter((c) => c.status === 'draft').length,
-    icon: FileText,
-    bg: 'bg-gray-100',
-    color: 'text-gray-500',
-  },
-  {
-    label: 'Awaiting',
-    count: chains.value.filter((c) => c.status === 'pending').length,
+    label: isAdminRole.value ? 'Pending Requests' : 'Pending for You',
+    count: pendingApprovalsCount.value,
     icon: AlertCircle,
     bg: 'bg-amber-100',
     color: 'text-amber-600',
   },
   {
-    label: 'Approved',
-    count: chains.value.filter((c) => c.status === 'approved').length,
+    label: isAdminRole.value ? 'Approved Requests' : 'Approved by You',
+    count: approvedHistoryCount.value,
     icon: CheckCircle2,
     bg: 'bg-emerald-100',
     color: 'text-emerald-600',
   },
   {
-    label: 'Rejected',
-    count: chains.value.filter((c) => c.status === 'rejected').length,
+    label: isAdminRole.value ? 'Rejected Requests' : 'Rejected by You',
+    count: rejectedHistoryCount.value,
     icon: XCircle,
     bg: 'bg-red-100',
     color: 'text-red-500',
+  },
+  {
+    label: 'Visible to You',
+    count: chains.value.length,
+    icon: FileText,
+    bg: 'bg-gray-100',
+    color: 'text-gray-500',
   },
 ])
 
 // ─── Quick Links ──────────────────────────
 const quickLinks = computed(() => {
   const all = [
+    {
+      to: '/approval-tracking',
+      label: 'Approval Queue',
+      desc: 'Review requests assigned to your approver email',
+      icon: CheckSquare,
+      bg: 'bg-amber-100',
+      color: 'text-amber-700',
+      visible: showApprovalPanel.value,
+    },
     {
       to: '/job-requests/create',
       label: 'Create ERF',
@@ -435,6 +488,7 @@ const quickLinks = computed(() => {
   ]
   const filtered = all.filter(
     (link) =>
+      (link.visible ?? true) &&
       (!link.permissions || hasAnyPermission(link.permissions)) &&
       (!link.adminOnly || isAdminRole.value),
   )

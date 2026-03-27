@@ -288,7 +288,6 @@ const navigationSections = computed((): NavSection[] => [
         to: '/approval-tracking',
         label: 'Approval Tracking',
         icon: CheckSquare,
-        permissions: ['approval:read'],
       },
     ],
   },

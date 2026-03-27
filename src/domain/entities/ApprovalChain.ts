@@ -29,6 +29,7 @@ export interface ApprovalChain {
   job_request?: {
     id: string
     main_position: string | null
+    department: string | null
     site: string | null
     employment_status: string | null
     direct_manager: string | null

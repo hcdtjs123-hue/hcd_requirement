@@ -19,6 +19,8 @@ export interface ApprovalRepository {
   } | null>
   approveStep(token: string, notes?: string): Promise<void>
   rejectStep(token: string, notes?: string): Promise<void>
+  approveAssignedStep(stepId: string, notes?: string): Promise<void>
+  rejectAssignedStep(stepId: string, notes?: string): Promise<void>
 
   // Approver Master Data
   getAllApproverMasters(): Promise<ApproverMaster[]>

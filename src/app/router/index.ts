@@ -31,6 +31,12 @@ const router = createRouter({
           meta: { requiredPermissions: ['job_request:create'] },
         },
         {
+          path: 'job-requests/:id',
+          name: 'job-requests-detail',
+          component: () => import('@/presentation/pages/jobRequests/JobRequestFormPage.vue'),
+          meta: { requiredPermissions: ['job_request:read'] },
+        },
+        {
           path: 'job-requests/:id/edit',
           name: 'job-requests-edit',
           component: () => import('@/presentation/pages/jobRequests/JobRequestFormPage.vue'),
@@ -103,7 +109,6 @@ const router = createRouter({
           path: 'approval-tracking',
           name: 'approval-tracking',
           component: () => import('@/presentation/pages/approvals/ApprovalTrackingPage.vue'),
-          meta: { requiredPermissions: ['approval:read'] },
         },
         // Recruitment Routes
         {
@@ -181,12 +186,6 @@ const router = createRouter({
       meta: { public: true },
     },
     {
-      path: '/approve/:token',
-      name: 'public-approval',
-      component: () => import('@/presentation/pages/approvals/PublicApprovalPage.vue'),
-      meta: { public: true },
-    },
-    {
       path: '/candidate-decision',
       name: 'public-candidate-decision',
       component: () => import('@/presentation/pages/recruitment/PublicCandidateDecisionPage.vue'),
@@ -219,7 +218,12 @@ router.beforeEach(async (to, _from, next) => {
   }
 
   if (!authStore.isAuthenticated) {
-    return next({ name: 'login' })
+    return next({
+      name: 'login',
+      query: {
+        redirect: to.fullPath,
+      },
+    })
   }
 
   // Check permission-based access

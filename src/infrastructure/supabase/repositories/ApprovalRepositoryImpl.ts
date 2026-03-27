@@ -22,6 +22,7 @@ const chainWithJobRequestSelect = `
   job_request:employee_request_form(
     id,
     main_position,
+    department,
     site,
     employment_status,
     required_date,
@@ -51,14 +52,39 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
   // ========================
 
   async getChainsByUser(): Promise<ApprovalChain[]> {
-    const accessScope = await this.getApprovalChainAccessScope()
-    let query = supabase.from('approval_chains').select(chainWithJobRequestSelect)
+    const currentUserRole = await this.getAuthenticatedUserRole()
+    if (currentUserRole === 'admin') {
+      const { data, error } = await supabase
+        .from('approval_chains')
+        .select(chainWithJobRequestSelect)
+        .order('created_at', { ascending: false })
 
-    if (accessScope.isManager && accessScope.userId) {
-      query = query.eq('created_by', accessScope.userId)
+      if (error) throw new Error(error.message)
+
+      return (data ?? []).map(this.normalizeChain)
     }
 
-    const { data, error } = await query.order('created_at', { ascending: false })
+    const currentUserEmail = await this.getAuthenticatedUserEmail()
+    if (!currentUserEmail) return []
+
+    const { data: assignedSteps, error: stepError } = await supabase
+      .from('approval_steps')
+      .select('chain_id')
+      .ilike('approver_email', currentUserEmail)
+
+    if (stepError) throw new Error(stepError.message)
+
+    const chainIds = Array.from(
+      new Set((assignedSteps ?? []).map((step) => step.chain_id).filter(Boolean)),
+    )
+
+    if (chainIds.length === 0) return []
+
+    const { data, error } = await supabase
+      .from('approval_chains')
+      .select(chainWithJobRequestSelect)
+      .in('id', chainIds)
+      .order('created_at', { ascending: false })
 
     if (error) throw new Error(error.message)
 
@@ -181,7 +207,7 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
       await this.sendApprovalEmail(
         firstStep.approver_email,
         firstStep.approver_name || 'Approver',
-        firstStep.token,
+        result.id,
         result.job_request?.main_position,
       )
     }
@@ -221,151 +247,27 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
   }
 
   async approveStep(token: string, notes?: string): Promise<void> {
-    // 1. Get the step
-    const { data: step, error: stepError } = await supabase
-      .from('approval_steps')
-      .select('*')
-      .eq('token', token)
-      .single()
-
-    if (stepError) throw new Error(stepError.message)
-    if (step.status !== 'pending') {
-      throw new Error('This step has been processed already.')
-    }
-
-    // 2. Check sequential: all previous steps must be approved
-    const { data: previousSteps, error: prevError } = await supabase
-      .from('approval_steps')
-      .select('*')
-      .eq('chain_id', step.chain_id)
-      .lt('step_order', step.step_order)
-      .neq('status', 'approved')
-
-    if (prevError) throw new Error(prevError.message)
-    if (previousSteps && previousSteps.length > 0) {
-      throw new Error('Waiting for approval from previous stage.')
-    }
-
-    // 3. Approve this step
-    const approvedAt = new Date().toISOString()
-    const { error: updateError } = await supabase
-      .from('approval_steps')
-      .update({
-        status: 'approved',
-        approved_at: approvedAt,
-        notes: notes || null,
-      })
-      .eq('id', step.id)
-
-    if (updateError) throw new Error(updateError.message)
-
-    await this.syncJobRequestApprovalField(step.chain_id, step.step_order, step.approver_name, approvedAt)
-
-    // 4. Check if all steps in chain are now approved
-    const { data: remainingPending, error: remainError } = await supabase
-      .from('approval_steps')
-      .select('id')
-      .eq('chain_id', step.chain_id)
-      .eq('status', 'pending')
-
-    if (remainError) throw new Error(remainError.message)
-
-    if (!remainingPending || remainingPending.length === 0) {
-      // All steps approved → update chain status
-      await supabase
-        .from('approval_chains')
-        .update({
-          status: 'approved',
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', step.chain_id)
-
-      // Auto-create recruitment tracking
-      const { data: chain } = await supabase
-        .from('approval_chains')
-        .select('job_request_id')
-        .eq('id', step.chain_id)
-        .single()
-
-      if (chain) {
-        await supabase.from('recruitment_tracking').insert({
-          job_request_id: chain.job_request_id,
-          chain_id: step.chain_id,
-        })
-      }
-    } else {
-      // Notify the NEXT approver in the chain
-      const { data: nextStep } = await supabase
-        .from('approval_steps')
-        .select('*')
-        .eq('chain_id', step.chain_id)
-        .eq('step_order', step.step_order + 1)
-        .maybeSingle()
-
-      if (nextStep && nextStep.token) {
-        const { data: chainData, error: chainError } = await supabase
-          .from('approval_chains')
-          .select(chainWithJobRequestSelect)
-          .eq('id', step.chain_id)
-          .single()
-
-        if (chainError) throw new Error(chainError.message)
-
-        const chain = this.normalizeChain(chainData as Record<string, unknown>)
-        await this.sendApprovalEmail(
-          nextStep.approver_email,
-          nextStep.approver_name || 'Approver',
-          nextStep.token,
-          chain.job_request?.main_position,
-        )
-      }
-    }
+    const step = await this.getStepByTokenOrThrow(token)
+    await this.ensureCurrentUserMatchesApprover(step.approver_email)
+    await this.processApprovalStep(step, notes)
   }
 
   async rejectStep(token: string, notes?: string): Promise<void> {
-    const { data: step, error: stepError } = await supabase
-      .from('approval_steps')
-      .select('*')
-      .eq('token', token)
-      .single()
+    const step = await this.getStepByTokenOrThrow(token)
+    await this.ensureCurrentUserMatchesApprover(step.approver_email)
+    await this.processRejectedStep(step, notes)
+  }
 
-    if (stepError) throw new Error(stepError.message)
-    if (step.status !== 'pending') {
-      throw new Error('Step ini sudah diproses sebelumnya.')
-    }
+  async approveAssignedStep(stepId: string, notes?: string): Promise<void> {
+    const step = await this.getStepByIdOrThrow(stepId)
+    await this.ensureCurrentUserMatchesApprover(step.approver_email)
+    await this.processApprovalStep(step, notes)
+  }
 
-    // Check sequential
-    const { data: previousSteps, error: prevError } = await supabase
-      .from('approval_steps')
-      .select('*')
-      .eq('chain_id', step.chain_id)
-      .lt('step_order', step.step_order)
-      .neq('status', 'approved')
-
-    if (prevError) throw new Error(prevError.message)
-    if (previousSteps && previousSteps.length > 0) {
-      throw new Error('Menunggu approval dari tahap sebelumnya.')
-    }
-
-    const { error: updateError } = await supabase
-      .from('approval_steps')
-      .update({
-        status: 'rejected',
-        approved_at: new Date().toISOString(),
-        notes: notes || null,
-      })
-      .eq('id', step.id)
-
-    if (updateError) throw new Error(updateError.message)
-
-    // Update chain status to rejected
-    await supabase
-      .from('approval_chains')
-      .update({
-        status: 'rejected',
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', step.chain_id)
+  async rejectAssignedStep(stepId: string, notes?: string): Promise<void> {
+    const step = await this.getStepByIdOrThrow(stepId)
+    await this.ensureCurrentUserMatchesApprover(step.approver_email)
+    await this.processRejectedStep(step, notes)
   }
 
   // ========================
@@ -437,6 +339,204 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
   // ========================
   // Helpers
   // ========================
+
+  private async getStepByTokenOrThrow(token: string) {
+    const { data: step, error } = await supabase
+      .from('approval_steps')
+      .select('*')
+      .eq('token', token)
+      .single()
+
+    if (error) throw new Error(error.message)
+    return step as ApprovalStep
+  }
+
+  private async getStepByIdOrThrow(stepId: string) {
+    const { data: step, error } = await supabase
+      .from('approval_steps')
+      .select('*')
+      .eq('id', stepId)
+      .single()
+
+    if (error) throw new Error(error.message)
+    return step as ApprovalStep
+  }
+
+  private async getAuthenticatedUserEmail() {
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser()
+
+    if (error) throw new Error(error.message)
+
+    return String(user?.email ?? '').trim().toLowerCase() || null
+  }
+
+  private async getAuthenticatedUserRole() {
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser()
+
+    if (userError) throw new Error(userError.message)
+    if (!user) return null
+
+    const { data: roleData, error: roleError } = await supabase
+      .from('user_roles')
+      .select('roles(name)')
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    if (roleError) throw new Error(roleError.message)
+
+    return String(
+      (roleData as { roles?: { name?: string } | null } | null)?.roles?.name ?? '',
+    )
+      .trim()
+      .toLowerCase() || null
+  }
+
+  private async ensureCurrentUserMatchesApprover(approverEmail: string) {
+    const currentUserRole = await this.getAuthenticatedUserRole()
+    if (
+      currentUserRole
+      && ['admin', 'administrator', 'super admin', 'super_admin'].includes(currentUserRole)
+    ) {
+      throw new Error('Administrator accounts can view approval tracking, but cannot approve or reject requests.')
+    }
+
+    const currentUserEmail = await this.getAuthenticatedUserEmail()
+    const normalizedApproverEmail = String(approverEmail ?? '').trim().toLowerCase()
+
+    if (!currentUserEmail || !normalizedApproverEmail || currentUserEmail !== normalizedApproverEmail) {
+      throw new Error(
+        'Approval can only be processed by the designated approver email registered for this stage.',
+      )
+    }
+  }
+
+  private async ensurePreviousStepsApproved(step: ApprovalStep) {
+    if (step.status !== 'pending') {
+      throw new Error('This step has been processed already.')
+    }
+
+    const { data: previousSteps, error } = await supabase
+      .from('approval_steps')
+      .select('*')
+      .eq('chain_id', step.chain_id)
+      .lt('step_order', step.step_order)
+      .neq('status', 'approved')
+
+    if (error) throw new Error(error.message)
+    if (previousSteps && previousSteps.length > 0) {
+      throw new Error('Waiting for approval from the previous stage.')
+    }
+  }
+
+  private async processApprovalStep(step: ApprovalStep, notes?: string) {
+    await this.ensurePreviousStepsApproved(step)
+
+    const approvedAt = new Date().toISOString()
+    const { error: updateError } = await supabase
+      .from('approval_steps')
+      .update({
+        status: 'approved',
+        approved_at: approvedAt,
+        notes: notes || null,
+      })
+      .eq('id', step.id)
+
+    if (updateError) throw new Error(updateError.message)
+
+    await this.syncJobRequestApprovalField(
+      step.chain_id,
+      step.step_order,
+      step.approver_name,
+      approvedAt,
+    )
+
+    const { data: remainingPending, error: remainError } = await supabase
+      .from('approval_steps')
+      .select('id')
+      .eq('chain_id', step.chain_id)
+      .eq('status', 'pending')
+
+    if (remainError) throw new Error(remainError.message)
+
+    if (!remainingPending || remainingPending.length === 0) {
+      await supabase
+        .from('approval_chains')
+        .update({
+          status: 'approved',
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', step.chain_id)
+
+      const { data: chain } = await supabase
+        .from('approval_chains')
+        .select('job_request_id')
+        .eq('id', step.chain_id)
+        .single()
+
+      if (chain) {
+        await supabase.from('recruitment_tracking').insert({
+          job_request_id: chain.job_request_id,
+          chain_id: step.chain_id,
+        })
+      }
+
+      return
+    }
+
+    const { data: nextStep } = await supabase
+      .from('approval_steps')
+      .select('*')
+      .eq('chain_id', step.chain_id)
+      .eq('step_order', step.step_order + 1)
+      .maybeSingle()
+
+    if (!nextStep) return
+
+    const { data: chainData, error: chainError } = await supabase
+      .from('approval_chains')
+      .select(chainWithJobRequestSelect)
+      .eq('id', step.chain_id)
+      .single()
+
+    if (chainError) throw new Error(chainError.message)
+
+    const chain = this.normalizeChain(chainData as Record<string, unknown>)
+    await this.sendApprovalEmail(
+      nextStep.approver_email,
+      nextStep.approver_name || 'Approver',
+      chain.id,
+      chain.job_request?.main_position,
+    )
+  }
+
+  private async processRejectedStep(step: ApprovalStep, notes?: string) {
+    await this.ensurePreviousStepsApproved(step)
+
+    const { error: updateError } = await supabase
+      .from('approval_steps')
+      .update({
+        status: 'rejected',
+        approved_at: new Date().toISOString(),
+        notes: notes || null,
+      })
+      .eq('id', step.id)
+
+    if (updateError) throw new Error(updateError.message)
+
+    await supabase
+      .from('approval_chains')
+      .update({
+        status: 'rejected',
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', step.chain_id)
+  }
 
   private normalizeChain(data: Record<string, unknown>): ApprovalChain {
     const steps = Array.isArray(data.steps)
@@ -645,7 +745,7 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
   private async sendApprovalEmail(
     email: string,
     name: string,
-    token: string,
+    chainId: string,
     mainPosition?: string | null,
   ) {
     if (!email?.trim()) {
@@ -660,15 +760,22 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
       throw new Error('VITE_EMAIL_API_KEY is not set.')
     }
 
-    const approvalLink = `${window.location.origin}/approve/${token}`
+    const redirectPath = `/approval-tracking?chain=${encodeURIComponent(chainId)}`
+    const loginLink = `${window.location.origin}/login?redirect=${encodeURIComponent(redirectPath)}`
     const html = `
       <div style="font-family: sans-serif; padding: 20px;">
-        <h2>Approval Request (HCD)</h2>
+        <h2>Approval Request Notification</h2>
         <p>Dear ${name},</p>
-        <p>There is a new Employee Request Form (ERF) submission that requires your approval.</p>
-        <p>Please click the link below to view the details and provide your decision:</p>
-        <a href="${approvalLink}" style="display:inline-block; padding:10px 20px; background-color:#2563eb; color:white; text-decoration:none; border-radius:5px;">Open Approval Form</a>
-        <p style="margin-top:20px; font-size: 12px; color: #666;">If the button doesn't work, copy the following link: <br/>${approvalLink}</p>
+        <p>
+          An Employee Request Form (ERF) has been submitted and is awaiting your review.
+          Please sign in to the HCD Workspace using your designated approver email address to
+          review the request details and record your decision.
+        </p>
+        <p>
+          For security and audit purposes, approval can only be completed after a successful login.
+        </p>
+        <a href="${loginLink}" style="display:inline-block; padding:10px 20px; background-color:#2563eb; color:white; text-decoration:none; border-radius:5px;">Sign In to Review Approval</a>
+        <p style="margin-top:20px; font-size: 12px; color: #666;">If the button above does not work, please use this link:<br/>${loginLink}</p>
       </div>
     `
 

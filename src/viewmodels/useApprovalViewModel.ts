@@ -42,13 +42,43 @@ export function useApprovalViewModel() {
     return getChainByJobRequest(approvalRepo, jobRequestId)
   }
 
+  async function approveAssignedStep(stepId: string, notes?: string) {
+    saving.value = true
+    error.value = ''
+    try {
+      await approvalRepo.approveAssignedStep(stepId, notes)
+      await refreshChains()
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to approve the request.'
+      throw err
+    } finally {
+      saving.value = false
+    }
+  }
+
+  async function rejectAssignedStep(stepId: string, notes?: string) {
+    saving.value = true
+    error.value = ''
+    try {
+      await approvalRepo.rejectAssignedStep(stepId, notes)
+      await refreshChains()
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to reject the request.'
+      throw err
+    } finally {
+      saving.value = false
+    }
+  }
+
   onMounted(refreshChains)
 
   return {
+    approveAssignedStep,
     chains,
     error,
     fetchChainByJobRequest,
     loading,
+    rejectAssignedStep,
     refreshChains,
     saving,
     submitForApproval: submitApproval,
