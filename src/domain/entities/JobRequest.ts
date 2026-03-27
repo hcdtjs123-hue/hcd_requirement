@@ -11,7 +11,9 @@ export type PositionStatus = (typeof positionStatusOptions)[number]
 
 export interface JobRequest {
   id: string
+  pt_id?: string | null
   pt_pembebanan: string | null
+  department_id?: string | null
   department: string | null
   employment_status: EmploymentStatus | null
   direct_manager: string | null
@@ -51,7 +53,9 @@ export interface JobRequest {
 }
 
 export interface JobRequestInput {
+  pt_id?: string | null
   pt_pembebanan: string
+  department_id?: string | null
   department: string
   employment_status: EmploymentStatus | ""
   direct_manager: string

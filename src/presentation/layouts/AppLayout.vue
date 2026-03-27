@@ -235,6 +235,7 @@ import {
   ShieldCheck,
   ChevronDown,
   ChevronUp,
+  Building2,
 } from 'lucide-vue-next'
 
 import { useAppToast } from '@/presentation/components/feedback/useAppToast'
@@ -338,6 +339,13 @@ const navigationSections = computed((): NavSection[] => [
         permissions: ['user:read'],
         adminOnly: true,
       },
+      {
+        to: '/master-data-management',
+        label: 'PT & Department',
+        icon: Building2,
+        permissions: ['user:read'],
+        adminOnly: true,
+      },
     ],
   },
   {
@@ -410,6 +418,7 @@ const pageTitle = computed(() => {
     { prefix: '/user-management', title: 'User Management' },
     { prefix: '/role-management', title: 'Role Management' },
     { prefix: '/custom-group-management', title: 'Custom Group Management' },
+    { prefix: '/master-data-management', title: 'PT & Department Master' },
   ]
 
   const match = titleMatchers.find(

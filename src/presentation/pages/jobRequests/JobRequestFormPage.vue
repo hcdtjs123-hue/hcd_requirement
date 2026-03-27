@@ -22,16 +22,21 @@
       <form v-if="!loading" class="grid gap-5 md:grid-cols-2" @submit.prevent="handleSubmit">
         <label class="space-y-2 md:col-span-2">
           <span class="text-sm font-medium text-gray-700">Cost Center PT</span>
-          <input v-model="form.pt_pembebanan" class="field" type="text" placeholder="Enter PT" />
+          <select v-model="form.pt_pembebanan" class="field">
+            <option value="">Select PT...</option>
+            <option v-for="option in ptOptions" :key="option.id" :value="option.name">
+              {{ option.name }}
+            </option>
+          </select>
         </label>
         <label class="space-y-2 md:col-span-2">
           <span class="text-sm font-medium text-gray-700">Department</span>
-          <input
-            v-model="form.department"
-            class="field"
-            type="text"
-            placeholder="Enter department"
-          />
+          <select v-model="form.department" class="field">
+            <option value="">Select department...</option>
+            <option v-for="option in departmentOptions" :key="option.id" :value="option.name">
+              {{ option.name }}
+            </option>
+          </select>
         </label>
         <label class="space-y-2">
           <span class="text-sm font-medium text-gray-700">Main Position *</span>
@@ -155,15 +160,18 @@ import {
   positionStatusOptions,
   type JobRequestInput,
 } from '@/domain/entities/JobRequest'
+import type { MasterDataItem } from '@/domain/entities/MasterData'
 import { useAppToast } from '@/presentation/components/feedback/useAppToast'
 import { useJobRequestViewModel } from '@/viewmodels/useJobRequestViewModel'
 import { useCustomGroupViewModel } from '@/viewmodels/useCustomGroupViewModel'
+import { useMasterDataViewModel } from '@/viewmodels/useMasterDataViewModel'
 import { supabase } from '@/infrastructure/supabase/client'
 
 const route = useRoute()
 const router = useRouter()
 const { jobs, loading, saving, error, create, update, refresh } = useJobRequestViewModel()
 const { groupedOptions, loadAllOptions } = useCustomGroupViewModel()
+const { optionsByType, loadAllOptions: loadMasterDataOptions } = useMasterDataViewModel()
 const appToast = useAppToast()
 
 const id = computed(() => route.params.id as string | undefined)
@@ -222,6 +230,28 @@ function filterManagers(term: string) {
 
 const filteredDirectManagers = computed(() => filterManagers(searchDirectManager.value))
 const filteredApprovalDirectorBu = computed(() => filterManagers(searchApprovalDirectorBu.value))
+
+function withCurrentOption(options: MasterDataItem[], currentValue: string) {
+  const normalizedValue = currentValue.trim()
+  if (!normalizedValue) return options
+  if (options.some((option) => option.name === normalizedValue)) return options
+
+  return [
+    {
+      id: `current-${normalizedValue}`,
+      name: normalizedValue,
+      description: 'Existing ERF value',
+      created_at: null,
+      updated_at: null,
+    },
+    ...options,
+  ]
+}
+
+const ptOptions = computed(() => withCurrentOption(optionsByType.value.pt, form.pt_pembebanan))
+const departmentOptions = computed(() =>
+  withCurrentOption(optionsByType.value.department, form.department),
+)
 
 async function loadDirectManagers() {
   const { data, error } = await supabase
@@ -309,6 +339,9 @@ onMounted(() => {
   if (isEdit.value && jobs.value.length === 0) refresh()
   loadDirectManagers()
   loadAllOptions()
+  loadMasterDataOptions().catch(() => {
+    appToast.error('Failed to load PT and Department master data.')
+  })
   document.addEventListener('click', handleClickOutside)
 })
 

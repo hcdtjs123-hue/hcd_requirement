@@ -173,6 +173,15 @@ const router = createRouter({
           },
         },
         {
+          path: 'master-data-management',
+          name: 'master-data-management',
+          component: () => import('@/presentation/pages/admin/MasterDataManagementPage.vue'),
+          meta: {
+            requiredPermissions: ['user:read'],
+            allowedRoles: ['admin', 'administrator', 'super admin', 'super_admin'],
+          },
+        },
+        {
           path: 'role-management',
           name: 'role-management',
           component: () => import('@/presentation/pages/role/RoleManagementPage.vue'),

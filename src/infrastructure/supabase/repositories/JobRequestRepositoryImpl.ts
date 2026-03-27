@@ -11,6 +11,8 @@ export class JobRequestRepositoryImpl implements JobRequestRepository {
     const accessScope = await this.getAccessScope()
     let query = supabase.from('employee_request_form').select(`
       *,
+      pt:master_pt(id, name),
+      department_ref:master_department(id, name),
       custom_grup_1:master_custom_grup_1(name),
       custom_grup_2:master_custom_grup_2(name),
       custom_grup_3:master_custom_grup_3(name),
@@ -36,6 +38,8 @@ export class JobRequestRepositoryImpl implements JobRequestRepository {
     const accessScope = await this.getAccessScope()
     let query = supabase.from('employee_request_form').select(`
       *,
+      pt:master_pt(id, name),
+      department_ref:master_department(id, name),
       custom_grup_1:master_custom_grup_1(name),
       custom_grup_2:master_custom_grup_2(name),
       custom_grup_3:master_custom_grup_3(name),
@@ -63,6 +67,10 @@ export class JobRequestRepositoryImpl implements JobRequestRepository {
   private flattenCustomGroups(item: any): JobRequest {
     return {
       ...item,
+      pt_id: item.pt_id ?? item.pt?.id ?? null,
+      pt_pembebanan: item.pt?.name ?? item.pt_pembebanan ?? null,
+      department_id: item.department_id ?? item.department_ref?.id ?? null,
+      department: item.department_ref?.name ?? item.department ?? null,
       custom_grup_1: item.custom_grup_1?.name ?? null,
       custom_grup_2: item.custom_grup_2?.name ?? null,
       custom_grup_3: item.custom_grup_3?.name ?? null,
@@ -105,6 +113,7 @@ export class JobRequestRepositoryImpl implements JobRequestRepository {
 
   async create(data: JobRequestInput): Promise<JobRequest> {
     const user = await supabase.auth.getUser()
+    const masterDataIds = await this.resolveMasterDataIds(data)
 
     // Auto-populate: find active GM HRD approver from approver_master
     const { data: gmHrdApprover } = await supabase
@@ -130,7 +139,7 @@ export class JobRequestRepositoryImpl implements JobRequestRepository {
       String(directorEmployee?.full_name ?? directorEmployee?.username ?? '').trim() || null
 
     const payload = {
-      ...this.mapInput(data),
+      ...this.mapInput(data, masterDataIds),
       approval_gm_hrd: approvalGmHrd,
       approval_director_hrd: approvalDirectorHrd,
       created_by: user.data.user?.id ?? null,
@@ -168,11 +177,12 @@ export class JobRequestRepositoryImpl implements JobRequestRepository {
 
   async update(id: string, data: JobRequestInput): Promise<JobRequest> {
     const accessScope = await this.getAccessScope()
+    const masterDataIds = await this.resolveMasterDataIds(data)
 
     let query = supabase
       .from('employee_request_form')
       .update({
-        ...this.mapInput(data),
+        ...this.mapInput(data, masterDataIds),
         updated_at: new Date().toISOString(),
       })
       .eq('id', id)
@@ -265,9 +275,36 @@ export class JobRequestRepositoryImpl implements JobRequestRepository {
     }
   }
 
-  private mapInput(data: JobRequestInput) {
+  private async resolveMasterDataIds(data: JobRequestInput) {
+    const ptName = String(data.pt_pembebanan ?? '').trim()
+    const departmentName = String(data.department ?? '').trim()
+
+    const [ptResult, departmentResult] = await Promise.all([
+      ptName
+        ? supabase.from('master_pt').select('id').eq('name', ptName).maybeSingle()
+        : Promise.resolve({ data: null, error: null }),
+      departmentName
+        ? supabase.from('master_department').select('id').eq('name', departmentName).maybeSingle()
+        : Promise.resolve({ data: null, error: null }),
+    ])
+
+    if (ptResult.error) throw new Error(ptResult.error.message)
+    if (departmentResult.error) throw new Error(departmentResult.error.message)
+
     return {
+      pt_id: data.pt_id || ptResult.data?.id || null,
+      department_id: data.department_id || departmentResult.data?.id || null,
+    }
+  }
+
+  private mapInput(
+    data: JobRequestInput,
+    masterDataIds: { pt_id: string | null; department_id: string | null },
+  ) {
+    return {
+      pt_id: masterDataIds.pt_id,
       pt_pembebanan: data.pt_pembebanan || null,
+      department_id: masterDataIds.department_id,
       department: data.department || null,
       employment_status: data.employment_status || null,
       direct_manager: data.direct_manager || null,
