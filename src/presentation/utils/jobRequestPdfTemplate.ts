@@ -63,6 +63,24 @@ function buildApprovalItem(
   `
 }
 
+function buildPairedFieldRow(
+  leftLabel: string,
+  leftValue: string,
+  rightLabel: string,
+  rightValue: string,
+) {
+  return `
+    <div class="paired-row">
+      <div class="field-label">${escapeHtml(leftLabel)}</div>
+      <div class="field-separator">:</div>
+      <div class="paired-field-value">${leftValue}</div>
+      <div class="field-label">${escapeHtml(rightLabel)}</div>
+      <div class="field-separator">:</div>
+      <div class="paired-field-value">${rightValue}</div>
+    </div>
+  `
+}
+
 function buildTemplate(job: JobRequest) {
   const isClosed = job.status === 'closed'
   const isFullyApproved = Boolean(
@@ -141,6 +159,13 @@ function buildTemplate(job: JobRequest) {
           align-items: start;
           margin-top: 8px;
         }
+        .paired-row {
+          display: grid;
+          grid-template-columns: 165px 12px minmax(140px, 1fr) 165px 12px minmax(140px, 1fr);
+          gap: 6px;
+          align-items: start;
+          margin-top: 8px;
+        }
         .field-label {
           font-weight: 700;
           color: #334155;
@@ -157,7 +182,8 @@ function buildTemplate(job: JobRequest) {
           word-break: break-word;
         }
         .approval-field-value,
-        .approval-date-value {
+        .approval-date-value,
+        .paired-field-value {
           min-height: 20px;
           padding: 0 2px 3px;
           border-bottom: 1px solid #cbd5e1;
@@ -224,9 +250,25 @@ function buildTemplate(job: JobRequest) {
               job.periode_probation ? `${escapeHtml(job.periode_probation)} months` : '-',
             )}
             ${buildRow('Direct Manager', nameOnly(job.direct_manager))}
-            ${buildRow('GM HRD Approval', nameOnly(job.approval_gm_hrd))}
-            ${buildRow('Director HRD Approval', nameOnly(job.approval_director_hrd))}
             ${buildRow('Manpower Requirement Category', lineValue(job.position_status))}
+            ${buildPairedFieldRow(
+              'Custom Group 1',
+              lineValue(job.custom_grup_1),
+              'Custom Group 2',
+              lineValue(job.custom_grup_2),
+            )}
+            ${buildPairedFieldRow(
+              'Custom Group 3',
+              lineValue(job.custom_grup_3),
+              'Custom Group 4',
+              lineValue(job.custom_grup_4),
+            )}
+            ${buildPairedFieldRow(
+              'Custom Group 5',
+              lineValue(job.custom_grup_5),
+              'Custom Group 6',
+              lineValue(job.custom_grup_6),
+            )}
           </div>
 
           ${
