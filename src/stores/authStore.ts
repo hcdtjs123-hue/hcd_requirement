@@ -76,6 +76,7 @@ export const useAuthStore = defineStore("auth", () => {
 
     return {
       username: profile?.username ?? undefined,
+      phone: profile?.phone ?? undefined,
       full_name: profile?.full_name ?? undefined,
       first_name: profile?.full_name ?? undefined,
       middle_name: undefined,

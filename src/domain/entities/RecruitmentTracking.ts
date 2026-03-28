@@ -8,7 +8,7 @@ export interface RecruitmentTracking {
   chain_id: string | null
   created_at: string | null
   updated_at: string | null
-  job_request?: {
+  employee_request_form?: {
     id: string
     pt_pembebanan: string | null
     department: string | null

@@ -246,7 +246,7 @@ const { isLoading, logout, user, userRole, hasAnyPermission } = useAuthViewModel
 const appToast = useAppToast()
 
 const isMobileSidebarOpen = ref(false)
-const openSections = ref<string[]>(['Overview', 'ERF Management', 'Hiring'])
+const openSections = ref<string[]>(['Overview', 'Employee Request Forms', 'Recruitment'])
 const normalizedRole = computed(() => (userRole.value ?? '').toLowerCase())
 const isAdminRole = computed(() =>
   ['admin', 'administrator', 'super admin', 'super_admin'].includes(normalizedRole.value),
@@ -275,14 +275,14 @@ const navigationSections = computed((): NavSection[] => [
     items: [{ to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard }],
   },
   {
-    label: 'ERF Management',
+    label: 'Employee Request Forms',
     icon: FileText,
     items: [
       {
-        to: '/job-requests',
-        label: 'ERF Submissions',
+        to: '/employee-request-forms',
+        label: 'Employee Request Forms',
         icon: FileText,
-        permissions: ['job_request:read'],
+        permissions: ['employee_request_form:read'],
       },
       {
         to: '/approval-tracking',
@@ -292,20 +292,20 @@ const navigationSections = computed((): NavSection[] => [
     ],
   },
   {
-    label: 'Hiring',
+    label: 'Recruitment',
     icon: Briefcase,
     items: [
       {
         to: '/recruitment',
-        label: 'Hiring Dashboard',
+        label: 'Recruitment Dashboard',
         icon: Briefcase,
-        permissions: ['recruitment:read', 'candidate:read'],
+        permissions: ['recruitment:read', 'candidate_form:read'],
       },
       {
-        to: '/candidates',
-        label: 'Candidate Form',
+        to: '/candidate-forms',
+        label: 'Candidate Forms',
         icon: ClipboardList,
-        permissions: ['candidate_data:read', 'candidate:read'],
+        permissions: ['candidate_form:read'],
       },
     ],
   },
@@ -394,13 +394,15 @@ function isActiveRoute(targetPath: string) {
 const pageTitle = computed(() => {
   const titleMatchers: Array<{ prefix: string; title: string }> = [
     { prefix: '/dashboard', title: 'Dashboard' },
-    { prefix: '/job-requests', title: 'ERF' },
+    { prefix: '/employee-request-forms', title: 'Employee Request Forms' },
+    { prefix: '/job-requests', title: 'Employee Request Forms' },
     { prefix: '/approver-master', title: 'Approver Master' },
     { prefix: '/approval-tracking', title: 'Approval Tracking' },
-    { prefix: '/recruitment', title: 'Hiring Dashboard' },
-    { prefix: '/candidates', title: 'Candidate Form' },
-    { prefix: '/candidate-management', title: 'Candidate Form' },
-    { prefix: '/applications', title: 'Candidate Form' },
+    { prefix: '/recruitment', title: 'Recruitment Dashboard' },
+    { prefix: '/candidate-forms', title: 'Candidate Forms' },
+    { prefix: '/candidates', title: 'Candidate Forms' },
+    { prefix: '/candidate-management', title: 'Candidate Forms' },
+    { prefix: '/applications', title: 'Candidate Forms' },
     { prefix: '/profile', title: 'Profile' },
     { prefix: '/user-management', title: 'User Management' },
     { prefix: '/role-management', title: 'Role Management' },

@@ -42,40 +42,24 @@ export class RoleRepositoryImpl implements RoleRepository {
   private async ensureModulePermissions(existingPermissions: Permission[]): Promise<Permission[]> {
     const requiredPermissions = [
       {
-        name: 'recruitment:create',
-        description: 'Add candidates to the recruitment pipeline',
-      },
-      {
         name: 'recruitment:read',
-        description: 'View recruitment dashboard and pipeline',
+        description: 'View recruitment dashboard and approved employee request forms',
       },
       {
-        name: 'recruitment:update',
-        description: 'Modify candidate recruitment pipeline process',
+        name: 'candidate_form:create',
+        description: 'Create candidate forms',
       },
       {
-        name: 'can:upload',
-        description: 'Upload recruitment posting files and evidence',
+        name: 'candidate_form:read',
+        description: 'View candidate forms',
       },
       {
-        name: 'recruitment:delete',
-        description: 'Delete candidate recruitment pipeline data',
+        name: 'candidate_form:update',
+        description: 'Update candidate forms',
       },
       {
-        name: 'candidate_data:create',
-        description: 'Add new candidate data',
-      },
-      {
-        name: 'candidate_data:read',
-        description: 'View list and details of candidate data',
-      },
-      {
-        name: 'candidate_data:update',
-        description: 'Modify candidate profile and form data',
-      },
-      {
-        name: 'candidate_data:delete',
-        description: 'Delete candidate data',
+        name: 'candidate_form:delete',
+        description: 'Delete candidate forms',
       },
     ]
 

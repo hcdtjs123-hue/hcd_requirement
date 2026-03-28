@@ -31,8 +31,20 @@
               <p class="mt-1 break-all text-sm font-medium text-gray-900">{{ user?.id ?? '-' }}</p>
             </div>
             <div>
+              <p class="text-xs text-gray-400 uppercase tracking-wider">Full Name</p>
+              <p class="mt-1 text-sm font-medium text-gray-900">{{ user?.full_name ?? '-' }}</p>
+            </div>
+            <div>
+              <p class="text-xs text-gray-400 uppercase tracking-wider">Username</p>
+              <p class="mt-1 text-sm font-medium text-gray-900">{{ user?.username ?? '-' }}</p>
+            </div>
+            <div>
               <p class="text-xs text-gray-400 uppercase tracking-wider">Email Address</p>
               <p class="mt-1 text-sm font-medium text-gray-900">{{ user?.email ?? '-' }}</p>
+            </div>
+            <div>
+              <p class="text-xs text-gray-400 uppercase tracking-wider">Phone Number</p>
+              <p class="mt-1 text-sm font-medium text-gray-900">{{ user?.phone ?? '-' }}</p>
             </div>
           </div>
         </div>

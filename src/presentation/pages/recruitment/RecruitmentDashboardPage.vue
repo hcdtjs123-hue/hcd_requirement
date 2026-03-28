@@ -3,7 +3,7 @@
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div>
         <p class="text-sm uppercase tracking-[0.3em] text-blue-600">Recruitment Team</p>
-        <h1 class="mt-3 text-3xl font-semibold tracking-tight">Hiring Dashboard</h1>
+        <h1 class="mt-3 text-3xl font-semibold tracking-tight">Recruitment Dashboard</h1>
       </div>
       <button
         type="button"
@@ -30,9 +30,7 @@
           Open Position
         </p>
         <p class="mt-4 text-5xl font-semibold tracking-tight">{{ openPositionsCount }}</p>
-        <p class="mt-3 max-w-2xl text-sm leading-relaxed text-blue-50">
-          {{ openPositionCaption }}
-        </p>
+        
       </div>
     </section>
 
@@ -175,18 +173,18 @@ function compactText(value: unknown) {
     .trim()
 }
 
-function extractLevelCandidates(jobRequest: RecruitmentTracking['job_request']) {
-  if (!jobRequest) return []
+function extractLevelCandidates(employeeRequestForm: RecruitmentTracking['employee_request_form']) {
+  if (!employeeRequestForm) return []
 
   return [
-    jobRequest.job_level,
-    jobRequest.custom_grup_1,
-    jobRequest.custom_grup_2,
-    jobRequest.custom_grup_3,
-    jobRequest.custom_grup_4,
-    jobRequest.custom_grup_5,
-    jobRequest.custom_grup_6,
-    jobRequest.main_position,
+    employeeRequestForm.job_level,
+    employeeRequestForm.custom_grup_1,
+    employeeRequestForm.custom_grup_2,
+    employeeRequestForm.custom_grup_3,
+    employeeRequestForm.custom_grup_4,
+    employeeRequestForm.custom_grup_5,
+    employeeRequestForm.custom_grup_6,
+    employeeRequestForm.main_position,
   ]
     .map(compactText)
     .filter(Boolean)
@@ -202,8 +200,8 @@ const normalizedJobLevelMap = computed(
   () => new Map(masterJobLevelLabels.value.map((label) => [normalize(label), label])),
 )
 
-function resolveLevel(jobRequest: RecruitmentTracking['job_request']) {
-  const candidates = extractLevelCandidates(jobRequest)
+function resolveLevel(employeeRequestForm: RecruitmentTracking['employee_request_form']) {
+  const candidates = extractLevelCandidates(employeeRequestForm)
 
   for (const candidate of candidates) {
     const matchedMasterLabel = normalizedJobLevelMap.value.get(normalize(candidate))
@@ -246,8 +244,8 @@ const combinedError = computed(() => error.value || masterDataError.value || '')
 
 const enrichedTrackings = computed<EnrichedTracking[]>(() =>
   trackings.value.map((tracking) => {
-    const departmentLabel = compactText(tracking.job_request?.department) || 'No Department'
-    const level = resolveLevel(tracking.job_request ?? null)
+    const departmentLabel = compactText(tracking.employee_request_form?.department) || 'No Department'
+    const level = resolveLevel(tracking.employee_request_form ?? null)
 
     return {
       ...tracking,
@@ -259,7 +257,7 @@ const enrichedTrackings = computed<EnrichedTracking[]>(() =>
 )
 
 const openTrackings = computed(() =>
-  enrichedTrackings.value.filter((tracking) => tracking.job_request?.status !== 'closed'),
+  enrichedTrackings.value.filter((tracking) => tracking.employee_request_form?.status !== 'closed'),
 )
 
 const filteredOpenTrackings = computed(() => {
@@ -269,11 +267,11 @@ const filteredOpenTrackings = computed(() => {
   return openTrackings.value.filter((tracking) => {
     const haystack = [
       tracking.departmentLabel,
-      tracking.job_request?.pt_pembebanan,
-      tracking.job_request?.main_position,
-      tracking.job_request?.site,
+      tracking.employee_request_form?.pt_pembebanan,
+      tracking.employee_request_form?.main_position,
+      tracking.employee_request_form?.site,
       tracking.levelLabel,
-      ...extractLevelCandidates(tracking.job_request ?? null),
+      ...extractLevelCandidates(tracking.employee_request_form ?? null),
     ]
       .map(normalize)
       .join(' ')

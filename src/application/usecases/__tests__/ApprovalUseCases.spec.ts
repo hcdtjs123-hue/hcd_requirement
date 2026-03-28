@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import type { ApprovalRepository } from '@/domain/repositories/ApprovalRepository'
 import { getApprovalChains } from '../getApprovalChains'
-import { getChainByJobRequest } from '../getChainByJobRequest'
+import { getChainByEmployeeRequestForm } from '../getChainByEmployeeRequestForm'
 import { submitForApproval } from '../submitForApproval'
 
 describe('Approval Use Cases', () => {
@@ -18,9 +18,9 @@ describe('Approval Use Cases', () => {
     expect(result[0]?.id).toBe('1')
   })
 
-  it('getChainByJobRequest calls repo.getChainByJobRequest', async () => {
+  it('getChainByEmployeeRequestForm calls repo.getChainByEmployeeRequestForm', async () => {
     mockRepo.getChainByEmployeeRequestForm = vi.fn().mockResolvedValue({ id: '2' })
-    const result = await getChainByJobRequest(mockRepo, 'job-1')
+    const result = await getChainByEmployeeRequestForm(mockRepo, 'job-1')
     expect(mockRepo.getChainByEmployeeRequestForm).toHaveBeenCalledWith('job-1')
     expect(result?.id).toBe('2')
   })

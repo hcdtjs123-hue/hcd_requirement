@@ -80,17 +80,17 @@
         </div>
 
         <div class="grid gap-6 sm:grid-cols-2">
-          <!-- ERF Management -->
+          <!-- Employee Request Form -->
           <div class="space-y-3 rounded-xl bg-gray-50 p-4 border border-gray-100">
             <h3 class="text-sm font-semibold text-gray-900 border-l-4 border-blue-500 pl-3">
-              ERF Management
+              Employee Request Form
             </h3>
             <p class="text-xs text-gray-500">
-              Access to ERF submissions, creation, update, and request handling.
+              Access to employee request form submission, creation, update, and follow-up.
             </p>
             <div class="space-y-2">
               <label
-                v-for="perm in getPermissionsByPrefix('job_request')"
+                v-for="perm in getPermissionsByPrefix('employee_request_form')"
                 :key="perm.id"
                 class="flex items-start gap-3 cursor-pointer"
               >
@@ -138,7 +138,7 @@
           <div class="space-y-3 rounded-xl bg-gray-50 p-4 border border-gray-100">
             <h3 class="font-medium text-gray-900 border-b border-gray-200 pb-2">Hiring</h3>
             <p class="text-xs text-gray-500">
-              Access to hiring dashboard, pipeline updates, and posting file uploads.
+              Access to the recruitment dashboard and approved employee request form queue.
             </p>
             <div class="space-y-2">
               <label
@@ -160,15 +160,15 @@
             </div>
           </div>
 
-          <!-- Candidate Data -->
+          <!-- Candidate Form -->
           <div class="space-y-3 rounded-xl bg-gray-50 p-4 border border-gray-100">
-            <h3 class="font-medium text-gray-900 border-b border-gray-200 pb-2">Candidate Data</h3>
+            <h3 class="font-medium text-gray-900 border-b border-gray-200 pb-2">Candidate Form</h3>
             <p class="text-xs text-gray-500">
-              Access to candidate profiles, forms, and candidate-related data changes.
+              Access to candidate form records and candidate profile updates.
             </p>
             <div class="space-y-2">
               <label
-                v-for="perm in getPermissionsByPrefix('candidate_data')"
+                v-for="perm in getPermissionsByPrefix('candidate_form')"
                 :key="perm.id"
                 class="flex items-start gap-3 cursor-pointer"
               >
@@ -270,14 +270,22 @@ const formData = reactive({
 const selectedPermissionIds = ref<string[]>([])
 
 const legacyPermissionMap: Record<string, string[]> = {
-  'candidate:create': ['recruitment:create'],
-  'candidate:read': ['recruitment:read', 'candidate_data:read'],
-  'candidate:update': ['recruitment:update', 'candidate_data:update'],
-  'candidate:delete': ['recruitment:delete', 'candidate_data:delete'],
+  'job_request:create': ['employee_request_form:create'],
+  'job_request:read': ['employee_request_form:read'],
+  'job_request:update': ['employee_request_form:update'],
+  'job_request:delete': ['employee_request_form:delete'],
+  'candidate:create': ['candidate_form:create'],
+  'candidate:read': ['candidate_form:read'],
+  'candidate:update': ['candidate_form:update'],
+  'candidate:delete': ['candidate_form:delete'],
+  'candidate_data:create': ['candidate_form:create'],
+  'candidate_data:read': ['candidate_form:read'],
+  'candidate_data:update': ['candidate_form:update'],
+  'candidate_data:delete': ['candidate_form:delete'],
 }
 
 function getManageablePermissions() {
-  return permissions.value.filter((permission) => !permission.name.startsWith('candidate:'))
+  return permissions.value
 }
 
 const isAllSelected = computed({
@@ -317,7 +325,7 @@ function getSystemAdminPermissions() {
 
 function getHiringPermissions() {
   return permissions.value.filter((p) => {
-    return p.name.startsWith('recruitment:') || p.name === 'can:upload'
+    return p.name.startsWith('recruitment:')
   })
 }
 

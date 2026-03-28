@@ -46,13 +46,17 @@
           <table class="w-full text-left text-sm">
             <thead class="bg-gray-50 text-xs uppercase text-gray-500">
               <tr>
+                <th class="px-4 py-3 font-medium w-16">No</th>
                 <th class="px-4 py-3 font-medium">Name</th>
                 <th class="px-4 py-3 font-medium">Description</th>
                 <th class="px-4 py-3 text-right font-medium">Actions</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 text-gray-600">
-              <tr v-for="item in activeItems" :key="item.id" class="hover:bg-gray-50">
+              <tr v-for="(item, idx) in pagedActiveItems" :key="item.id" class="hover:bg-gray-50">
+                <td class="px-4 py-3 text-gray-500">
+                  {{ (page - 1) * pageSize + idx + 1 }}
+                </td>
                 <td class="px-4 py-3 font-medium text-gray-900">{{ item.name }}</td>
                 <td class="px-4 py-3">{{ item.description || '-' }}</td>
                 <td class="px-4 py-3 text-right">
@@ -68,6 +72,12 @@
               </tr>
             </tbody>
           </table>
+          <TablePagination
+            v-if="activeItems.length > 0"
+            v-model:page="page"
+            :page-size="pageSize"
+            :total-items="activeItems.length"
+          />
         </div>
       </div>
     </section>
@@ -123,6 +133,7 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import type { MasterDataItem, MasterDataType } from '@/domain/entities/MasterData'
 import { useMasterDataViewModel } from '@/viewmodels/useMasterDataViewModel'
 import { useAppToast } from '@/presentation/components/feedback/useAppToast'
+import TablePagination from '@/presentation/components/tables/TablePagination.vue'
 
 const tabs: Array<{ label: string; value: MasterDataType }> = [
   { label: 'PT', value: 'pt' },
@@ -133,6 +144,8 @@ const tabs: Array<{ label: string; value: MasterDataType }> = [
 const activeTab = ref<MasterDataType>('pt')
 const showModal = ref(false)
 const editingItem = ref<MasterDataItem | null>(null)
+const page = ref(1)
+const pageSize = 10
 const form = reactive({
   name: '',
   description: '',
@@ -144,8 +157,15 @@ const appToast = useAppToast()
 
 const activeItems = computed(() => optionsByType.value[activeTab.value])
 const activeLabel = computed(() => tabs.find((tab) => tab.value === activeTab.value)?.label ?? 'Item')
+const totalPages = computed(() => Math.max(1, Math.ceil(activeItems.value.length / pageSize)))
+const pagedActiveItems = computed(() => {
+  const safePage = Math.min(Math.max(page.value, 1), totalPages.value)
+  const start = (safePage - 1) * pageSize
+  return activeItems.value.slice(start, start + pageSize)
+})
 
 watch(activeTab, async (type) => {
+  page.value = 1
   if (optionsByType.value[type].length > 0) return
   try {
     await refreshOptions(type)
@@ -153,6 +173,12 @@ watch(activeTab, async (type) => {
     appToast.error(`Failed to load ${activeLabel.value.toLowerCase()} data.`)
   }
 })
+watch(
+  () => activeItems.value.length,
+  () => {
+    if (page.value > totalPages.value) page.value = totalPages.value
+  },
+)
 
 onMounted(async () => {
   try {
@@ -193,6 +219,7 @@ async function handleSubmit() {
     }
 
     showModal.value = false
+    page.value = 1
   } catch (err) {
     const message = err instanceof Error ? err.message : `Failed to save ${activeLabel.value.toLowerCase()}.`
     appToast.error(message)

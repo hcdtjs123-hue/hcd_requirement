@@ -1,10 +1,9 @@
 import type {
   ApprovalChain,
-  ApprovalStep,
   ApproverMaster,
   ApproverMasterInput,
   SubmitApprovalInput,
-} from "@/domain/entities/ApprovalChain"
+} from '@/domain/entities/ApprovalChain'
 
 export interface ApprovalRepository {
   // Approval Chain
@@ -12,13 +11,6 @@ export interface ApprovalRepository {
   getChainByEmployeeRequestForm(employeeRequestFormId: string): Promise<ApprovalChain | null>
   submitForApproval(data: SubmitApprovalInput): Promise<ApprovalChain>
 
-  // Public Approval (no auth)
-  getStepByToken(token: string): Promise<{
-    step: ApprovalStep
-    chain: ApprovalChain
-  } | null>
-  approveStep(token: string, notes?: string): Promise<void>
-  rejectStep(token: string, notes?: string): Promise<void>
   approveAssignedStep(stepId: string, notes?: string): Promise<void>
   rejectAssignedStep(stepId: string, notes?: string): Promise<void>
 

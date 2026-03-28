@@ -21,7 +21,7 @@
       {{ error }}
     </p>
 
-    <div v-if="loading" class="py-20 text-center text-sm text-gray-500">Loading configurations...</div>
+    <div v-if="loading" class="py-20 text-center text-sm text-gray-500">Loading approver configuration...</div>
 
     <div v-else class="grid gap-6 md:grid-cols-2">
       <!-- GM HRD Card -->
@@ -71,7 +71,7 @@
           </div>
         </div>
         <div v-else class="flex flex-col items-center justify-center py-10 text-gray-400">
-          <p class="text-sm">No GM HRD configuration found.</p>
+          <p class="text-sm">No active GM HRD approver is configured.</p>
         </div>
       </div>
 
@@ -122,7 +122,7 @@
           </div>
         </div>
         <div v-else class="flex flex-col items-center justify-center py-10 text-gray-400">
-          <p class="text-sm">No Director HRD configuration found.</p>
+          <p class="text-sm">No active Director HRD approver is configured.</p>
         </div>
       </div>
     </div>

@@ -1,8 +1,8 @@
 <template>
   <div class="flex flex-col gap-3 border-t border-gray-200 bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
     <p class="text-xs text-gray-500">
-      Menampilkan <span class="font-medium text-gray-700">{{ startItem }}</span>–<span class="font-medium text-gray-700">{{ endItem }}</span>
-      dari <span class="font-medium text-gray-700">{{ totalItems }}</span>
+      Showing <span class="font-medium text-gray-700">{{ startItem }}</span>–<span class="font-medium text-gray-700">{{ endItem }}</span>
+      of <span class="font-medium text-gray-700">{{ totalItems }}</span>
     </p>
 
     <div class="flex items-center justify-end gap-2">
@@ -30,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue"
+import { computed } from 'vue'
 
 const props = defineProps<{
   page: number
@@ -39,7 +39,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: "update:page", value: number): void
+  (e: 'update:page', value: number): void
 }>()
 
 const pageSize = computed(() => props.pageSize ?? 10)

@@ -3,10 +3,10 @@
     <!-- Header -->
     <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <p class="text-sm uppercase tracking-[0.3em] text-blue-600">Overview</p>
+        <p class="text-sm uppercase tracking-[0.3em] text-blue-600">Workspace Overview</p>
         <h1 class="mt-2 text-3xl font-semibold tracking-tight">Dashboard</h1>
         <p class="mt-1 text-sm text-gray-500">
-          Welcome, <span class="font-medium text-gray-800">{{ user?.email }}</span> —
+          Welcome, <span class="font-medium text-gray-800">{{ user?.email }}</span> -
           <span class="font-semibold text-blue-600 uppercase">{{ userRole }}</span>
         </p>
       </div>
@@ -53,7 +53,7 @@
     <div class="grid gap-6 lg:grid-cols-3" v-if="showOperationalOverview">
     <!-- Latest ERF Submissions -->
       <div
-        v-if="showJobRequestsPanel"
+        v-if="showEmployeeRequestFormsPanel"
         class="rounded-xl border border-gray-200 bg-white shadow-sm"
         :class="showApprovalPanel ? 'lg:col-span-2' : 'lg:col-span-3'"
       >
@@ -62,7 +62,7 @@
             <FileText class="h-4 w-4 text-blue-600" />
           <h2 class="text-sm font-semibold text-gray-900">Latest Employee Request Forms (ERF)</h2>
           </div>
-          <RouterLink to="/job-requests" class="text-xs text-blue-600 hover:underline"
+          <RouterLink to="/employee-request-forms" class="text-xs text-blue-600 hover:underline"
             >View all →</RouterLink
           >
         </div>
@@ -171,16 +171,16 @@ import {
 } from 'lucide-vue-next'
 
 import { useAuthViewModel } from '@/viewmodels/useAuthViewModel'
-import { useJobRequestViewModel } from '@/viewmodels/useJobRequestViewModel'
+import { useEmployeeRequestFormViewModel } from '@/viewmodels/useEmployeeRequestFormViewModel'
 import { useApprovalViewModel } from '@/viewmodels/useApprovalViewModel'
 import { useRecruitmentTrackingViewModel } from '@/viewmodels/useRecruitmentTrackingViewModel'
-import { useCandidateDataViewModel } from '@/viewmodels/useCandidateDataViewModel'
+import { useCandidateFormViewModel } from '@/viewmodels/useCandidateFormViewModel'
 
 const { user, userRole, hasAnyPermission } = useAuthViewModel()
-const { jobs } = useJobRequestViewModel()
+const { jobs } = useEmployeeRequestFormViewModel()
 const { chains } = useApprovalViewModel()
 const { trackings } = useRecruitmentTrackingViewModel()
-const { candidates } = useCandidateDataViewModel()
+const { candidates } = useCandidateFormViewModel()
 
 const currentDate = computed(() =>
   new Date().toLocaleDateString('en-US', {
@@ -193,12 +193,10 @@ const currentDate = computed(() =>
 
 const normalizedRole = computed(() => (userRole.value ?? '').toLowerCase())
 
-const canReadJobRequests = computed(() => hasAnyPermission(['job_request:read']))
+const canReadEmployeeRequestForms = computed(() => hasAnyPermission(['employee_request_form:read']))
 const canReadApprovals = computed(() => hasAnyPermission(['approval:read']))
-const canReadRecruitment = computed(() => hasAnyPermission(['recruitment:read', 'candidate:read']))
-const canReadCandidates = computed(() =>
-  hasAnyPermission(['candidate_data:read', 'candidate:read']),
-)
+const canReadRecruitment = computed(() => hasAnyPermission(['recruitment:read', 'candidate_form:read']))
+const canReadCandidates = computed(() => hasAnyPermission(['candidate_form:read']))
 const canManageUsers = computed(() => hasAnyPermission(['user:read']))
 const isCandidateRole = computed(() => normalizedRole.value === 'candidate')
 const isManagerRole = computed(() => normalizedRole.value === 'manager')
@@ -209,7 +207,7 @@ const isAdminRole = computed(() =>
 const dashboardIntro = computed(() => {
   if (isCandidateRole.value) {
     return {
-      title: 'Summary of your candidate data',
+      title: 'Summary of your candidate form',
       description:
         'This dashboard focuses on monitoring your candidate profile and quick access to forms that need updating.',
     }
@@ -227,7 +225,7 @@ const dashboardIntro = computed(() => {
     return {
       title: 'Manage operations and system access',
       description:
-        'The administrator dashboard highlights cross-process modules, from employee request form (erf), approval, recruitment, up to user and role management.',
+        'The administrator dashboard highlights cross-process modules, from Employee Request Form (ERF), approval, and recruitment to user and role management.',
     }
   }
 
@@ -246,10 +244,10 @@ const dashboardIntro = computed(() => {
   }
 })
 
-const showJobRequestsPanel = computed(() => canReadJobRequests.value)
+const showEmployeeRequestFormsPanel = computed(() => canReadEmployeeRequestForms.value)
 const showApprovalPanel = computed(() => !isCandidateRole.value && chains.value.length > 0)
 const showOperationalOverview = computed(
-  () => showJobRequestsPanel.value || showApprovalPanel.value,
+  () => showEmployeeRequestFormsPanel.value || showApprovalPanel.value,
 )
 
 function assignedApprovalStep(chain: (typeof chains.value)[number]) {
@@ -296,7 +294,7 @@ const rejectedHistoryCount = computed(
 const kpiCards = computed(() => {
   const cards = []
 
-  if (showJobRequestsPanel.value) {
+  if (showEmployeeRequestFormsPanel.value) {
     cards.push({
       label: 'Total ERF',
       value: jobs.value.length,
@@ -347,7 +345,7 @@ const kpiCards = computed(() => {
 
   if (canReadCandidates.value) {
     cards.push({
-      label: isCandidateRole.value ? 'Your Candidate Form' : 'Candidate Data',
+      label: isCandidateRole.value ? 'Your Candidate Form' : 'Candidate Forms',
       value: candidates.value.length,
       sub: isCandidateRole.value
         ? 'Candidate records available in your account'
@@ -431,18 +429,18 @@ const quickLinks = computed(() => {
       visible: showApprovalPanel.value,
     },
     {
-      to: '/job-requests/create',
+      to: '/employee-request-forms/create',
       label: 'Create ERF',
       desc: 'New position request form',
       icon: FileText,
       bg: 'bg-blue-100',
       color: 'text-blue-700',
-      permissions: ['job_request:create'],
+      permissions: ['employee_request_form:create'],
     },
     {
-      to: '/approver-master/create',
-      label: 'Add Approver',
-      desc: 'Register new approver',
+      to: '/approver-master/configure',
+      label: 'Configure Approver Master',
+      desc: 'Manage the active approval configuration',
       icon: UserCheck,
       bg: 'bg-amber-100',
       color: 'text-amber-700',
@@ -451,21 +449,21 @@ const quickLinks = computed(() => {
     },
     {
       to: '/recruitment',
-      label: 'Hiring Dashboard',
+      label: 'Recruitment Dashboard',
       desc: 'Monitor positions ready for processing',
       icon: Briefcase,
       bg: 'bg-emerald-100',
       color: 'text-emerald-700',
-      permissions: ['recruitment:read', 'candidate:read'],
+      permissions: ['recruitment:read', 'candidate_form:read'],
     },
     {
-      to: '/candidates',
-      label: 'Candidate Form',
+      to: '/candidate-forms',
+      label: 'Candidate Forms',
       desc: 'Manage candidate profiles and forms',
       icon: ClipboardList,
       bg: 'bg-indigo-100',
       color: 'text-indigo-700',
-      permissions: ['candidate_data:read', 'candidate:read'],
+      permissions: ['candidate_form:read'],
     },
     {
       to: '/user-management/create',
@@ -494,12 +492,12 @@ const quickLinks = computed(() => {
   )
 
   if (isCandidateRole.value) {
-    return filtered.filter((link) => ['/candidates'].includes(link.to))
+    return filtered.filter((link) => ['/candidate-forms'].includes(link.to))
   }
 
   if (isManagerRole.value) {
     return filtered.filter((link) =>
-      ['/job-requests/create', '/approver-master/create', '/recruitment'].includes(link.to),
+      ['/employee-request-forms/create', '/approver-master/configure', '/recruitment'].includes(link.to),
     )
   }
 

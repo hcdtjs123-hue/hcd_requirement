@@ -16,10 +16,10 @@ const chainSelect = `
   steps:approval_steps(*)
 `
 
-const chainWithJobRequestSelect = `
+const chainWithEmployeeRequestFormSelect = `
   *,
   steps:approval_steps(*),
-  job_request:employee_request_form(
+  employee_request_form:employee_request_form(
     id,
     main_position,
     pt:master_pt(name),
@@ -58,7 +58,31 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
     if (currentUserRole === 'admin') {
       const { data, error } = await supabase
         .from('approval_chains')
-        .select(chainWithJobRequestSelect)
+        .select(chainWithEmployeeRequestFormSelect)
+        .order('created_at', { ascending: false })
+
+      if (error) throw new Error(error.message)
+
+      return (data ?? []).map(this.normalizeChain)
+    }
+
+    const accessScope = await this.getApprovalChainAccessScope()
+    if (accessScope.isManager && accessScope.userId) {
+      const { data: ownedEmployeeRequestForms, error: ownedEmployeeRequestFormsError } = await supabase
+        .from('employee_request_form')
+        .select('id')
+        .eq('created_by', accessScope.userId)
+
+      if (ownedEmployeeRequestFormsError) throw new Error(ownedEmployeeRequestFormsError.message)
+
+      const employeeRequestFormIds = (ownedEmployeeRequestForms ?? []).map((item) => String(item.id))
+
+      if (employeeRequestFormIds.length === 0) return []
+
+      const { data, error } = await supabase
+        .from('approval_chains')
+        .select(chainWithEmployeeRequestFormSelect)
+        .in('employee_request_form_id', employeeRequestFormIds)
         .order('created_at', { ascending: false })
 
       if (error) throw new Error(error.message)
@@ -84,7 +108,7 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
 
     const { data, error } = await supabase
       .from('approval_chains')
-      .select(chainWithJobRequestSelect)
+      .select(chainWithEmployeeRequestFormSelect)
       .in('id', chainIds)
       .order('created_at', { ascending: false })
 
@@ -94,9 +118,23 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
   }
 
   async getChainByEmployeeRequestForm(employeeRequestFormId: string): Promise<ApprovalChain | null> {
+    const accessScope = await this.getApprovalChainAccessScope()
+
+    if (accessScope.isManager && accessScope.userId) {
+      const { data: ownedEmployeeRequestForm, error: ownedEmployeeRequestFormError } = await supabase
+        .from('employee_request_form')
+        .select('id')
+        .eq('id', employeeRequestFormId)
+        .eq('created_by', accessScope.userId)
+        .maybeSingle()
+
+      if (ownedEmployeeRequestFormError) throw new Error(ownedEmployeeRequestFormError.message)
+      if (!ownedEmployeeRequestForm) return null
+    }
+
     const { data, error } = await supabase
       .from('approval_chains')
-      .select(chainWithJobRequestSelect)
+      .select(chainWithEmployeeRequestFormSelect)
       .eq('employee_request_form_id', employeeRequestFormId)
       .order('created_at', { ascending: false })
       .limit(1)
@@ -113,20 +151,20 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
       throw new Error('This ERF already has an active approval chain.')
     }
 
-    const { data: jobRequest, error: jobRequestError } = await supabase
+    const { data: employeeRequestForm, error: employeeRequestFormError } = await supabase
       .from('employee_request_form')
       .select('id, approval_director_bu_id, approval_director_bu')
       .eq('id', input.employee_request_form_id)
       .single()
 
-    if (jobRequestError) throw new Error(jobRequestError.message)
-    if (!jobRequest.approval_director_bu) {
+    if (employeeRequestFormError) throw new Error(employeeRequestFormError.message)
+    if (!employeeRequestForm.approval_director_bu) {
       throw new Error('BU Director Approval is required before submitting ERF approval.')
     }
 
-    const buDirector = jobRequest.approval_director_bu_id
-      ? await this.resolveBuDirectorApproverById(jobRequest.approval_director_bu_id)
-      : await this.resolveBuDirectorApprover(jobRequest.approval_director_bu)
+    const buDirector = employeeRequestForm.approval_director_bu_id
+      ? await this.resolveBuDirectorApproverById(employeeRequestForm.approval_director_bu_id)
+      : await this.resolveBuDirectorApprover(employeeRequestForm.approval_director_bu)
 
     // 1. Get HR approver masters ordered by step_order with employee join
     const { data: approverMasters, error: approverError } = await supabase
@@ -205,59 +243,16 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
 
     // 6. Send email to the first approver
     const firstStep = result.steps.find((s) => s.step_order === 1)
-    if (firstStep && firstStep.token) {
+    if (firstStep) {
       await this.sendApprovalEmail(
         firstStep.approver_email,
         firstStep.approver_name || 'Approver',
         result.id,
-        result.job_request?.main_position,
+        result.employee_request_form?.main_position,
       )
     }
 
     return result
-  }
-
-  // ========================
-  // Public Approval (no auth)
-  // ========================
-
-  async getStepByToken(token: string): Promise<{
-    step: ApprovalStep
-    chain: ApprovalChain
-  } | null> {
-    const { data: step, error: stepError } = await supabase
-      .from('approval_steps')
-      .select('*')
-      .eq('token', token)
-      .maybeSingle()
-
-    if (stepError) throw new Error(stepError.message)
-    if (!step) return null
-
-    const { data: chain, error: chainError } = await supabase
-      .from('approval_chains')
-      .select(chainWithJobRequestSelect)
-      .eq('id', step.chain_id)
-      .single()
-
-    if (chainError) throw new Error(chainError.message)
-
-    return {
-      step: step as ApprovalStep,
-      chain: this.normalizeChain(chain),
-    }
-  }
-
-  async approveStep(token: string, notes?: string): Promise<void> {
-    const step = await this.getStepByTokenOrThrow(token)
-    await this.ensureCurrentUserMatchesApprover(step.approver_email)
-    await this.processApprovalStep(step, notes)
-  }
-
-  async rejectStep(token: string, notes?: string): Promise<void> {
-    const step = await this.getStepByTokenOrThrow(token)
-    await this.ensureCurrentUserMatchesApprover(step.approver_email)
-    await this.processRejectedStep(step, notes)
   }
 
   async approveAssignedStep(stepId: string, notes?: string): Promise<void> {
@@ -285,7 +280,9 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
 
     if (error) throw new Error(error.message)
 
-    return (data ?? []) as ApproverMaster[]
+    return (data ?? []).map((item) =>
+      this.normalizeApproverMaster(item as Record<string, unknown>),
+    )
   }
 
   async createApproverMaster(input: ApproverMasterInput): Promise<ApproverMaster> {
@@ -303,7 +300,7 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
 
     if (error) throw new Error(error.message)
 
-    return data as ApproverMaster
+    return this.normalizeApproverMaster(data as Record<string, unknown>)
   }
 
   async updateApproverMaster(id: string, input: ApproverMasterInput): Promise<ApproverMaster> {
@@ -324,7 +321,7 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
       throw new Error('Approver data not found.')
     }
 
-    return data as ApproverMaster
+    return this.normalizeApproverMaster(data as Record<string, unknown>)
   }
 
   async deleteApproverMaster(id: string): Promise<void> {
@@ -342,15 +339,13 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
   // Helpers
   // ========================
 
-  private async getStepByTokenOrThrow(token: string) {
-    const { data: step, error } = await supabase
-      .from('approval_steps')
-      .select('*')
-      .eq('token', token)
-      .single()
+  private normalizeApproverMaster(data: Record<string, unknown>): ApproverMaster {
+    const profile = (data.profile as ApproverMaster['employee'] | undefined) ?? undefined
 
-    if (error) throw new Error(error.message)
-    return step as ApprovalStep
+    return {
+      ...(data as unknown as ApproverMaster),
+      employee: profile,
+    }
   }
 
   private async getStepByIdOrThrow(stepId: string) {
@@ -451,7 +446,7 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
 
     if (updateError) throw new Error(updateError.message)
 
-    await this.syncJobRequestApprovalField(
+    await this.syncEmployeeRequestFormApprovalField(
       step.chain_id,
       step.step_order,
       step.approver_name,
@@ -475,19 +470,6 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
         })
         .eq('id', step.chain_id)
 
-      const { data: chain } = await supabase
-        .from('approval_chains')
-        .select('employee_request_form_id')
-        .eq('id', step.chain_id)
-        .single()
-
-      if (chain) {
-        await supabase.from('recruitment_tracking').insert({
-          employee_request_form_id: chain.employee_request_form_id,
-          chain_id: step.chain_id,
-        })
-      }
-
       return
     }
 
@@ -502,7 +484,7 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
 
     const { data: chainData, error: chainError } = await supabase
       .from('approval_chains')
-      .select(chainWithJobRequestSelect)
+      .select(chainWithEmployeeRequestFormSelect)
       .eq('id', step.chain_id)
       .single()
 
@@ -513,7 +495,7 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
       nextStep.approver_email,
       nextStep.approver_name || 'Approver',
       chain.id,
-      chain.job_request?.main_position,
+      chain.employee_request_form?.main_position,
     )
   }
 
@@ -546,20 +528,20 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
       : []
 
     const chain = data as unknown as any
-    const jobRequest = chain.job_request
+    const employeeRequestForm = chain.employee_request_form
 
-    if (jobRequest) {
-      chain.job_request = {
-        ...jobRequest,
-        pt_pembebanan: jobRequest.pt?.name ?? null,
-        department: jobRequest.department_ref?.name ?? null,
-        job_level: jobRequest.job_level_ref?.name ?? null,
-        custom_grup_1: jobRequest.custom_grup_1?.name ?? null,
-        custom_grup_2: jobRequest.custom_grup_2?.name ?? null,
-        custom_grup_3: jobRequest.custom_grup_3?.name ?? null,
-        custom_grup_4: jobRequest.custom_grup_4?.name ?? null,
-        custom_grup_5: jobRequest.custom_grup_5?.name ?? null,
-        custom_grup_6: jobRequest.custom_grup_6?.name ?? null,
+    if (employeeRequestForm) {
+      chain.employee_request_form = {
+        ...employeeRequestForm,
+        pt_pembebanan: employeeRequestForm.pt?.name ?? null,
+        department: employeeRequestForm.department_ref?.name ?? null,
+        job_level: employeeRequestForm.job_level_ref?.name ?? null,
+        custom_grup_1: employeeRequestForm.custom_grup_1?.name ?? null,
+        custom_grup_2: employeeRequestForm.custom_grup_2?.name ?? null,
+        custom_grup_3: employeeRequestForm.custom_grup_3?.name ?? null,
+        custom_grup_4: employeeRequestForm.custom_grup_4?.name ?? null,
+        custom_grup_5: employeeRequestForm.custom_grup_5?.name ?? null,
+        custom_grup_6: employeeRequestForm.custom_grup_6?.name ?? null,
       }
     }
 
@@ -585,7 +567,7 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
   private async getLatestActiveChainByEmployeeRequestForm(employeeRequestFormId: string) {
     const { data, error } = await supabase
       .from('approval_chains')
-      .select(chainWithJobRequestSelect)
+      .select(chainWithEmployeeRequestFormSelect)
       .eq('employee_request_form_id', employeeRequestFormId)
       .in('status', ['draft', 'pending'])
       .order('created_at', { ascending: false })
@@ -638,7 +620,7 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
     }
   }
 
-  private async syncJobRequestApprovalField(
+  private async syncEmployeeRequestFormApprovalField(
     chainId: string,
     stepOrder: number,
     approverName: string | null,

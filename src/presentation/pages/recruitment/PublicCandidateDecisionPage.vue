@@ -7,8 +7,8 @@
         >
           ✓
         </div>
-        <h1 class="text-2xl font-semibold text-emerald-900">Kandidat disetujui</h1>
-        <p class="mt-3 text-emerald-800">Status screening telah diperbarui.</p>
+        <h1 class="text-2xl font-semibold text-emerald-900">Candidate Approved</h1>
+        <p class="mt-3 text-emerald-800">The screening status has been updated.</p>
       </template>
       <template v-else-if="outcome === 'rejected'">
         <div
@@ -16,46 +16,46 @@
         >
           ✕
         </div>
-        <h1 class="text-2xl font-semibold text-red-900">Kandidat ditolak</h1>
-        <p class="mt-3 text-red-800">Status screening telah diperbarui.</p>
+        <h1 class="text-2xl font-semibold text-red-900">Candidate Rejected</h1>
+        <p class="mt-3 text-red-800">The screening status has been updated.</p>
       </template>
       <template v-else-if="outcome === 'expired'">
-        <h1 class="text-2xl font-semibold text-amber-900">Link kedaluwarsa</h1>
-        <p class="mt-3 text-amber-800">{{ message || "Silakan minta email baru dari tim HR." }}</p>
+        <h1 class="text-2xl font-semibold text-amber-900">Link Expired</h1>
+        <p class="mt-3 text-amber-800">{{ message || 'Please ask HR for a new email.' }}</p>
       </template>
       <template v-else-if="outcome === 'used'">
-        <h1 class="text-2xl font-semibold text-gray-900">Sudah diproses</h1>
+        <h1 class="text-2xl font-semibold text-gray-900">Already Processed</h1>
         <p class="mt-3 text-gray-600">
-          Link ini sudah digunakan
+          This link has already been used
           <span v-if="previous" class="font-medium">({{ previous }})</span>.
         </p>
       </template>
       <template v-else>
-        <h1 class="text-2xl font-semibold text-red-900">Tidak dapat memproses</h1>
-        <p class="mt-3 text-red-800">{{ message || "Terjadi kesalahan." }}</p>
+        <h1 class="text-2xl font-semibold text-red-900">Unable to Process</h1>
+        <p class="mt-3 text-red-800">{{ message || 'An unexpected error occurred.' }}</p>
       </template>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue"
-import { useRoute } from "vue-router"
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 
 const route = useRoute()
 
 const outcome = computed(() => {
   const v = route.query.outcome
-  return typeof v === "string" ? v : ""
+  return typeof v === 'string' ? v : ''
 })
 
 const message = computed(() => {
   const v = route.query.message
-  return typeof v === "string" ? v : ""
+  return typeof v === 'string' ? v : ''
 })
 
 const previous = computed(() => {
   const v = route.query.previous
-  return typeof v === "string" ? v : ""
+  return typeof v === 'string' ? v : ''
 })
 </script>

@@ -4,7 +4,7 @@ import type { ApprovalChain, SubmitApprovalInput } from "@/domain/entities/Appro
 import { approvalRepo } from "@/infrastructure/container"
 import { getApprovalChains } from "@/application/usecases/getApprovalChains"
 import { submitForApproval } from "@/application/usecases/submitForApproval"
-import { getChainByJobRequest } from "@/application/usecases/getChainByJobRequest"
+import { getChainByEmployeeRequestForm } from "@/application/usecases/getChainByEmployeeRequestForm"
 
 export function useApprovalViewModel() {
   const chains = ref<ApprovalChain[]>([])
@@ -38,8 +38,8 @@ export function useApprovalViewModel() {
     }
   }
 
-  async function fetchChainByJobRequest(jobRequestId: string) {
-    return getChainByJobRequest(approvalRepo, jobRequestId)
+  async function fetchChainByEmployeeRequestForm(employeeRequestFormId: string) {
+    return getChainByEmployeeRequestForm(approvalRepo, employeeRequestFormId)
   }
 
   async function approveAssignedStep(stepId: string, notes?: string) {
@@ -76,7 +76,7 @@ export function useApprovalViewModel() {
     approveAssignedStep,
     chains,
     error,
-    fetchChainByJobRequest,
+    fetchChainByEmployeeRequestForm,
     loading,
     rejectAssignedStep,
     refreshChains,

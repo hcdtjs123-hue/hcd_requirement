@@ -43,13 +43,17 @@
           <table class="w-full text-left text-sm">
             <thead class="bg-gray-50 text-xs uppercase text-gray-500">
               <tr>
+                <th class="px-4 py-3 font-medium w-16">No</th>
                 <th class="px-4 py-3 font-medium">Name</th>
                 <th class="px-4 py-3 font-medium">Description</th>
                 <th class="px-4 py-3 text-right font-medium">Actions</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 text-gray-600">
-              <tr v-for="item in items" :key="item.id" class="hover:bg-gray-50">
+              <tr v-for="(item, idx) in pagedItems" :key="item.id" class="hover:bg-gray-50">
+                <td class="px-4 py-3 text-gray-500">
+                  {{ (page - 1) * pageSize + idx + 1 }}
+                </td>
                 <td class="px-4 py-3 font-medium text-gray-900">{{ item.name }}</td>
                 <td class="px-4 py-3">{{ item.description || '-' }}</td>
                 <td class="px-4 py-3 text-right">
@@ -61,6 +65,12 @@
               </tr>
             </tbody>
           </table>
+          <TablePagination
+            v-if="items.length > 0"
+            v-model:page="page"
+            :page-size="pageSize"
+            :total-items="items.length"
+          />
         </div>
       </div>
     </section>
@@ -91,10 +101,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, reactive } from 'vue'
+import { computed, ref, onMounted, watch, reactive } from 'vue'
 import { customGroupRepo } from '@/infrastructure/supabase/repositories/CustomGroupRepositoryImpl'
 import type { CustomGroup } from '@/domain/entities/CustomGroup'
 import { useAppToast } from '@/presentation/components/feedback/useAppToast'
+import TablePagination from '@/presentation/components/tables/TablePagination.vue'
 
 const activeTab = ref(1)
 const items = ref<CustomGroup[]>([])
@@ -103,10 +114,19 @@ const saving = ref(false)
 const showModal = ref(false)
 const editingItem = ref<CustomGroup | null>(null)
 const appToast = useAppToast()
+const page = ref(1)
+const pageSize = 10
 
 const form = reactive({
   name: '',
   description: ''
+})
+
+const totalPages = computed(() => Math.max(1, Math.ceil(items.value.length / pageSize)))
+const pagedItems = computed(() => {
+  const safePage = Math.min(Math.max(page.value, 1), totalPages.value)
+  const start = (safePage - 1) * pageSize
+  return items.value.slice(start, start + pageSize)
 })
 
 async function fetchItems() {
@@ -120,7 +140,16 @@ async function fetchItems() {
   }
 }
 
-watch(activeTab, fetchItems)
+watch(activeTab, () => {
+  page.value = 1
+  fetchItems()
+})
+watch(
+  () => items.value.length,
+  () => {
+    if (page.value > totalPages.value) page.value = totalPages.value
+  },
+)
 
 onMounted(fetchItems)
 
@@ -155,6 +184,7 @@ async function handleSubmit() {
       appToast.created(`Custom Group ${activeTab.value} entry`)
     }
     showModal.value = false
+    page.value = 1
     fetchItems()
   } catch (err) {
     appToast.error('Failed to save')

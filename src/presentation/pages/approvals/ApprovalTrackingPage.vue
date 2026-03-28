@@ -67,11 +67,11 @@
               </td>
               <td class="px-4 py-3 align-top">
                 <p class="font-semibold text-gray-900 text-base whitespace-nowrap">
-                  {{ chain.job_request?.main_position || 'No Position' }}
+                  {{ chain.employee_request_form?.main_position || 'No Position' }}
                 </p>
               </td>
               <td class="px-4 py-3 align-top">
-                <p class="whitespace-nowrap">{{ chain.job_request?.site || '-' }}</p>
+                <p class="whitespace-nowrap">{{ chain.employee_request_form?.site || '-' }}</p>
               </td>
               <td class="px-4 py-3 align-top">
                 <p class="whitespace-nowrap">{{ formatDate(chain.created_at) }}</p>
@@ -154,7 +154,7 @@
           <div>
             <p class="text-sm uppercase tracking-[0.3em] text-blue-600">Approval Detail</p>
             <h2 class="mt-2 text-2xl font-semibold text-gray-900">
-              {{ selectedChain.job_request?.main_position || 'No Position' }}
+              {{ selectedChain.employee_request_form?.main_position || 'No Position' }}
             </h2>
             <p class="mt-2 text-sm text-gray-500">
               {{ approvalRoleLabel(selectedStep.step_order) }} | {{ stepApproverName(selectedStep) }}
@@ -177,7 +177,7 @@
               </h3>
               <div class="mt-4 grid gap-3 md:grid-cols-2">
                 <div
-                  v-for="field in buildJobRequestFields(selectedChain)"
+                  v-for="field in buildEmployeeRequestFormFields(selectedChain)"
                   :key="field.label"
                   class="rounded-xl border border-gray-100 bg-gray-50 px-4 py-3"
                 >
@@ -343,10 +343,10 @@ const filteredChains = computed(() => {
     if (!q) return true
 
     const haystack = [
-      c.job_request?.main_position,
-      c.job_request?.site,
-      c.job_request?.department,
-      c.job_request?.job_level,
+      c.employee_request_form?.main_position,
+      c.employee_request_form?.site,
+      c.employee_request_form?.department,
+      c.employee_request_form?.job_level,
       c.status,
       ...c.steps.map((step) => `${approvalRoleLabel(step.step_order)} ${stepApproverName(step)}`),
     ]
@@ -469,7 +469,7 @@ function getFinalStatusDate(chain: ApprovalChain) {
 
     return (
       hrDirectorStep?.approved_at
-      ?? chain.job_request?.approval_director_hrd_date
+      ?? chain.employee_request_form?.approval_director_hrd_date
       ?? null
     )
   }
@@ -589,33 +589,33 @@ function trackingStageStatusLabel(state: TrackingStageState) {
   return map[state]
 }
 
-function buildJobRequestFields(chain: ApprovalChain) {
-  const jobRequest = chain.job_request
+function buildEmployeeRequestFormFields(chain: ApprovalChain) {
+  const employeeRequestForm = chain.employee_request_form
 
   return [
-    { label: 'Department', value: jobRequest?.department || '-' },
-    { label: 'Job Level', value: jobRequest?.job_level || '-' },
-    { label: 'Main Position', value: jobRequest?.main_position || '-' },
-    { label: 'Site', value: jobRequest?.site || '-' },
-    { label: 'Employment Status', value: jobRequest?.employment_status || '-' },
-    { label: 'Position Status', value: jobRequest?.position_status || '-' },
-    { label: 'Required Date', value: formatDate(jobRequest?.required_date || null) },
-    { label: 'Probation Period', value: jobRequest?.periode_probation?.toString() || '-' },
-    { label: 'Cost Center PT', value: jobRequest?.pt_pembebanan || '-' },
-    { label: 'Direct Manager', value: jobRequest?.direct_manager || '-' },
-    { label: 'Working Location', value: jobRequest?.working_location || '-' },
-    { label: 'BU Director', value: jobRequest?.approval_director_bu || '-' },
-    { label: 'BU Director Date', value: formatDate(jobRequest?.approval_director_bu_date || null) },
-    { label: 'GM HRD', value: jobRequest?.approval_gm_hrd || '-' },
-    { label: 'GM HRD Date', value: formatDate(jobRequest?.approval_gm_hrd_date || null) },
-    { label: 'HR Director', value: jobRequest?.approval_director_hrd || '-' },
-    { label: 'HR Director Date', value: formatDate(jobRequest?.approval_director_hrd_date || null) },
-    { label: 'Custom Group 1', value: jobRequest?.custom_grup_1 || '-' },
-    { label: 'Custom Group 2', value: jobRequest?.custom_grup_2 || '-' },
-    { label: 'Custom Group 3', value: jobRequest?.custom_grup_3 || '-' },
-    { label: 'Custom Group 4', value: jobRequest?.custom_grup_4 || '-' },
-    { label: 'Custom Group 5', value: jobRequest?.custom_grup_5 || '-' },
-    { label: 'Custom Group 6', value: jobRequest?.custom_grup_6 || '-' },
+    { label: 'Department', value: employeeRequestForm?.department || '-' },
+    { label: 'Job Level', value: employeeRequestForm?.job_level || '-' },
+    { label: 'Main Position', value: employeeRequestForm?.main_position || '-' },
+    { label: 'Site', value: employeeRequestForm?.site || '-' },
+    { label: 'Employment Status', value: employeeRequestForm?.employment_status || '-' },
+    { label: 'Position Status', value: employeeRequestForm?.position_status || '-' },
+    { label: 'Required Date', value: formatDate(employeeRequestForm?.required_date || null) },
+    { label: 'Probation Period', value: employeeRequestForm?.periode_probation?.toString() || '-' },
+    { label: 'Cost Center PT', value: employeeRequestForm?.pt_pembebanan || '-' },
+    { label: 'Direct Manager', value: employeeRequestForm?.direct_manager || '-' },
+    { label: 'Working Location', value: employeeRequestForm?.working_location || '-' },
+    { label: 'BU Director', value: employeeRequestForm?.approval_director_bu || '-' },
+    { label: 'BU Director Date', value: formatDate(employeeRequestForm?.approval_director_bu_date || null) },
+    { label: 'GM HRD', value: employeeRequestForm?.approval_gm_hrd || '-' },
+    { label: 'GM HRD Date', value: formatDate(employeeRequestForm?.approval_gm_hrd_date || null) },
+    { label: 'HR Director', value: employeeRequestForm?.approval_director_hrd || '-' },
+    { label: 'HR Director Date', value: formatDate(employeeRequestForm?.approval_director_hrd_date || null) },
+    { label: 'Custom Group 1', value: employeeRequestForm?.custom_grup_1 || '-' },
+    { label: 'Custom Group 2', value: employeeRequestForm?.custom_grup_2 || '-' },
+    { label: 'Custom Group 3', value: employeeRequestForm?.custom_grup_3 || '-' },
+    { label: 'Custom Group 4', value: employeeRequestForm?.custom_grup_4 || '-' },
+    { label: 'Custom Group 5', value: employeeRequestForm?.custom_grup_5 || '-' },
+    { label: 'Custom Group 6', value: employeeRequestForm?.custom_grup_6 || '-' },
   ]
 }
 

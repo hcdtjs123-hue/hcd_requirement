@@ -11,7 +11,6 @@ export interface ApprovalStep {
   step_order: number
   approver_email: string
   approver_name: string | null
-  token: string
   status: ApprovalStepStatus
   approved_at: string | null
   notes: string | null
@@ -26,7 +25,7 @@ export interface ApprovalChain {
   created_at: string | null
   updated_at: string | null
   steps: ApprovalStep[]
-  job_request?: {
+  employee_request_form?: {
     id: string
     main_position: string | null
     department: string | null

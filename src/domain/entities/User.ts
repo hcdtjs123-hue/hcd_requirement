@@ -4,9 +4,10 @@ export interface User {
   id: string
   email: string
   role?: UserRole
-  permissions?: string[] // e.g., ['job_request:read', 'user:create']
+  permissions?: string[] // e.g., ['employee_request_form:read', 'user:create']
   is_active?: boolean | null
   username?: string
+  phone?: string
   full_name?: string
   created_at?: string
   updated_at?: string
