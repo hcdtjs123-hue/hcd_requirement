@@ -5,5 +5,5 @@ export function getChainByJobRequest(
   repo: ApprovalRepository,
   jobRequestId: string,
 ): Promise<ApprovalChain | null> {
-  return repo.getChainByJobRequest(jobRequestId)
+  return repo.getChainByEmployeeRequestForm(jobRequestId)
 }

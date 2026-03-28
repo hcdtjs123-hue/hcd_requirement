@@ -4,7 +4,7 @@ import type { JobRequestRepository } from '@/domain/repositories/JobRequestRepos
 import { approvalRepo } from '@/infrastructure/container'
 
 const approverEmployeeSelect =
-  'employee:profiles!approver_master_employee_id_fkey(full_name, email, username)'
+  'profile:profiles!approver_master_profile_id_fkey(full_name, email, username)'
 
 export class JobRequestRepositoryImpl implements JobRequestRepository {
   async getAll(): Promise<JobRequest[]> {
@@ -135,10 +135,10 @@ export class JobRequestRepositoryImpl implements JobRequestRepository {
       .limit(1)
       .maybeSingle()
 
-    const gmEmployee = (gmHrdApprover?.employee as any)
+    const gmEmployee = (gmHrdApprover?.profile as any)
     const approvalGmHrd = String(gmEmployee?.full_name ?? gmEmployee?.username ?? '').trim() || null
 
-    const directorEmployee = (directorHrdApprover?.employee as any)
+    const directorEmployee = (directorHrdApprover?.profile as any)
     const approvalDirectorHrd =
       String(directorEmployee?.full_name ?? directorEmployee?.username ?? '').trim() || null
 
@@ -164,7 +164,7 @@ export class JobRequestRepositoryImpl implements JobRequestRepository {
     // the ERF did not enter the approval flow correctly.
     if (created) {
       try {
-        await approvalRepo.submitForApproval({ job_request_id: created.id })
+        await approvalRepo.submitForApproval({ employee_request_form_id: created.id })
       } catch (err) {
         console.error('Failed to start approval chain:', err)
 

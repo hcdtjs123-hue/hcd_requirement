@@ -7,7 +7,7 @@ import { submitForApproval } from '../submitForApproval'
 describe('Approval Use Cases', () => {
   const mockRepo = {
     getChainsByUser: vi.fn(),
-    getChainByJobRequest: vi.fn(),
+    getChainByEmployeeRequestForm: vi.fn(),
     submitForApproval: vi.fn(),
   } as unknown as ApprovalRepository
 
@@ -19,14 +19,14 @@ describe('Approval Use Cases', () => {
   })
 
   it('getChainByJobRequest calls repo.getChainByJobRequest', async () => {
-    mockRepo.getChainByJobRequest = vi.fn().mockResolvedValue({ id: '2' })
+    mockRepo.getChainByEmployeeRequestForm = vi.fn().mockResolvedValue({ id: '2' })
     const result = await getChainByJobRequest(mockRepo, 'job-1')
-    expect(mockRepo.getChainByJobRequest).toHaveBeenCalledWith('job-1')
+    expect(mockRepo.getChainByEmployeeRequestForm).toHaveBeenCalledWith('job-1')
     expect(result?.id).toBe('2')
   })
 
   it('submitForApproval calls repo.submitForApproval', async () => {
-    const data = { job_request_id: 'job-1' } as any
+    const data = { employee_request_form_id: 'job-1' } as any
     mockRepo.submitForApproval = vi.fn().mockResolvedValue({ id: '1', ...data })
     const result = await submitForApproval(mockRepo, data)
     expect(mockRepo.submitForApproval).toHaveBeenCalledWith(data)

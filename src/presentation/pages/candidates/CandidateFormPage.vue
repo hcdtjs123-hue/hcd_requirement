@@ -28,7 +28,7 @@
         <section class="grid gap-4 md:grid-cols-2">
           <label class="space-y-2 md:col-span-2">
             <span class="text-sm font-medium text-gray-700">Employee Request Form (ERF)</span>
-            <select v-model="form.job_request_id" class="field" required>
+            <select v-model="form.employee_request_form_id" class="field" required>
               <option value="">Select ERF</option>
               <option v-for="job in jobs" :key="job.id" :value="job.id">
                 {{ job.main_position || '-' }}
@@ -594,7 +594,7 @@ function createPersonalStatement(): PersonalStatementInput {
 
 function createEmptyForm(): CandidateRecordInput {
   return {
-    job_request_id: '',
+    employee_request_form_id: '',
     candidate_id: null,
     date_application: '',
     notice_period: '',
@@ -726,7 +726,7 @@ onMounted(() => {
 
 function populateForm(candidate: CandidateRecord) {
   Object.assign(form, {
-    job_request_id: candidate.job_request_id ?? '',
+    employee_request_form_id: candidate.employee_request_form_id ?? '',
     candidate_id: candidate.candidate_id ?? null,
     date_application: candidate.date_application ?? '',
     notice_period: candidate.notice_period ?? '',

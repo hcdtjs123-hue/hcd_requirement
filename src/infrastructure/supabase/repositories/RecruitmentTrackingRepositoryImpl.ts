@@ -6,9 +6,9 @@ const trackingSelect = `
   *,
   job_request:employee_request_form(
     id,
-    pt_pembebanan,
-    department,
-    job_level,
+    pt:master_pt(name),
+    department_ref:master_department(name),
+    job_level_ref:master_job_level(name),
     main_position,
     site,
     working_location,
@@ -59,6 +59,9 @@ export class RecruitmentTrackingRepositoryImpl implements RecruitmentTrackingRep
   private normalizeTracking(data: Record<string, unknown>): RecruitmentTracking {
     const jobRequest = data.job_request as
       | (Record<string, unknown> & {
+          pt?: { name?: string | null } | null
+          department_ref?: { name?: string | null } | null
+          job_level_ref?: { name?: string | null } | null
           custom_grup_1?: { name?: string | null } | null
           custom_grup_2?: { name?: string | null } | null
           custom_grup_3?: { name?: string | null } | null
@@ -73,6 +76,9 @@ export class RecruitmentTrackingRepositoryImpl implements RecruitmentTrackingRep
       job_request: jobRequest
         ? ({
             ...jobRequest,
+            pt_pembebanan: jobRequest.pt?.name ?? null,
+            department: jobRequest.department_ref?.name ?? null,
+            job_level: jobRequest.job_level_ref?.name ?? null,
             custom_grup_1: jobRequest.custom_grup_1?.name ?? null,
             custom_grup_2: jobRequest.custom_grup_2?.name ?? null,
             custom_grup_3: jobRequest.custom_grup_3?.name ?? null,

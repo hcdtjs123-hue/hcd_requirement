@@ -64,7 +64,7 @@
             </div>
           </label>
           
-          <div v-if="gmForm.employee_id" class="grid grid-cols-2 gap-4 rounded-xl bg-gray-50 p-4 border border-gray-100">
+          <div v-if="gmForm.profile_id" class="grid grid-cols-2 gap-4 rounded-xl bg-gray-50 p-4 border border-gray-100">
             <div class="space-y-1">
               <p class="text-[10px] font-bold uppercase text-gray-400">Position</p>
               <p class="text-sm font-medium">{{ getSelectedEmployee('gm')?.rawPosition || '-' }}</p>
@@ -117,7 +117,7 @@
             </div>
           </label>
 
-          <div v-if="directorForm.employee_id" class="grid grid-cols-2 gap-4 rounded-xl bg-gray-50 p-4 border border-gray-100">
+          <div v-if="directorForm.profile_id" class="grid grid-cols-2 gap-4 rounded-xl bg-gray-50 p-4 border border-gray-100">
             <div class="space-y-1">
               <p class="text-[10px] font-bold uppercase text-gray-400">Position</p>
               <p class="text-sm font-medium">{{ getSelectedEmployee('director')?.rawPosition || '-' }}</p>
@@ -184,7 +184,7 @@ type EmployeeOption = {
 
 function createEmptyForm(step: number): ApproverMasterInput & { id?: string } {
   return {
-    employee_id: '',
+    profile_id: '',
     step_order: step,
   }
 }
@@ -215,7 +215,7 @@ async function loadEmployees() {
 }
 
 function getSelectedEmployee(type: 'gm' | 'director') {
-  const id = type === 'gm' ? gmForm.employee_id : directorForm.employee_id
+  const id = type === 'gm' ? gmForm.profile_id : directorForm.profile_id
   return employees.value.find(e => e.id === id)
 }
 
@@ -231,11 +231,11 @@ const filteredDirectorEmployees = computed(() => filterEmployees(searchDirector.
 function selectEmployee(type: 'gm' | 'director', emp: EmployeeOption) {
   if (type === 'gm') {
     searchGm.value = emp.rawName
-    gmForm.employee_id = emp.id
+    gmForm.profile_id = emp.id
     isGmDropdownOpen.value = false
   } else {
     searchDirector.value = emp.rawName
-    directorForm.employee_id = emp.id
+    directorForm.profile_id = emp.id
     isDirectorDropdownOpen.value = false
   }
 }
@@ -257,10 +257,10 @@ function loadData() {
     if (gm) {
       Object.assign(gmForm, {
         id: gm.id,
-        employee_id: gm.employee_id,
+        profile_id: gm.profile_id,
         step_order: gm.step_order,
       })
-      const emp = employees.value.find(e => e.id === gm.employee_id)
+      const emp = employees.value.find(e => e.id === gm.profile_id)
       if (emp) searchGm.value = emp.rawName
     }
 
@@ -268,10 +268,10 @@ function loadData() {
     if (director) {
       Object.assign(directorForm, {
         id: director.id,
-        employee_id: director.employee_id,
+        profile_id: director.profile_id,
         step_order: director.step_order,
       })
-      const emp = employees.value.find(e => e.id === director.employee_id)
+      const emp = employees.value.find(e => e.id === director.profile_id)
       if (emp) searchDirector.value = emp.rawName
     }
   }
@@ -295,7 +295,7 @@ onBeforeUnmount(() => {
 
 async function saveRecord(form: ApproverFormState) {
   const { id, ...data } = form
-  if (!data.employee_id) return // Skip if no employee selected
+  if (!data.profile_id) return // Skip if no employee selected
   
   if (id) {
     await update(id, data)
@@ -305,7 +305,7 @@ async function saveRecord(form: ApproverFormState) {
 }
 
 async function handleSubmit() {
-  if (!gmForm.employee_id || !directorForm.employee_id) {
+  if (!gmForm.profile_id || !directorForm.profile_id) {
       appToast.error('Please select an employee for both roles.')
       return
   }
@@ -315,13 +315,13 @@ async function handleSubmit() {
 
     const gmPayload: ApproverFormState = {
       id: gmForm.id,
-      employee_id: gmForm.employee_id,
+      profile_id: gmForm.profile_id,
       step_order: gmForm.step_order,
     }
 
     const directorPayload: ApproverFormState = {
       id: directorForm.id,
-      employee_id: directorForm.employee_id,
+      profile_id: directorForm.profile_id,
       step_order: directorForm.step_order,
     }
 

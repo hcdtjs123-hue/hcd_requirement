@@ -39,7 +39,7 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
       if (accessScope.jobRequestIds.length === 0) {
         return []
       }
-      query = query.in('job_request_id', accessScope.jobRequestIds)
+      query = query.in('employee_request_form_id', accessScope.jobRequestIds)
     }
 
     const { data, error } = await query.order('created_at', { ascending: false })
@@ -62,7 +62,7 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
       if (accessScope.jobRequestIds.length === 0) {
         return null
       }
-      query = query.in('job_request_id', accessScope.jobRequestIds)
+      query = query.in('employee_request_form_id', accessScope.jobRequestIds)
     }
 
     const { data, error } = await query.maybeSingle()
@@ -77,7 +77,7 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
   async create(data: CandidateRecordInput): Promise<CandidateRecord> {
     const accessScope = await this.getAccessScope()
 
-    if (accessScope.isManager && !accessScope.jobRequestIds.includes(data.job_request_id)) {
+    if (accessScope.isManager && !accessScope.jobRequestIds.includes(data.employee_request_form_id)) {
       throw new Error('You can only add candidates for job requests you created.')
     }
 
@@ -109,7 +109,7 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
   async update(id: string, data: CandidateRecordInput): Promise<CandidateRecord> {
     const accessScope = await this.getAccessScope()
 
-    if (accessScope.isManager && !accessScope.jobRequestIds.includes(data.job_request_id)) {
+    if (accessScope.isManager && !accessScope.jobRequestIds.includes(data.employee_request_form_id)) {
       throw new Error('You can only move candidates to job requests you created.')
     }
 
@@ -129,7 +129,7 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
       if (accessScope.jobRequestIds.length === 0) {
         throw new Error('Candidate data not found or inaccessible.')
       }
-      query = query.in('job_request_id', accessScope.jobRequestIds)
+      query = query.in('employee_request_form_id', accessScope.jobRequestIds)
     }
 
     const { data: updatedRows, error } = await query.select('id')
@@ -163,7 +163,7 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
       if (accessScope.jobRequestIds.length === 0) {
         throw new Error('Candidate data not found or could not be deleted.')
       }
-      query = query.in('job_request_id', accessScope.jobRequestIds)
+      query = query.in('employee_request_form_id', accessScope.jobRequestIds)
     }
 
     const { data, error } = await query.select('id')
@@ -251,7 +251,7 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
 
   private mapCandidateInput(data: CandidateRecordInput) {
     return {
-      job_request_id: data.job_request_id || null,
+      employee_request_form_id: data.employee_request_form_id || null,
       date_application: data.date_application || null,
       notice_period: data.notice_period || null,
       first_name: data.first_name || null,
@@ -297,7 +297,7 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
     const { error: deleteError } = await supabase
       .from('family_and_emergency')
       .delete()
-      .eq('application_id', candidateRecordId)
+      .eq('candidate_form_id', candidateRecordId)
 
     if (deleteError) {
       throw new Error(deleteError.message)
@@ -306,7 +306,7 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
     const payload = items
       .filter((item) => item.name || item.relationship || item.education || item.description)
       .map((item) => ({
-        application_id: candidateRecordId,
+        candidate_form_id: candidateRecordId,
         name: item.name || null,
         relationship: item.relationship || null,
         gender: item.gender || null,
@@ -330,7 +330,7 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
     const { error: deleteError } = await supabase
       .from('education')
       .delete()
-      .eq('application_id', candidateRecordId)
+      .eq('candidate_form_id', candidateRecordId)
 
     if (deleteError) {
       throw new Error(deleteError.message)
@@ -339,7 +339,7 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
     const payload = items
       .filter((item) => item.institution || item.major || item.category || item.description)
       .map((item) => ({
-        application_id: candidateRecordId,
+        candidate_form_id: candidateRecordId,
         level: item.level || null,
         institution: item.institution || null,
         city: item.city || null,
@@ -365,7 +365,7 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
     const { error: deleteError } = await supabase
       .from('work_history')
       .delete()
-      .eq('application_id', candidateRecordId)
+      .eq('candidate_form_id', candidateRecordId)
 
     if (deleteError) {
       throw new Error(deleteError.message)
@@ -376,7 +376,7 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
         (item) => item.company || item.position || item.reason_to_quitting || item.description,
       )
       .map((item) => ({
-        application_id: candidateRecordId,
+        candidate_form_id: candidateRecordId,
         company: item.company || null,
         position: item.position || null,
         from_year: item.from_year ?? null,
@@ -404,7 +404,7 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
   ) {
     const { error } = await supabase.from('personal_statement').upsert(
       {
-        application_id: candidateRecordId,
+        candidate_form_id: candidateRecordId,
         contract: personalStatement.contract,
         contract_period: personalStatement.contract_period || null,
         legal_issues: personalStatement.legal_issues || null,
@@ -417,7 +417,7 @@ export class CandidateDataRepositoryImpl implements CandidateDataRepository {
         expected_salary: personalStatement.expected_salary ?? null,
       },
       {
-        onConflict: 'application_id',
+        onConflict: 'candidate_form_id',
       },
     )
 

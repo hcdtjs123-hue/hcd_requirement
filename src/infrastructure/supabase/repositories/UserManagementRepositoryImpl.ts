@@ -21,7 +21,6 @@ export class UserManagementRepositoryImpl implements UserManagementRepository {
          full_name,
          phone,
          avatar_url,
-         deleted_at,
           created_at`,
       )
       .order('created_at', { ascending: false })
@@ -109,7 +108,7 @@ export class UserManagementRepositoryImpl implements UserManagementRepository {
         custom_grup_4_id: null,
         custom_grup_5_id: null,
         custom_grup_6_id: null,
-        is_active: !employee.deleted_at,
+        is_active: true,
         role: (roleInfo?.role_name as UserRole) ?? null,
         role_id: roleInfo?.role_id ?? null,
         created_at: employee.created_at ?? null,

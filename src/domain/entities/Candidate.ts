@@ -18,7 +18,7 @@ export type EducationLevel = (typeof educationLevelOptions)[number]
 
 export interface FamilyEmergency {
   id: string
-  application_id: string
+  candidate_form_id: string
   name: string | null
   relationship: string | null
   gender: Gender | null
@@ -29,7 +29,7 @@ export interface FamilyEmergency {
 
 export interface EducationHistory {
   id: string
-  application_id: string
+  candidate_form_id: string
   level: EducationLevel | null
   institution: string | null
   city: string | null
@@ -42,7 +42,7 @@ export interface EducationHistory {
 
 export interface WorkHistory {
   id: string
-  application_id: string
+  candidate_form_id: string
   company: string | null
   position: string | null
   from_year: number | null
@@ -55,7 +55,7 @@ export interface WorkHistory {
 
 export interface PersonalStatement {
   id: string
-  application_id: string
+  candidate_form_id: string
   contract: boolean | null
   contract_period: string | null
   legal_issues: string | null
@@ -72,7 +72,7 @@ export type HrScreeningStatus = 'pending' | 'hr_approved' | 'hr_rejected'
 
 export interface CandidateRecord {
   id: string
-  job_request_id: string | null
+  employee_request_form_id: string | null
   candidate_id: string | null
   hr_screening_status?: HrScreeningStatus | null
   date_application: string | null
@@ -165,7 +165,7 @@ export interface PersonalStatementInput {
 }
 
 export interface CandidateRecordInput {
-  job_request_id: string
+  employee_request_form_id: string
   candidate_id?: string | null
   date_application: string
   notice_period: string

@@ -22,8 +22,9 @@ const chainWithJobRequestSelect = `
   job_request:employee_request_form(
     id,
     main_position,
-    department,
-    job_level,
+    pt:master_pt(name),
+    department_ref:master_department(name),
+    job_level_ref:master_job_level(name),
     site,
     employment_status,
     required_date,
@@ -33,7 +34,7 @@ const chainWithJobRequestSelect = `
     approval_gm_hrd_date,
     approval_director_hrd,
     approval_director_hrd_date,
-    direct_manager, pt_pembebanan, working_location, required_date,
+    direct_manager, working_location, required_date,
     position_status, periode_probation,
     custom_grup_1:master_custom_grup_1(name),
     custom_grup_2:master_custom_grup_2(name),
@@ -45,7 +46,7 @@ const chainWithJobRequestSelect = `
 `
 
 const approverEmployeeSelect =
-  'employee:profiles!approver_master_employee_id_fkey(full_name, email, phone, username)'
+  'profile:profiles!approver_master_profile_id_fkey(full_name, email, phone, username)'
 
 export class ApprovalRepositoryImpl implements ApprovalRepository {
   // ========================
@@ -92,11 +93,11 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
     return (data ?? []).map(this.normalizeChain)
   }
 
-  async getChainByJobRequest(jobRequestId: string): Promise<ApprovalChain | null> {
+  async getChainByEmployeeRequestForm(employeeRequestFormId: string): Promise<ApprovalChain | null> {
     const { data, error } = await supabase
       .from('approval_chains')
       .select(chainWithJobRequestSelect)
-      .eq('job_request_id', jobRequestId)
+      .eq('employee_request_form_id', employeeRequestFormId)
       .order('created_at', { ascending: false })
       .limit(1)
 
@@ -107,7 +108,7 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
   }
 
   async submitForApproval(input: SubmitApprovalInput): Promise<ApprovalChain> {
-    const existingChain = await this.getLatestActiveChainByJobRequest(input.job_request_id)
+    const existingChain = await this.getLatestActiveChainByEmployeeRequestForm(input.employee_request_form_id)
     if (existingChain) {
       throw new Error('This ERF already has an active approval chain.')
     }
@@ -115,7 +116,7 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
     const { data: jobRequest, error: jobRequestError } = await supabase
       .from('employee_request_form')
       .select('id, approval_director_bu_id, approval_director_bu')
-      .eq('id', input.job_request_id)
+      .eq('id', input.employee_request_form_id)
       .single()
 
     if (jobRequestError) throw new Error(jobRequestError.message)
@@ -131,7 +132,7 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
     const { data: approverMasters, error: approverError } = await supabase
       .from('approver_master')
       .select(
-        '*, employee:profiles!approver_master_employee_id_fkey(full_name, email, username)',
+        '*, profile:profiles!approver_master_profile_id_fkey(full_name, email, username)',
       )
       .order('step_order', { ascending: true })
 
@@ -145,11 +146,11 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
     const gmHrdApprover = approverMasters.find((approver: any) => approver.step_order === 1)
     const directorHrdApprover = approverMasters.find((approver: any) => approver.step_order === 2)
 
-    if (!gmHrdApprover?.employee?.email) {
+    if (!gmHrdApprover?.profile?.email) {
       throw new Error('GM HRD approver is not configured correctly.')
     }
 
-    if (!directorHrdApprover?.employee?.email) {
+    if (!directorHrdApprover?.profile?.email) {
       throw new Error('Director HRD approver is not configured correctly.')
     }
 
@@ -160,7 +161,7 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
     const { data: chain, error: chainError } = await supabase
       .from('approval_chains')
       .insert({
-        job_request_id: input.job_request_id,
+        employee_request_form_id: input.employee_request_form_id,
         created_by: user.data.user?.id ?? null,
         status: 'pending',
       })
@@ -181,15 +182,15 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
       {
         chain_id: chain.id,
         step_order: 2,
-        approver_email: gmHrdApprover.employee.email || '',
-        approver_name: this.buildEmployeeFullName(gmHrdApprover.employee),
+        approver_email: gmHrdApprover.profile.email || '',
+        approver_name: this.buildEmployeeFullName(gmHrdApprover.profile),
         status: 'pending',
       },
       {
         chain_id: chain.id,
         step_order: 3,
-        approver_email: directorHrdApprover.employee.email || '',
-        approver_name: this.buildEmployeeFullName(directorHrdApprover.employee),
+        approver_email: directorHrdApprover.profile.email || '',
+        approver_name: this.buildEmployeeFullName(directorHrdApprover.profile),
         status: 'pending',
       },
     ]
@@ -199,7 +200,7 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
     if (stepsError) throw new Error(stepsError.message)
 
     // 5. Return the full chain with steps
-    const result = await this.getChainByJobRequest(input.job_request_id)
+    const result = await this.getChainByEmployeeRequestForm(input.employee_request_form_id)
     if (!result) throw new Error('Failed to load newly created approval chain.')
 
     // 6. Send email to the first approver
@@ -293,7 +294,7 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
     const { data, error } = await supabase
       .from('approver_master')
       .insert({
-        employee_id: input.employee_id,
+        profile_id: input.profile_id,
         step_order: input.step_order,
         created_by: user.data.user?.id ?? null,
       })
@@ -309,7 +310,7 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
     const query = supabase
       .from('approver_master')
       .update({
-        employee_id: input.employee_id,
+        profile_id: input.profile_id,
         step_order: input.step_order,
       })
       .eq('id', id)
@@ -476,13 +477,13 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
 
       const { data: chain } = await supabase
         .from('approval_chains')
-        .select('job_request_id')
+        .select('employee_request_form_id')
         .eq('id', step.chain_id)
         .single()
 
       if (chain) {
         await supabase.from('recruitment_tracking').insert({
-          job_request_id: chain.job_request_id,
+          employee_request_form_id: chain.employee_request_form_id,
           chain_id: step.chain_id,
         })
       }
@@ -550,6 +551,9 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
     if (jobRequest) {
       chain.job_request = {
         ...jobRequest,
+        pt_pembebanan: jobRequest.pt?.name ?? null,
+        department: jobRequest.department_ref?.name ?? null,
+        job_level: jobRequest.job_level_ref?.name ?? null,
         custom_grup_1: jobRequest.custom_grup_1?.name ?? null,
         custom_grup_2: jobRequest.custom_grup_2?.name ?? null,
         custom_grup_3: jobRequest.custom_grup_3?.name ?? null,
@@ -578,11 +582,11 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
       .trim()
   }
 
-  private async getLatestActiveChainByJobRequest(jobRequestId: string) {
+  private async getLatestActiveChainByEmployeeRequestForm(employeeRequestFormId: string) {
     const { data, error } = await supabase
       .from('approval_chains')
       .select(chainWithJobRequestSelect)
-      .eq('job_request_id', jobRequestId)
+      .eq('employee_request_form_id', employeeRequestFormId)
       .in('status', ['draft', 'pending'])
       .order('created_at', { ascending: false })
       .limit(1)
@@ -642,7 +646,7 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
   ) {
     const { data: chain, error: chainError } = await supabase
       .from('approval_chains')
-      .select('job_request_id')
+      .select('employee_request_form_id')
       .eq('id', chainId)
       .single()
 
@@ -669,7 +673,7 @@ export class ApprovalRepositoryImpl implements ApprovalRepository {
     const { error: updateJobError } = await supabase
       .from('employee_request_form')
       .update(payload)
-      .eq('id', chain.job_request_id)
+      .eq('id', chain.employee_request_form_id)
 
     if (updateJobError) throw new Error(updateJobError.message)
   }

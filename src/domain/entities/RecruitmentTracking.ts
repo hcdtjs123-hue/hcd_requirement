@@ -4,7 +4,7 @@
 
 export interface RecruitmentTracking {
   id: string
-  job_request_id: string
+  employee_request_form_id: string
   chain_id: string | null
   created_at: string | null
   updated_at: string | null

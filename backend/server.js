@@ -74,15 +74,15 @@ function validateIssueBody(body) {
   if (!body || typeof body !== "object") {
     return ["Invalid JSON body"]
   }
-  const { applicationId, to, candidateName, position, expiresInHours } = body
-  if (!isNonEmptyString(applicationId)) {
-    errors.push("applicationId is required")
+  const { candidateFormId, to, candidateName, position, expiresInHours } = body
+  if (!isNonEmptyString(candidateFormId)) {
+    errors.push("candidateFormId is required")
   } else if (
     !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
-      applicationId.trim(),
+      candidateFormId.trim(),
     )
   ) {
-    errors.push("applicationId must be a UUID")
+    errors.push("candidateFormId must be a UUID")
   }
   if (!isNonEmptyString(to) || !emailRx.test(to.trim())) {
     errors.push("to must be a valid email")
@@ -195,7 +195,7 @@ app.post("/candidate-approval/issue", requireApiSecret, async (req, res) => {
       return res.status(400).json({ ok: false, error: errs.join("; ") })
     }
     const {
-      applicationId,
+      candidateFormId,
       to,
       candidateName,
       position,
@@ -210,7 +210,7 @@ app.post("/candidate-approval/issue", requireApiSecret, async (req, res) => {
     const { data: inserted, error: insertError } = await supabase
       .from("candidate_hr_approval_tokens")
       .insert({
-        application_id: applicationId.trim(),
+        candidate_form_id: candidateFormId.trim(),
         approve_token: approveToken,
         reject_token: rejectToken,
         expires_at: expiresAt.toISOString(),
@@ -275,7 +275,7 @@ async function processDecision(token, decision, res) {
     const col = decision === "approve" ? "approve_token" : "reject_token"
     const { data: row, error: fetchError } = await supabase
       .from("candidate_hr_approval_tokens")
-      .select("id, application_id, expires_at, outcome")
+      .select("id, candidate_form_id, expires_at, outcome")
       .eq(col, token.trim())
       .maybeSingle()
 
@@ -307,7 +307,7 @@ async function processDecision(token, decision, res) {
         hr_screening_status: screening,
         updated_at: decidedAt,
       })
-      .eq("id", row.application_id)
+      .eq("id", row.candidate_form_id)
 
     if (appError) {
       console.error(appError)

@@ -20,7 +20,7 @@ export interface ApprovalStep {
 
 export interface ApprovalChain {
   id: string
-  job_request_id: string
+  employee_request_form_id: string
   created_by: string | null
   status: ApprovalChainStatus
   created_at: string | null
@@ -60,7 +60,7 @@ export interface ApprovalChain {
 
 export interface ApproverMaster {
   id: string
-  employee_id: string
+  profile_id: string
   step_order: number
   created_by: string | null
   created_at: string | null
@@ -77,10 +77,10 @@ export interface ApproverMaster {
 // ===========================
 
 export interface ApproverMasterInput {
-  employee_id: string
+  profile_id: string
   step_order: number
 }
 
 export interface SubmitApprovalInput {
-  job_request_id: string
+  employee_request_form_id: string
 }

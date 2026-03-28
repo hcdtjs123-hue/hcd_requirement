@@ -9,7 +9,7 @@ import type {
 export interface ApprovalRepository {
   // Approval Chain
   getChainsByUser(): Promise<ApprovalChain[]>
-  getChainByJobRequest(jobRequestId: string): Promise<ApprovalChain | null>
+  getChainByEmployeeRequestForm(employeeRequestFormId: string): Promise<ApprovalChain | null>
   submitForApproval(data: SubmitApprovalInput): Promise<ApprovalChain>
 
   // Public Approval (no auth)
